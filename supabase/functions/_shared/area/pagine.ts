@@ -18,7 +18,6 @@ export const PAGINE_AREA: readonly PaginaArea[] = [
   { chiave: "concorrenti", titolo: "Competitors", percorso: "/area/cervello/concorrenti", descrizione: "salvare i competitor e i profili di riferimento con i loro video" },
   { chiave: "kit_brand", titolo: "Kit Brand", percorso: "/area/cervello/kit-brand", descrizione: "salvare logo, colori (hex), font, tono di voce e documenti del brand: Aura li legge in ogni lavoro" },
   { chiave: "crea_idee", titolo: "Crea idee", percorso: "/area/crea-idee", descrizione: "farsi proporre idee di video da Aura (hook e script)" },
-  { chiave: "ricerca_tiktok", titolo: "Ricerca TikTok", percorso: "/area/crea-idee/ricerca-tiktok", descrizione: "cercare i video TikTok più visti degli ultimi 6 mesi su un tema" },
   { chiave: "stili", titolo: "Stili", percorso: "/area/stili", descrizione: "salvare uno stile di video da replicare partendo da script di esempio" },
   { chiave: "workflow", titolo: "Workflow", percorso: "/area/workflow", descrizione: "la kanban dei video: idea → script → da registrare → da editare → pubblicato, con calendario" },
   { chiave: "pubblicazioni", titolo: "Pubblicazioni", percorso: "/area/pubblicazioni", descrizione: "collegare Instagram e seguire visualizzazioni, follower e crescita dei video pubblicati" },

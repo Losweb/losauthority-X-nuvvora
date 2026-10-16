@@ -33,7 +33,6 @@ Come rispondi, SEMPRE in questo ordine:
 
 Se il cliente ti chiede di cambiare una proposta (più corta, altro hook, altra tipologia), rispondi con la versione nuova nel blocco <idee>, una sola idea.
 Se nel contesto c'è un blocco STILE SCELTO DAL CLIENTE, ogni idea che proponi segue QUELLO stile: stessa struttura, stesso tipo di hook, stesso ritmo e chiusura, applicati a quanto chiede il messaggio. Lo stile vince sulle abitudini generali.
-Se nel contesto c'è un blocco RICERCA TIKTOK SCELTA DAL CLIENTE, sono i video con più like degli ultimi 6 mesi sul suo tema (dati reali, li hai solo come didascalia: non li hai visti). Le idee prendono spunto da quello che torna tra i vincitori (temi, angoli, forme di hook) adattato al cliente e alla sua scheda: mai copiare un video, mai citare numeri che non sono nel blocco. I video segnati «da non replicare» non si usano mai come modello; quelli «fuori tema» o «sponsorizzato» pesano poco.
 Se nel contesto c'è il blocco KIT BRAND DEL CLIENTE, per colori, font, tono di voce e regole della marca usa SOLO quei dati: non inventare codici colore o font.
 Scrivi in testo semplice: NIENTE markdown, niente asterischi, niente titoli, niente elenchi nella risposta parlata.
 Non promettere risultati. Nessun consiglio legale, medico o finanziario. Niente testo dopo il blocco </idee>.`;
@@ -47,30 +46,6 @@ export interface TopPubblicazione {
   titolo: string;
   piattaforma: string;
   visualizzazioni: number | null;
-}
-
-/** Un video della ricerca TikTok agganciata al messaggio («Usa in Crea idee»). */
-export interface VideoRicerca {
-  sezione: string;
-  posizione: number;
-  autore: string | null;
-  lingua: string | null;
-  mi_piace: number | null;
-  visualizzazioni: number | null;
-  di_cosa_parla: string | null;
-  didascalia: string | null;
-  url: string;
-  sponsorizzato: boolean;
-  fuori_tema: boolean;
-  da_non_replicare: boolean;
-}
-
-/** Ricerca TikTok scelta dal cliente (tabella ricerche_tiktok + ricerche_tiktok_video). */
-export interface RicercaScelta {
-  tema: string;
-  soglia_dal: string | null;
-  osservazioni: string[];
-  video: VideoRicerca[];
 }
 
 /** Stile della pagina "Stili" richiamato dal cliente con "/" (tabella stili). */
@@ -87,7 +62,6 @@ export interface DatiPrompt {
   kitBrand: string | null;
   conoscenza: string;
   stile: StileScelto | null;
-  ricerca: RicercaScelta | null;
   storico: Storico[];
   ideeRecenti: string[];
   topPubblicazioni: TopPubblicazione[];
@@ -96,24 +70,7 @@ export interface DatiPrompt {
 
 const taglia = (t: string, n: number) => (t.length > n ? `${t.slice(0, n)}…` : t);
 
-const NOMI_LINGUA: Record<string, string> = { it: "italiano", en: "inglese", es: "spagnolo" };
-const etichettaSezione = (v: VideoRicerca) =>
-  v.sezione === "lingua_target" ? "[migliori nella sua lingua] " : v.sezione === "top_lingua" ? `[top in ${NOMI_LINGUA[v.lingua ?? ""] ?? v.lingua ?? "?"}] ` : "";
-
-/** Il blocco della ricerca TikTok: una riga per video con numeri, segnali e la riga «di cosa parla» (una top per lingua dal 07/10/2026). */
-function bloccoRicerca(r: RicercaScelta): string {
-  const segnali = (v: VideoRicerca) =>
-    [v.da_non_replicare && "DA NON REPLICARE", v.fuori_tema && "fuori tema", v.sponsorizzato && "sponsorizzato"].filter(Boolean).join(", ");
-  const righe = r.video.map((v) => {
-    const s = segnali(v);
-    const tema = v.di_cosa_parla ?? (v.didascalia ? taglia(v.didascalia.replace(/\s+/g, " "), 160) : "senza didascalia");
-    return `• ${etichettaSezione(v)}#${v.posizione} @${v.autore ?? "?"} (${v.lingua ?? "–"}) · ${v.mi_piace ?? "?"} like · ${v.visualizzazioni ?? "?"} views — ${tema}${s ? ` [${s}]` : ""}`;
-  });
-  const oss = r.osservazioni.length > 0 ? `\nOsservazioni: ${r.osservazioni.join(" · ")}` : "";
-  return `=== RICERCA TIKTOK SCELTA DAL CLIENTE: "${r.tema}" (video dal ${r.soglia_dal ?? "?"}, ordinati per like dentro ogni top) ===\n${righe.join("\n")}${oss}\n\nLe idee di questa risposta prendono spunto da questi video.`;
-}
-
-/** Tre tratti per il prompt caching: metodo (fisso), stile+scheda+analisi (fissi nella sessione), idee recenti+pubblicazioni+ricerca TikTok+storico+messaggio. */
+/** Tre tratti per il prompt caching: metodo (fisso), stile+scheda+analisi (fissi nella sessione), idee recenti+pubblicazioni+storico+messaggio. */
 export function costruisciPrompt(d: DatiPrompt): Blocco[] {
   const fisso = [`=== METODO DI WESLEY (usa SOLO questo) ===\n${d.conoscenza || "(nessun blocco caricato: usa buon senso e chiedi conferma)"}`];
   const cliente: string[] = [];
@@ -133,7 +90,6 @@ export function costruisciPrompt(d: DatiPrompt): Blocco[] {
     );
     variabile.push(`--- Video del cliente che hanno funzionato meglio ---\n${righe.join("\n")}`);
   }
-  if (d.ricerca && d.ricerca.video.length > 0) variabile.push(bloccoRicerca(d.ricerca));
   if (d.storico.length > 0) {
     const righe = d.storico.map((m) => `${m.ruolo === "cliente" ? "CLIENTE" : "AURA"}: ${taglia(m.contenuto, 1500)}`);
     variabile.push(`=== CONVERSAZIONE FINORA ===\n${righe.join("\n\n")}`);

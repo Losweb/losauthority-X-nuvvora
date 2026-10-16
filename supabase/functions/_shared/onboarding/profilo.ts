@@ -107,7 +107,6 @@ const TITOLI_BLOCCO: Record<string, string> = {
   D: "Il tuo tempo",
   E: "Tu e l'IA",
   F: "Obiettivi e percorso",
-  G: "Materiali",
 };
 
 /** Etichetta di un campo (prima versione), per i log e per aura-help. */

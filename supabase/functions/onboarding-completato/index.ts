@@ -69,8 +69,14 @@ Deno.serve(async (req: Request) => {
     // 4) Telegram solo alla transizione: una volta per cliente.
     if (cambiaStato) {
       const sito = await sitoGestionale(admin);
+      const r = riga as Record<string, unknown>;
+      const rigaTesto = (etichetta: string, v: unknown) =>
+        typeof v === "string" && v.trim() ? `\n${etichetta}: ${v.trim().replace(/\s+/g, " ").slice(0, 300)}` : "";
       await notifyTelegram(
         `🎉 Onboarding completato!\nCliente: ${c.nombre || "(senza nome)"}\nEmail: ${c.email || "(senza email)"}` +
+          rigaTesto("Come ha conosciuto Wesley", r.come_conosciuto) +
+          rigaTesto("Perché lui", r.perche_wesley) +
+          rigaTesto("💬 Messaggio per Wesley", r.messaggio_wesley) +
           rigaLink(sito, `/clienti/${c.id}?tab=onboarding`),
       );
     }

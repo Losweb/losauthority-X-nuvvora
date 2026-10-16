@@ -15,15 +15,20 @@ export const CAMPI_TESTO = {
   momento: 200,
   frase: 200,
   settore: 80,
-  snapshot: 600,
+  snapshot: 1000,
   desiderio_pratico: 400,
   desiderio_emotivo: 400,
   dove_cerca: 300,
+  // La mappa della skill (16/10/2026): la freccia, il ponte, lo stesso arrivo, il nemico.
+  cosa_manca: 400,
+  ponte: 800,
+  arrivo: 400,
+  nemico: 300,
 } as const;
 
 export const CAMPI_LISTA = ["dolori_superficie", "dolori_profondi", "credenze_limitanti", "linguaggio", "piattaforme", "chi_segue", "obiezioni", "trigger_acquisto"] as const;
 
-export const DIAGNOSI_TESTO = { quadro: 800, quanto_ristretto: 500, come_usarlo: 800 } as const;
+export const DIAGNOSI_TESTO = { quadro: 1200, quanto_ristretto: 500, come_usarlo: 1500 } as const;
 export const DIAGNOSI_LISTA = ["punti_forza", "criticita", "da_validare"] as const;
 
 export const ORIGINI = ["clienti_reali", "costruito", "misto"] as const;
@@ -38,7 +43,8 @@ export type CampiAvatar = Partial<Record<CampoTesto, string> & Record<CampoLista
 /** Update pronto per `avatar_diagnosi`. */
 export type CampiDiagnosi = Partial<Record<DiagnosiTesto, string> & Record<DiagnosiLista, string[]>>;
 
-const MAX_VOCE = 200;
+// 400: con il metodo LosAvatar ogni voce porta la marca (vera/riassunto/lettura) e la coppia «crede che → cosa metti al posto».
+const MAX_VOCE = 400;
 const MAX_VOCI = 12;
 
 const pulisciTesto = (v: unknown, max: number): string | null => {
@@ -127,10 +133,13 @@ export function campiMancanti(avatar: Record<string, unknown>, diagnosi: Record<
   const testo = (o: Record<string, unknown>, k: string) => typeof o[k] === "string" && (o[k] as string).trim().length > 0;
   const lista = (k: string, min: number) => Array.isArray(avatar[k]) && (avatar[k] as unknown[]).length >= min;
   const mancanti: string[] = [];
-  for (const k of ["nome", "eta", "genere", "situazione", "contesto", "momento", "desiderio_pratico", "desiderio_emotivo", "snapshot"]) {
+  for (const k of ["nome", "eta", "genere", "situazione", "contesto", "momento", "desiderio_pratico", "desiderio_emotivo", "snapshot", "cosa_manca", "ponte", "arrivo"]) {
     if (!testo(avatar, k)) mancanti.push(k);
   }
   if (!testo(diagnosi, "quadro")) mancanti.push("quadro");
+  for (const k of ["punti_forza", "criticita"]) {
+    if (!Array.isArray(diagnosi[k]) || (diagnosi[k] as unknown[]).length === 0) mancanti.push(k);
+  }
   if (!lista("dolori_superficie", 1)) mancanti.push("dolori_superficie");
   if (!lista("dolori_profondi", 1)) mancanti.push("dolori_profondi");
   if (!lista("linguaggio", 3)) mancanti.push("linguaggio (almeno 3 frasi)");

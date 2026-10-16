@@ -14,6 +14,10 @@ export const SKOOL_COMMUNITY_URL = Deno.env.get("SKOOL_COMMUNITY_URL") || "https
 export const APIFY_SKOOL_ACTOR = Deno.env.get("APIFY_SKOOL_ACTOR") || "memo23~skool-posts-with-comments-scraper";
 export const HAS_SKOOL = APIFY_TOKEN.length > 0 && SKOOL_COOKIES.length > 0;
 
+/** OpenAI: solo per la trascrizione dei video Skool (whisper-1, 12/10/2026). */
+export const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
+export const HAS_OPENAI = OPENAI_API_KEY.length > 0;
+
 export const TELEGRAM_WEBHOOK_SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET") ?? "";
 export const TELEGRAM_ALLOWED_CHAT_IDS = (Deno.env.get("TELEGRAM_ALLOWED_CHAT_IDS") ?? "")
   .split(",").map((s) => s.trim()).filter(Boolean);

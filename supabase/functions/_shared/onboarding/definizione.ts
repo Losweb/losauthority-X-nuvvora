@@ -7,7 +7,7 @@ import { BLOCCO_INIZIO } from "./blocco-inizio.ts";
 import { BLOCCO_A } from "./blocco-a.ts";
 import { BLOCCO_B } from "./blocco-b.ts";
 import { BLOCCO_C } from "./blocco-c.ts";
-import { BLOCCO_D, BLOCCO_E, BLOCCO_F, BLOCCO_G } from "./blocco-d-g.ts";
+import { BLOCCO_D, BLOCCO_E, BLOCCO_F } from "./blocco-d-g.ts";
 import {
   domandeVisibili,
   eDomandaLista,
@@ -25,7 +25,7 @@ import {
 
 export const TITOLO_SCHEDA = "Onboarding";
 
-export const BLOCCHI: Blocco[] = [BLOCCO_INIZIO, BLOCCO_A, BLOCCO_B, BLOCCO_C, BLOCCO_D, BLOCCO_E, BLOCCO_F, BLOCCO_G];
+export const BLOCCHI: Blocco[] = [BLOCCO_INIZIO, BLOCCO_A, BLOCCO_B, BLOCCO_C, BLOCCO_D, BLOCCO_E, BLOCCO_F];
 
 /** Tutte le versioni di tutte le domande, in ordine. */
 export const DOMANDE: Domanda[] = BLOCCHI.flatMap((b) => b.domande);

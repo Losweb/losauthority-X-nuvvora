@@ -1,12 +1,10 @@
 /**
  * aura-idee — "Crea idee" dell'area cliente. Il cliente scrive ad Aura; Aura
  * risponde e propone 1-3 idee di video (titolo, hook, script, tipologia).
- * Body: { messaggio, sessione_id?, stile_id?, ricerca_id? } oppure { riprova_messaggio_id } per rifare
+ * Body: { messaggio, sessione_id?, stile_id? } oppure { riprova_messaggio_id } per rifare
  * una risposta finita in errore. Risposta: { ok, sessione_id, messaggio_id, risposta, idee }.
  * stile_id = uno stile della pagina "Stili" (tabella stili, richiamato con "/"): entra nel
  * prompt e le proposte lo seguono; si salva sul messaggio del cliente.
- * ricerca_id = una ricerca TikTok pronta del cliente («Usa in Crea idee»): le top (una per lingua
- * dal 07/10/2026) entrano nel prompt come spunto; si salva sul messaggio del cliente (idee_messaggi.ricerca_id).
  *
  * Traccia dello stato: la riga di Aura in idee_messaggi nasce 'in_corso' e
  * finisce 'completato' o 'errore' (con il motivo). Le proposte vanno in `idee`
@@ -19,14 +17,13 @@ import { ANTHROPIC_MODEL, HAS_ANTHROPIC, streamAnthropicText } from "../_shared/
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { bloccoKitBrand } from "../_shared/kit-brand.ts";
-import { costruisciPrompt, estraiProposte, SYSTEM, type RicercaScelta, type StileScelto, type Storico, type TopPubblicazione, type VideoRicerca } from "./prompt.ts";
+import { costruisciPrompt, estraiProposte, SYSTEM, type StileScelto, type Storico, type TopPubblicazione } from "./prompt.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 type Body = {
   messaggio?: unknown;
   sessione_id?: unknown;
   stile_id?: unknown;
-  ricerca_id?: unknown;
   riprova_messaggio_id?: unknown;
 };
 
@@ -70,37 +67,6 @@ async function stilePer(admin: SupabaseClient, clienteId: string, stileId: strin
   return data as StileScelto;
 }
 
-/** Ordine dei video nel prompt: top unica (ricerche vecchie), top per lingua (it, en, es), migliori nella lingua target. */
-const ORDINE_LINGUE = ["it", "en", "es"];
-const rango = (v: VideoRicerca) => {
-  if (v.sezione === "top") return 0;
-  if (v.sezione === "lingua_target") return 20;
-  const i = ORDINE_LINGUE.indexOf(v.lingua ?? "");
-  return 1 + (i === -1 ? ORDINE_LINGUE.length : i);
-};
-
-/** Ricerca TikTok pronta del cliente con le sue top (null se non richiesta). Altrui o non pronta → 404. */
-async function ricercaPer(admin: SupabaseClient, clienteId: string, ricercaId: string | null): Promise<RicercaScelta | null> {
-  if (!ricercaId) return null;
-  const { data } = await admin
-    .from("ricerche_tiktok")
-    .select("id, tema, soglia_dal, osservazioni")
-    .eq("id", ricercaId)
-    .eq("cliente_id", clienteId)
-    .eq("stato", "pronta")
-    .maybeSingle();
-  if (!data) throw new HttpError(404, "Ricerca TikTok non trovata o non ancora pronta.");
-  const r = data as { tema: string; soglia_dal: string | null; osservazioni: string[] | null };
-  const { data: video, error } = await admin
-    .from("ricerche_tiktok_video")
-    .select("sezione, posizione, autore, lingua, mi_piace, visualizzazioni, di_cosa_parla, didascalia, url, sponsorizzato, fuori_tema, da_non_replicare")
-    .eq("ricerca_id", ricercaId)
-    .in("sezione", ["top", "top_lingua", "lingua_target"]);
-  if (error) throw error;
-  const ordinati = ((video ?? []) as VideoRicerca[]).sort((x, y) => rango(x) - rango(y) || x.posizione - y.posizione);
-  return { tema: r.tema, soglia_dal: r.soglia_dal, osservazioni: r.osservazioni ?? [], video: ordinati };
-}
-
 /** Riprova: la riga di Aura in errore e il messaggio del cliente che la precede. */
 async function perRiprova(admin: SupabaseClient, clienteId: string, auraId: string) {
   const { data: aura } = await admin
@@ -114,7 +80,7 @@ async function perRiprova(admin: SupabaseClient, clienteId: string, auraId: stri
   const a = aura as unknown as Messaggio;
   const { data: prec } = await admin
     .from("idee_messaggi")
-    .select("id, contenuto, stile_id, ricerca_id")
+    .select("id, contenuto, stile_id")
     .eq("sessione_id", a.sessione_id)
     .eq("ruolo", "cliente")
     .lt("created_at", a.created_at)
@@ -123,8 +89,8 @@ async function perRiprova(admin: SupabaseClient, clienteId: string, auraId: stri
     .maybeSingle();
   if (!prec) throw new HttpError(400, "Nessun messaggio da riprovare.");
   await admin.from("idee_messaggi").update({ stato: "in_corso", errore: null, contenuto: "" }).eq("id", a.id);
-  const p = prec as { contenuto: string; stile_id: string | null; ricerca_id: string | null };
-  return { sessioneId: a.sessione_id, auraId: a.id, messaggio: p.contenuto, stileId: p.stile_id, ricercaId: p.ricerca_id };
+  const p = prec as { contenuto: string; stile_id: string | null };
+  return { sessioneId: a.sessione_id, auraId: a.id, messaggio: p.contenuto, stileId: p.stile_id };
 }
 
 async function contesto(admin: SupabaseClient, clienteId: string, sessioneId: string, escludiAuraId: string) {
@@ -188,20 +154,18 @@ Deno.serve(async (req: Request) => {
     let auraId: string;
     let messaggio: string;
     let stileId: string | null;
-    let ricercaId: string | null;
     if (typeof body.riprova_messaggio_id === "string" && body.riprova_messaggio_id) {
-      ({ sessioneId, auraId, messaggio, stileId, ricercaId } = await perRiprova(admin, c.id, body.riprova_messaggio_id));
+      ({ sessioneId, auraId, messaggio, stileId } = await perRiprova(admin, c.id, body.riprova_messaggio_id));
     } else {
       messaggio = typeof body.messaggio === "string" ? body.messaggio.trim().slice(0, MAX_MESSAGGIO) : "";
       if (messaggio.length < 3) throw new HttpError(400, "Scrivi ad Aura cosa vuoi raccontare.");
       stileId = typeof body.stile_id === "string" && body.stile_id ? body.stile_id : null;
-      ricercaId = typeof body.ricerca_id === "string" && body.ricerca_id ? body.ricerca_id : null;
-      // Verifica PRIMA di scrivere: uno stile o una ricerca altrui non devono lasciare tracce.
-      await Promise.all([stilePer(admin, c.id, stileId), ricercaPer(admin, c.id, ricercaId)]);
+      // Verifica PRIMA di scrivere: uno stile altrui non deve lasciare tracce.
+      await stilePer(admin, c.id, stileId);
       sessioneId = await sessionePer(admin, c.id, typeof body.sessione_id === "string" ? body.sessione_id : null, messaggio);
       const { error: e1 } = await admin
         .from("idee_messaggi")
-        .insert({ sessione_id: sessioneId, ruolo: "cliente", contenuto: messaggio, stile_id: stileId, ricerca_id: ricercaId });
+        .insert({ sessione_id: sessioneId, ruolo: "cliente", contenuto: messaggio, stile_id: stileId });
       if (e1) throw e1;
       const { data: aura, error: e2 } = await admin
         .from("idee_messaggi")
@@ -212,13 +176,9 @@ Deno.serve(async (req: Request) => {
       auraId = (aura as { id: string }).id;
     }
 
-    // In riprova lo stile o la ricerca potrebbero essere stati eliminati nel frattempo: si prosegue senza.
-    const [dati, stile, ricerca] = await Promise.all([
-      contesto(admin, c.id, sessioneId, auraId),
-      stilePer(admin, c.id, stileId).catch(() => null),
-      ricercaPer(admin, c.id, ricercaId).catch(() => null),
-    ]);
-    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, stile, ricerca, messaggio }), maxTokens: 3000, tag: "aura-idee", utente: c.id });
+    // In riprova lo stile potrebbe essere stato eliminato nel frattempo: si prosegue senza.
+    const [dati, stile] = await Promise.all([contesto(admin, c.id, sessioneId, auraId), stilePer(admin, c.id, stileId).catch(() => null)]);
+    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, stile, messaggio }), maxTokens: 3000, tag: "aura-idee", utente: c.id });
     if (!testo) {
       await admin.from("idee_messaggi").update({ stato: "errore", errore: "Nessuna risposta dal modello" }).eq("id", auraId);
       await logError("aura-idee:anthropic", "Nessuna risposta da Aura", { user: c.id, sessioneId }, { silent: true });

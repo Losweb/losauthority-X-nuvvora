@@ -158,7 +158,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const dati = await contesto(admin, c.id, avatar.id, [auraId, clienteMsgId]);
-    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, avatar, messaggio }), maxTokens: 2500, tag: "aura-avatar", utente: c.id });
+    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, avatar, messaggio }), maxTokens: 4000, tag: "aura-avatar", utente: c.id });
     if (!testo) {
       await admin.from("avatar_messaggi").update({ stato: "errore", errore: "Nessuna risposta dal modello" }).eq("id", auraId);
       await logError("aura-avatar:anthropic", "Nessuna risposta da Aura", { user: c.id, avatar: avatar.id }, { silent: true });

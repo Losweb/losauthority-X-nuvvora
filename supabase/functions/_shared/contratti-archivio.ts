@@ -49,6 +49,8 @@ export interface RigaContratto {
   pagato_il: string | null;
   fattura_id: string | null;
   cliente_id: string | null;
+  /** Il lead (pagina Leads) da cui è nato l'invito. */
+  lead_id: string | null;
   attivato_il: string | null;
   attivazione_consegne: string[];
   scade_il: string | null;

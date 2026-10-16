@@ -89,7 +89,7 @@ export interface Blocco {
   domande: Domanda[];
 }
 
-/** Tutti i campi del profilo (una colonna ciascuno, tranne `allegati` = files_onboarding). */
+/** Tutti i campi del profilo (una colonna ciascuno). Le domande tolte il 16/10/2026 (tentativi_passati, riferimenti, follower, views_medie, ore_per_attivita, ore_percorso, allegati) hanno ancora la colonna ma non sono più nel percorso. */
 export const ID_CAMPI = [
   // modulo iniziale
   "nome", "nome_attivita", "attivita_breve", "tipo", "tipo_principale", "mercato", "clienti", "social",
@@ -100,21 +100,20 @@ export const ID_CAMPI = [
   "canali_acquisizione", "cliente_migliore", "acquirente_utente", "anti_cliente", "messaggi_tipici", "obiezioni",
   "avatar_ipotesi", "domande_ricevute", "esperienze_prova",
   // C
-  "link_profili", "camera_agio", "vincoli_camera", "tentativi_passati", "riferimenti", "blocco_partenza", "blocco_partenza_testo", "paure",
-  "collo_bottiglia", "diagnosi_cliente", "frequenza", "contenuti_migliori", "follower", "views_medie", "clienti_da_social", "priorita_crescita",
+  "link_profili", "camera_agio", "vincoli_camera", "blocco_partenza", "blocco_partenza_testo", "paure",
+  "collo_bottiglia", "diagnosi_cliente", "frequenza", "contenuti_migliori", "clienti_da_social", "priorita_crescita",
   // D
-  "ore_social", "attivita_pesanti", "non_delegabile", "ore_per_attivita",
+  "ore_social", "attivita_pesanti", "non_delegabile",
   // E
   "ia_uso", "abbonamenti", "dispositivo",
   // F
-  "obiettivo_6_mesi", "competenza_obiettivo", "da_evitare", "perche_ora", "ore_percorso", "disponibilita_call",
-  // G
-  "allegati",
+  "obiettivo_6_mesi", "competenza_obiettivo", "da_evitare", "perche_ora", "disponibilita_call",
+  "come_conosciuto", "perche_wesley", "messaggio_wesley",
 ] as const;
 export type IdCampo = (typeof ID_CAMPI)[number];
 
 /** Campi che Claude deve leggere come opinioni (regola 1 del compito 2). */
-export const CAMPI_OPINIONE: readonly IdCampo[] = ["presentazione", "avatar_ipotesi", "diagnosi_cliente", "paure"];
+export const CAMPI_OPINIONE: readonly IdCampo[] = ["presentazione", "avatar_ipotesi", "diagnosi_cliente", "paure", "messaggio_wesley"];
 
 /** Valore in memoria di una risposta: testo, lista, oppure mappa opzione → valore (conteggi, fasce). */
 export type ValoreRisposta = string | string[] | Record<string, string>;

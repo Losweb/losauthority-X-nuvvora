@@ -97,6 +97,12 @@ export async function registraPagamento(admin: SupabaseClient, id: string, pagat
     throw new HttpError(500, "Account creato, ma non sono riuscito a compilare la scheda. Riprova.");
   }
 
+  // Invito nato da un lead (pagina Leads): da adesso quel lead È questo cliente, così in Clienti non c'è un doppione.
+  if (c.lead_id) {
+    const { error: errLead } = await admin.from("lead").update({ cliente_id: clienteId, stage: "cliente" }).eq("id", c.lead_id);
+    if (errLead) await logError("contratti:pagamento:lead", errLead, { id, clienteId, lead: c.lead_id }, { silent: true });
+  }
+
   // Fattura incassata, come quando la si aggiunge dalla scheda (il PDF, se c'è, lo carica il gestionale dopo).
   const { data: fattura, error: errFatt } = await admin
     .from("fatture")

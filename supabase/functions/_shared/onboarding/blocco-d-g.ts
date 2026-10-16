@@ -1,6 +1,6 @@
 import { PUBBLICA, type Blocco, type Opzione } from "./tipi.ts";
 
-/** Le attività della settimana (D2 e D4): una voce cambia con il ramo. */
+/** Le attività della settimana (D2; fino al 16/10/2026 anche le fasce D4): una voce cambia con il ramo. */
 export const ATTIVITA: Opzione[] = [
   { value: "idee", label: "Trovare idee" },
   { value: "testi", label: "Scrivere i testi" },
@@ -14,7 +14,7 @@ export const ATTIVITA: Opzione[] = [
   { value: "admin", label: "Fatture, email e organizzazione" },
 ];
 
-/** Le attività che pesano sul tempo "operativo" dei contenuti (clienti.ore_operative). */
+/** Le attività che pesano sul tempo "operativo" dei contenuti (clienti.ore_operative; la domanda D4 non c'è più, resta per le righe vecchie). */
 export const ATTIVITA_OPERATIVE = ["idee", "testi", "registrare", "montare", "pubblicare"] as const;
 
 export const FASCE_ORE: Opzione[] = [
@@ -63,15 +63,6 @@ export const BLOCCO_D: Blocco = {
       testo: "C'è un'attività che non delegheresti mai? Quale e perché?",
       tipo: "textarea",
       obbligatoria: true,
-    },
-    {
-      id: "ore_per_attivita",
-      codice: "D4",
-      testo: "Per ognuna delle attività qui sopra: quante ore a settimana ci dedichi?",
-      hint: "Facoltativa: serve a misurare le ore risparmiate a fine percorso.",
-      tipo: "fasce",
-      obbligatoria: false,
-      opzioni: ATTIVITA,
     },
   ],
 };
@@ -157,21 +148,8 @@ export const BLOCCO_F: Blocco = {
     { id: "da_evitare", codice: "F3", testo: "Cosa vuoi EVITARE mentre cresci?", tipo: "textarea", obbligatoria: true },
     { id: "perche_ora", codice: "F4", testo: "Perché proprio adesso?", tipo: "textarea", obbligatoria: true },
     {
-      id: "ore_percorso",
-      codice: "F5",
-      testo: "Quante ore a settimana puoi dedicare al percorso, davvero?",
-      tipo: "select",
-      obbligatoria: true,
-      opzioni: [
-        { value: "1-2", label: "1-2" },
-        { value: "3-5", label: "3-5" },
-        { value: "6-10", label: "6-10" },
-        { value: ">10", label: "Più di 10" },
-      ],
-    },
-    {
       id: "disponibilita_call",
-      codice: "F6",
+      codice: "F5",
       testo: "Quali giorni e fasce orarie preferisci per le call?",
       tipo: "multiselect-text",
       obbligatoria: true,
@@ -182,23 +160,31 @@ export const BLOCCO_F: Blocco = {
         { value: "sera", label: "Sera" },
       ],
     },
-  ],
-};
-
-export const BLOCCO_G: Blocco = {
-  id: "G_materiali",
-  chiave: "G",
-  titolo: "Materiali",
-  emoji: "📎",
-  intro: "Se hai documenti pronti, caricali qui: Aura e Wesley li leggono insieme alle tue risposte.",
-  domande: [
+    // --- Le tre domande finali su Wesley (16/10/2026) ---
     {
-      id: "allegati",
-      codice: "G1",
-      testo: "Carica la presentazione della tua offerta, il listino, il brand kit o altri documenti utili.",
-      hint: "PDF e immagini vengono letti da Aura; gli altri file restano a disposizione di Wesley.",
-      tipo: "file-list",
+      id: "come_conosciuto",
+      codice: "F6",
+      testo: "Come hai conosciuto Wesley?",
+      tipo: "textarea",
+      obbligatoria: true,
+      placeholder: "Un video, una live, un amico che ti ha parlato di lui, una ricerca su Google…",
+    },
+    {
+      id: "perche_wesley",
+      codice: "F7",
+      testo: "Cosa ti ha convinto a scegliere Wesley, e non un altro?",
+      tipo: "textarea",
+      obbligatoria: true,
+      placeholder: "Quello che hai visto, sentito o capito, con le tue parole",
+    },
+    {
+      id: "messaggio_wesley",
+      codice: "F8",
+      testo: "C'è qualcosa che vorresti dire a Wesley prima di iniziare?",
+      hint: "Anche qualcosa di personale: una paura, un dubbio, un'aspettativa. Vanno bene le cose belle e quelle meno belle. Per noi dietro ogni cliente c'è una persona, e vogliamo aiutarla al massimo.",
+      tipo: "textarea",
       obbligatoria: false,
+      opinione: true,
     },
   ],
 };

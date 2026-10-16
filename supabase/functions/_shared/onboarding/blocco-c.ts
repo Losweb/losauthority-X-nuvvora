@@ -44,21 +44,6 @@ export const BLOCCO_C: Blocco = {
       tipo: "textarea",
       obbligatoria: false,
     },
-    {
-      id: "tentativi_passati",
-      codice: "C3",
-      testo: "Cosa hai già provato per farti conoscere online, e quanto hai speso più o meno? Com'è andata? Per esempio corsi, agenzie, pubblicità.",
-      tipo: "textarea",
-      obbligatoria: true,
-    },
-    {
-      id: "riferimenti",
-      codice: "C4",
-      testo: "2-3 creator o professionisti che comunicano in un modo che ti piace.",
-      tipo: "textarea",
-      obbligatoria: true,
-      placeholder: "Nomi o link",
-    },
     // --- versione «non pubblico ancora» ---
     {
       id: "blocco_partenza",
@@ -147,24 +132,6 @@ export const BLOCCO_C: Blocco = {
       testo: "I contenuti che ti hanno portato messaggi o {clienti}: link o descrizione. Se non ce ne sono, i 3 con più visualizzazioni.",
       tipo: "textarea",
       obbligatoria: true,
-      mostraSe: { social: PUBBLICA },
-    },
-    {
-      id: "follower",
-      codice: "C9",
-      testo: "Quanti follower hai in tutto, anche a occhio?",
-      tipo: "number",
-      unita: "follower",
-      obbligatoria: false,
-      mostraSe: { social: PUBBLICA },
-    },
-    {
-      id: "views_medie",
-      codice: "C9",
-      testo: "Visualizzazioni medie di un contenuto negli ultimi 30 giorni, anche a occhio.",
-      tipo: "number",
-      unita: "views",
-      obbligatoria: false,
       mostraSe: { social: PUBBLICA },
     },
     {

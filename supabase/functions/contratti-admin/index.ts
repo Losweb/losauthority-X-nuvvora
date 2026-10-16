@@ -2,7 +2,9 @@
  * contratti-admin — le operazioni del gestionale sul modulo contratti che hanno
  * bisogno del service role o di un controllo lato server. Il resto (offerte,
  * annullare/eliminare un invito, telefono e istruzioni) passa dalla RLS.
- *   { azione: "crea_invito", offerta_id, note? }   admin    → { ok, id, token, offerta, programma }
+ *   { azione: "crea_invito", offerta_id, note?, lead_id? }   admin → { ok, id, token, offerta, programma }
+ *       lead_id (pagina Leads → Clienti «in attesa di contratto»): l'invito resta agganciato al lead e i suoi
+ *       dati (nome, email o telefono) precompilano il modulo del cliente.
  *   { azione: "salva_firma", firma }               admin    → { ok }   (valida la forma del tratto)
  *   { azione: "segna_pagato", id, pagato_il? }      finance  → { ok, cliente_id, fattura_id }
  *   { azione: "attiva", id, consegne: string[] }    finance  → { ok, cliente_id, email, password?, nome, scade_il, recesso_fino_al }
@@ -18,7 +20,7 @@ import { STATI_FIRMATI } from "../_shared/contratti/tipi.ts";
 import { validaFirma } from "../_shared/contratti/validazione.ts";
 import { attivaProgramma, registraPagamento } from "./operazioni.ts";
 
-type Body = { azione?: unknown; offerta_id?: unknown; note?: unknown; firma?: unknown; id?: unknown; pagato_il?: unknown; consegne?: unknown };
+type Body = { azione?: unknown; offerta_id?: unknown; note?: unknown; lead_id?: unknown; firma?: unknown; id?: unknown; pagato_il?: unknown; consegne?: unknown };
 
 function richiediAdmin(c: Chiamante): void {
   if (c.rol !== "admin") throw new HttpError(403, "Solo l'admin può fare questa operazione.");
@@ -38,13 +40,42 @@ function nuovoToken(): string {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+interface LeadInvito {
+  id: string;
+  nome: string;
+  contatto: string | null;
+}
+
+/** Da quel che sappiamo del lead (nome e un contatto libero) i campi del modulo che possiamo già riempire. */
+function datiDalLead(lead: LeadInvito): Record<string, string> {
+  const parole = lead.nome.trim().split(/\s+/).filter(Boolean);
+  const dati: Record<string, string> = {};
+  if (parole.length > 0) dati.nome = parole[0];
+  if (parole.length > 1) dati.cognome = parole.slice(1).join(" ");
+  const contatto = (lead.contatto ?? "").trim();
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contatto)) dati.email = contatto.toLowerCase();
+  else if (/^\+?[0-9 ().-]{6,30}$/.test(contatto)) dati.telefono = contatto;
+  else if (/^@?[A-Za-z0-9._]{2,30}$/.test(contatto)) dati.instagram = contatto;
+  return dati;
+}
+
 /** L'invito si crea scegliendo un'offerta: i dati li inserisce poi il cliente. Offerta, prezzo e firma di Wesley si fissano ORA. */
 async function creaInvito(body: Body, c: Chiamante): Promise<Response> {
   richiediAdmin(c);
   const offertaId = typeof body.offerta_id === "string" ? body.offerta_id : "";
-  const note = typeof body.note === "string" ? body.note.trim().slice(0, 1000) || null : null;
+  let note = typeof body.note === "string" ? body.note.trim().slice(0, 1000) || null : null;
+  const leadId = typeof body.lead_id === "string" && /^[0-9a-f-]{36}$/.test(body.lead_id) ? body.lead_id : null;
   if (!offertaId) throw new HttpError(400, "Scegli un'offerta.");
   const admin = adminClient();
+  // Invito nato da un lead (Leads → Clienti «in attesa di contratto»): resta agganciato e precompila il modulo.
+  let lead: LeadInvito | null = null;
+  if (leadId) {
+    const { data } = await admin.from("lead").select("id, nome, contatto").eq("id", leadId).maybeSingle();
+    lead = (data as LeadInvito | null) ?? null;
+    if (!lead) throw new HttpError(404, "Lead non trovato.");
+    // Senza nota, nella lista dei contratti si legge il nome del lead finché lui non compila i dati.
+    note = note ?? lead.nome;
+  }
   const { data: offerta } = await admin.from("offerte").select("id, nome, modello, prezzo, attiva").eq("id", offertaId).maybeSingle();
   const o = offerta as { id: string; nome: string; modello: string; prezzo: string | number; attiva: boolean } | null;
   if (!o || !o.attiva) throw new HttpError(404, "Offerta non trovata o non più attiva.");
@@ -66,6 +97,8 @@ async function creaInvito(body: Body, c: Chiamante): Promise<Response> {
       durata_mesi: modello.durataMesi,
       prezzo: Number(o.prezzo),
       firma_fornitore: (imp as { firma?: unknown } | null)?.firma ?? null,
+      lead_id: lead?.id ?? null,
+      dati: lead ? datiDalLead(lead) : {},
     })
     .select("id")
     .single();
