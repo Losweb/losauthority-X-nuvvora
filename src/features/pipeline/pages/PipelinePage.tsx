@@ -29,7 +29,7 @@ function riepilogoPerStage(leads: Lead[]): Record<string, RiepilogoStage> {
   return mappa;
 }
 
-/** Pipeline in stile CRM: imbuto per stage, ricerca e tabella con cambio stage inline. */
+/** Leads (la pipeline commerciale): imbuto per stage, ricerca e tabella con cambio stage inline. Allo stage «Cliente» il lead compare in Clienti, in attesa di contratto. */
 export default function PipelinePage() {
   const { data: leads, isLoading, isError } = useLeads();
   const sposta = useSpostaLead();
@@ -64,7 +64,7 @@ export default function PipelinePage() {
   return (
     <div className="grid gap-4">
       <PageHeader
-        titolo="Pipeline"
+        titolo="Leads"
         sottotitolo={
           leads
             ? `${aperti.length} lead ${aperti.length === 1 ? "attivo" : "attivi"} · valore potenziale ${formatCurrency(valorePipeline)}`

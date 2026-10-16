@@ -62,7 +62,7 @@ export function CardIdea({ idea, indice = 0, onSalva, onScarta, onWorkflow, occu
       <h3 className="font-sans text-base leading-snug font-semibold">{idea.titolo}</h3>
 
       {idea.hook ? (
-        <p className="font-display text-[19px] leading-snug text-foreground italic">“{idea.hook}”</p>
+        <p className="text-[17px] leading-snug font-semibold tracking-[-0.01em] text-foreground">“{idea.hook}”</p>
       ) : null}
 
       {idea.script ? (

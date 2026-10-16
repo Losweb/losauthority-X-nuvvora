@@ -14,8 +14,8 @@ export function AvatarVuoto({ nome, occupato, onCrea }: AvatarVuotoProps) {
       {/* La carta ancora bianca: tratteggiata, con il punto di domanda al posto della foto. */}
       <div aria-hidden className="w-full max-w-[420px] rounded-lg border border-dashed border-input bg-card/60 p-5 shadow-xs animate-in fade-in zoom-in-95 fill-mode-both duration-700">
         <div className="mb-4 flex items-center justify-between">
-          <span className="eyebrow text-[9px]">Carta d'identità · Cliente ideale</span>
-          <span className="figure text-[10px] text-muted-foreground/60">N. AV-0001</span>
+          <span className="eyebrow text-[12px]">Carta d'identità · Cliente ideale</span>
+          <span className="figure text-[12px] text-muted-foreground/60">N. AV-0001</span>
         </div>
         <div className="grid grid-cols-[72px_1fr] gap-4">
           <div className="grid aspect-[3/4] place-items-center rounded-md border border-dashed border-input bg-muted/30 font-display text-[40px] text-muted-foreground/40">?</div>
@@ -34,7 +34,7 @@ export function AvatarVuoto({ nome, occupato, onCrea }: AvatarVuotoProps) {
 
       <div className="grid gap-3">
         <p className="eyebrow">Avatar</p>
-        <h2 className="font-display text-[clamp(26px,3.4vw,36px)] leading-[1.15] font-normal italic">
+        <h2 className="font-display text-[clamp(26px,3.4vw,36px)] leading-[1.15] font-bold">
           {nome ? `${nome}, a chi parli quando registri?` : "A chi parli quando registri?"}
         </h2>
         <p className="mx-auto max-w-[460px] text-[15px] leading-relaxed text-muted-foreground">

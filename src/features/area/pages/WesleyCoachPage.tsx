@@ -53,7 +53,7 @@ export default function WesleyCoachPage() {
   return (
     // Pagina fissa come Crea idee: scorre solo la conversazione, il composer resta a 1rem dal fondo.
     // Sul telefono scorre la pagina e il composer resta incollato in basso (BARRA_COMPOSER).
-    <div className="-mb-16 grid gap-6 md:-mt-4 md:h-[calc(100dvh-var(--header-h)-2.5rem)] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden">
+    <div className="-mb-16 grid gap-6 md:-mb-10 md:h-[calc(var(--vh-finestra)-var(--header-h)-1.5rem)] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden">
       <section className="flex min-h-0 min-w-0 flex-col" aria-label="Wesley Coach">
         <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -82,6 +82,7 @@ export default function WesleyCoachPage() {
 
         <div className={BARRA_COMPOSER}>
           <ComposerAura
+            auraViva={!vuota}
             inAttesa={auraScrive}
             onInvia={manda}
             suggerito={spunto}

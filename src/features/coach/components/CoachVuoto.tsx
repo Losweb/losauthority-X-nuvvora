@@ -13,7 +13,7 @@ export function CoachVuoto({ nome, onSpunto }: CoachVuotoProps) {
       <AuraSfera dimensione={120} />
       <div className="grid gap-3">
         <p className="eyebrow">Wesley Coach</p>
-        <h2 className="font-display text-[clamp(26px,3.6vw,38px)] leading-[1.2] font-normal tracking-[-0.01em] italic">
+        <h2 className="font-display text-[clamp(26px,3.6vw,38px)] leading-[1.2] font-bold tracking-[-0.01em]">
           {nome ? `${nome}, dove sei bloccato oggi?` : "Dove sei bloccato oggi?"}
         </h2>
         <p className="mx-auto max-w-[460px] text-[15px] leading-relaxed text-muted-foreground">

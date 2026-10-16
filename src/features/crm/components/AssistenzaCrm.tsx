@@ -53,7 +53,7 @@ export function AssistenzaCrm({ clienteId, nomeCliente }: AssistenzaCrmProps) {
         </Button>
 
         <div className="grid gap-2">
-          <p className="eyebrow text-[10px]">Accessi per assistenza</p>
+          <p className="eyebrow text-[12px]">Accessi per assistenza</p>
           {accessi.data && accessi.data.length === 0 ? <p className="text-xs text-muted-foreground">Nessun accesso.</p> : null}
           {accessi.data && accessi.data.length > 0 ? (
             <ul className="grid gap-1.5">

@@ -108,7 +108,7 @@ function Contenuto({ clienteId, nomeCliente, onChiudi }: Omit<ContattiAssistenza
                   <TableCell className="hidden text-[12.5px] text-muted-foreground sm:table-cell">{formatDate(c.arrivato_il)}</TableCell>
                   <TableCell className="text-[12.5px]">
                     {etichettaStato(c.stato)}
-                    {c.valore !== null ? <span className="figure block text-[11px] text-muted-foreground">{formatCurrency(c.valore)}</span> : null}
+                    {c.valore !== null ? <span className="figure block text-[12px] text-muted-foreground">{formatCurrency(c.valore)}</span> : null}
                   </TableCell>
                   <TableCell className="hidden max-w-48 truncate text-[12.5px] text-muted-foreground sm:table-cell">{c.offerta ?? "—"}</TableCell>
                 </TableRow>

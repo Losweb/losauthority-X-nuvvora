@@ -11,8 +11,8 @@ export function DiagnosiAvatar({ diagnosi, completo }: { diagnosi: Diagnosi | nu
   return (
     <article aria-label="Diagnosi per Wesley" className="grid gap-5 rounded-lg border border-foreground/30 bg-muted/30 p-5 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="eyebrow font-sans text-[10px] text-foreground">Diagnosi · la lettura di Aura per Wesley</h3>
-        <p className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <h3 className="eyebrow font-sans text-[12px] text-foreground">Diagnosi · la lettura di Aura per Wesley</h3>
+        <p className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground">
           <EyeOff className="size-3.5" aria-hidden /> Il cliente non la vede
         </p>
       </header>

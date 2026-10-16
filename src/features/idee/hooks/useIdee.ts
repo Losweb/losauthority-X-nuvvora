@@ -79,8 +79,8 @@ interface RispostaAura {
 }
 
 type InvioInput =
-  /** stileId = stile della pagina "Stili" richiamato con "/"; ricercaId = ricerca TikTok («Usa in Crea idee»). */
-  | { sessioneId: string | null; messaggio: string; stileId?: string | null; ricercaId?: string | null }
+  /** stileId = stile della pagina "Stili" richiamato con "/". */
+  | { sessioneId: string | null; messaggio: string; stileId?: string | null }
   | { riprovaId: string; sessioneId: string };
 
 /** Manda un messaggio ad Aura (o riprova una risposta in errore). Ritorna l'id della sessione. */
@@ -91,7 +91,7 @@ export function useInviaAdAura(clienteId: string) {
       const body =
         "riprovaId" in input
           ? { riprova_messaggio_id: input.riprovaId }
-          : { sessione_id: input.sessioneId, messaggio: input.messaggio, stile_id: input.stileId ?? null, ricerca_id: input.ricercaId ?? null };
+          : { sessione_id: input.sessioneId, messaggio: input.messaggio, stile_id: input.stileId ?? null };
       return invocaEdge<RispostaAura>("aura-idee", body);
     },
     onSettled: (data, _err, input) => {

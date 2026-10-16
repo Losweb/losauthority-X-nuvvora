@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/features/auth";
-import { CartaGirevole, FlussoAvatar, SceltaVista, useAvatar, useAvatars, useEliminaAvatar, useInviaAvatar, useMessaggiAvatar, type MessaggioAvatar, type VistaMobile } from "@/features/avatar";
+import { CartaGirevole, DossierPagina, FlussoAvatar, SceltaVista, useAvatar, useAvatars, useEliminaAvatar, useInviaAvatar, useMessaggiAvatar, type MessaggioAvatar, type VistaMobile } from "@/features/avatar";
 import { ComposerAura } from "@/features/idee";
 import {
   AlertDialog,
@@ -21,7 +21,9 @@ import { cn } from "@/lib/utils";
 
 /**
  * /area/cervello/avatar/:id → a sinistra la conversazione con Aura, a destra la
- * carta d'identità che si compila man mano (e si gira per il dossier).
+ * carta d'identità che si compila man mano; «Gira per il dossier» mostra il
+ * dossier a tutta larghezza al posto di chat e carta (barra laterale e barra
+ * in alto restano), e «Torna alla carta» riporta alla vista normale.
  */
 export default function AvatarDettaglioPage() {
   const { id = "" } = useParams<{ id: string }>();
@@ -34,6 +36,8 @@ export default function AvatarDettaglioPage() {
   const [confermaElimina, setConfermaElimina] = useState(false);
   /** Sul telefono si vede una cosa per volta; null = la sceglie lo stato (in costruzione → chat, completa → carta). */
   const [sceltaVista, setSceltaVista] = useState<VistaMobile | null>(null);
+  /** Il dossier aperto prende il posto di chat e carta (la chat resta montata, nascosta). */
+  const [dossierAperto, setDossierAperto] = useState(false);
 
   const messaggi = useMessaggiAvatar(id);
   const lista = messaggi.data ?? [];
@@ -100,15 +104,16 @@ export default function AvatarDettaglioPage() {
         </div>
       </div>
 
-      <SceltaVista vista={vista} onCambia={setSceltaVista} />
+      {dossierAperto ? <DossierPagina avatar={a} numero={numero} onChiudi={() => setDossierAperto(false)} /> : null}
+      {!dossierAperto ? <SceltaVista vista={vista} onCambia={setSceltaVista} /> : null}
 
       {/* grid-cols-1 + min-w-0: senza, la riga MRZ della carta allarga la colonna oltre lo schermo. */}
-      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(400px,480px)] lg:items-start">
+      <div className={cn("grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(400px,480px)] lg:items-start", dossierAperto && "hidden")}>
         <section
           aria-label="Conversazione con Aura"
           className={cn(
             // Telefono: alta quanto lo schermo libero, così il campo per scrivere resta sempre a vista.
-            "order-2 min-h-[360px] min-w-0 flex-col rounded-2xl border bg-card/70 h-[calc(100dvh-var(--header-h)-13.25rem)] md:h-auto md:min-h-[460px] lg:order-1 lg:h-[calc(100dvh-var(--header-h)-9rem)]",
+            "order-2 min-h-[360px] min-w-0 flex-col rounded-2xl border bg-card/70 h-[calc(var(--vh-finestra)-var(--header-h)-13.25rem)] md:h-auto md:min-h-[460px] lg:order-1 lg:h-[calc(var(--vh-finestra)-var(--header-h)-9rem)]",
             vista === "chat" ? "flex" : "hidden md:flex",
           )}
         >
@@ -134,8 +139,8 @@ export default function AvatarDettaglioPage() {
           </div>
         </section>
 
-        <aside className={cn("order-1 min-w-0 lg:order-2", vista === "carta" ? "block" : "hidden md:block", "lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]")}>
-          <CartaGirevole avatar={a} numero={numero} titolare={titolare} inCompilazione={!completo} />
+        <aside className={cn("order-1 min-w-0 lg:order-2", vista === "carta" ? "block" : "hidden md:block", "lg:sticky lg:top-0")}>
+          <CartaGirevole avatar={a} numero={numero} titolare={titolare} inCompilazione={!completo} onApriDossier={() => setDossierAperto(true)} />
         </aside>
       </div>
 

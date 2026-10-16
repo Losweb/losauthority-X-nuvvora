@@ -35,7 +35,7 @@ function PannelloFilm() {
         <MarmoLogo altezza={28} />
         <div>
           <p className="eyebrow text-paper/60">Area riservata</p>
-          <h2 className="mt-4 max-w-[420px] text-[46px] leading-[1.05] font-normal tracking-[-0.02em] text-paper">
+          <h2 className="mt-4 max-w-[420px] text-[44px] leading-[1.05] text-paper">
             Bentornato. La tua area ti aspetta.
           </h2>
         </div>
@@ -80,15 +80,16 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-card lg:grid-cols-[1.05fr_1fr]">
+    <main className="st-canvas">
+      <div className="st-window grid lg:grid-cols-[1.05fr_1fr]">
       <PannelloFilm />
 
-      <div className="flex items-center justify-center px-8 py-12">
+      <div className="flex items-center justify-center px-6 py-12 sm:px-8">
         <div className="w-full max-w-[360px]">
           <div className="mb-10 lg:hidden">
             <MarmoLogo altezza={22} />
           </div>
-          <h1 className="mb-2 text-[38px] leading-none">Accedi</h1>
+          <h1 className="mb-2 text-[36px] leading-[44px]">Accedi</h1>
           <p className="mb-8 text-sm text-muted-foreground">Inserisci le credenziali che ti ha fornito Wesley.</p>
 
           <Form {...form}>
@@ -98,9 +99,9 @@ export function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[13px] font-semibold tracking-[-0.01em]">Email</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input className="h-[42px]" type="email" autoComplete="email" placeholder="nome@email.it" {...field} />
+                      <Input type="email" autoComplete="email" placeholder="nome@email.it" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -111,9 +112,9 @@ export function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[13px] font-semibold tracking-[-0.01em]">Password</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input className="h-[42px]" type="password" autoComplete="current-password" placeholder="••••••••" {...field} />
+                      <Input type="password" autoComplete="current-password" placeholder="••••••••" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,6 +134,7 @@ export function LoginPage() {
           </div>
           <p className="mt-7 text-center text-xs text-muted-foreground/80">Accesso protetto e tracciato.</p>
         </div>
+      </div>
       </div>
     </main>
   );

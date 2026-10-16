@@ -46,6 +46,8 @@ export default defineConfig(({ command, mode }) => {
         "@area": path.resolve(__dirname, "./supabase/functions/_shared/area"),
       },
     },
+    // ffmpeg.wasm (pagina Skool Video): il pre-bundle di Vite romperebbe il worker del pacchetto.
+    optimizeDeps: { exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"] },
     build: {
       rollupOptions: {
         output: {

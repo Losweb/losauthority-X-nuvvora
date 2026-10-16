@@ -37,7 +37,7 @@ export function campiCompilati(a: Avatar): { fatti: number; totale: number } {
 }
 
 /** Tutto quello che il retro della carta (DossierAvatar) mostra oltre al fronte. */
-const DOSSIER_TESTO = ["snapshot", "contesto", "desiderio_pratico", "desiderio_emotivo", "dove_cerca"] as const;
+const DOSSIER_TESTO = ["snapshot", "contesto", "desiderio_pratico", "desiderio_emotivo", "dove_cerca", "cosa_manca", "ponte", "arrivo", "nemico"] as const;
 const DOSSIER_LISTE = ["dolori_superficie", "dolori_profondi", "credenze_limitanti", "linguaggio", "piattaforme", "chi_segue", "obiezioni", "trigger_acquisto"] as const;
 
 /** Il dossier ha qualcosa da mostrare (dati o diagnosi)? */

@@ -18,7 +18,7 @@ interface CartaAvatarProps {
 function Campo({ etichetta, valore, inCompilazione, className }: { etichetta: string; valore: string | null | undefined; inCompilazione: boolean; className?: string }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <p className="eyebrow text-[10px]">{etichetta}</p>
+      <p className="eyebrow text-[12px]">{etichetta}</p>
       {valore ? (
         // Al massimo tre righe: la carta resta compatta, il testo intero è nel dossier (e nel title).
         <p
@@ -49,8 +49,8 @@ export function CartaAvatar({ avatar, numero, titolare, inCompilazione, onGira, 
   return (
     <article aria-label={`Carta d'identità di ${avatar.nome ?? "avatar in compilazione"}`} className="overflow-hidden rounded-lg border bg-card shadow-sm">
       <header className="flex items-center justify-between gap-4 border-b px-5 py-3">
-        <p className="eyebrow text-[10px] text-foreground">Carta d'identità · Cliente ideale</p>
-        <p className="figure shrink-0 text-[11px] text-muted-foreground">N. {codiceAvatar(numero)}</p>
+        <p className="eyebrow text-[12px] text-foreground">Carta d'identità · Cliente ideale</p>
+        <p className="figure shrink-0 text-[12px] text-muted-foreground">N. {codiceAvatar(numero)}</p>
       </header>
 
       {/* La colonna "foto" ha larghezza fissa anche sul telefono: senza, aspect-[3/4] la farebbe alta quanto tutta la carta.
@@ -58,7 +58,7 @@ export function CartaAvatar({ avatar, numero, titolare, inCompilazione, onGira, 
       <div className="grid grid-cols-[minmax(0,84px)_minmax(0,1fr)] gap-x-4 gap-y-5 p-5 sm:grid-cols-[minmax(0,150px)_1fr] sm:gap-6 sm:p-6">
         <div className="grid aspect-[3/4] place-items-center self-start rounded-md border bg-muted/40" aria-hidden>
           {iniziale ? (
-            <span key={iniziale} className="font-display text-[56px] leading-none font-medium animate-in fade-in zoom-in-95 fill-mode-both duration-500 sm:text-[104px]">
+            <span key={iniziale} className="font-display text-[56px] leading-none font-semibold animate-in fade-in zoom-in-95 fill-mode-both duration-500 sm:text-[104px]">
               {iniziale}
             </span>
           ) : (
@@ -68,7 +68,7 @@ export function CartaAvatar({ avatar, numero, titolare, inCompilazione, onGira, 
 
         <div className="contents sm:grid sm:min-w-0 sm:content-start sm:gap-5">
           <div className="min-w-0 self-center sm:self-auto">
-            <p className="eyebrow text-[10px]">Nome</p>
+            <p className="eyebrow text-[12px]">Nome</p>
             {avatar.nome ? (
               <h3 key={avatar.nome} className="text-[36px] leading-[1.05] break-words animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 sm:text-[44px]">
                 {avatar.nome}
@@ -86,17 +86,17 @@ export function CartaAvatar({ avatar, numero, titolare, inCompilazione, onGira, 
             <Campo etichetta="Titolare" valore={titolare} inCompilazione={false} />
           </div>
           {avatar.frase ? (
-            <p key={avatar.frase} className="col-span-2 font-display text-[21px] leading-snug italic text-foreground/85 animate-in fade-in fill-mode-both duration-700 sm:col-span-1 sm:mt-2">
+            <p key={avatar.frase} className="col-span-2 font-display text-[21px] leading-snug text-foreground/85 animate-in fade-in fill-mode-both duration-700 sm:col-span-1 sm:mt-2">
               «{avatar.frase}»
             </p>
           ) : (
-            <p className={cn("col-span-2 font-display text-[19px] italic text-muted-foreground/40 sm:col-span-1 sm:mt-2", inCompilazione && "animate-pulse")}>«…»</p>
+            <p className={cn("col-span-2 font-display text-[19px] text-muted-foreground/40 sm:col-span-1 sm:mt-2", inCompilazione && "animate-pulse")}>«…»</p>
           )}
         </div>
       </div>
 
       <footer className="flex items-center justify-between gap-4 border-t bg-muted/40 px-5 py-2.5">
-        <p className="figure min-w-0 truncate text-[11px] tracking-[0.14em] text-muted-foreground" aria-hidden>
+        <p className="figure min-w-0 truncate text-[12px] tracking-[0.14em] text-muted-foreground" aria-hidden>
           {rigaMrz(avatar)}
         </p>
         {onGira ? (

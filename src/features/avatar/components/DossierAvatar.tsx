@@ -1,18 +1,21 @@
 import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { codiceAvatar, haDossier, type Avatar } from "../types";
+import { haMappa, MappaAvatar } from "./MappaAvatar";
 
 interface DossierAvatarProps {
   avatar: Avatar;
   numero: number;
   /** Torna al fronte della carta; assente (vista del team) → niente piè di pagina. */
   onGira?: () => void;
+  /** A schermo pieno: le sezioni si distribuiscono su più colonne e il testo respira. */
+  ampio?: boolean;
 }
 
 export function SezioneDossier({ titolo, children }: { titolo: string; children: ReactNode }) {
   return (
     <section className="grid gap-1.5">
-      <h4 className="eyebrow font-sans text-[10px]">{titolo}</h4>
+      <h4 className="eyebrow font-sans text-[12px]">{titolo}</h4>
       <div className="text-[14px] leading-snug text-foreground">{children}</div>
     </section>
   );
@@ -23,7 +26,7 @@ export function ElencoDossier({ voci, corsivo = false }: { voci: string[]; corsi
   return (
     <ul className="grid gap-1 pl-4 list-disc marker:text-muted-foreground/60">
       {voci.map((v) => (
-        <li key={v} className={corsivo ? "font-display text-[16px] italic" : ""}>
+        <li key={v} className={corsivo ? "text-[15px] leading-snug" : ""}>
           {corsivo ? `«${v}»` : v}
         </li>
       ))}
@@ -39,24 +42,27 @@ export const TestoDossier = ({ v }: { v: string | null }) => (v ? <p className="
  * canali, obiezioni, trigger). La diagnosi per Wesley NON è qui: vive in
  * avatar_diagnosi e la vede solo il team (DiagnosiAvatar).
  */
-export function DossierAvatar({ avatar, numero, onGira }: DossierAvatarProps) {
+export function DossierAvatar({ avatar, numero, onGira, ampio = false }: DossierAvatarProps) {
   const pronto = haDossier(avatar);
+  // Con `ampio` le griglie salgono a 3-4 colonne da lg: nella colonna stretta restano a 2.
+  const due = ampio ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2";
   return (
     <article aria-label={`Dossier di ${avatar.nome ?? "avatar in compilazione"}`} className="overflow-hidden rounded-lg border bg-card shadow-sm">
       <header className="flex items-center justify-between gap-4 border-b px-5 py-3">
-        <h3 className="eyebrow font-sans text-[10px] text-foreground">Dossier · Cliente ideale</h3>
-        <p className="figure shrink-0 text-[11px] text-muted-foreground">N. {codiceAvatar(numero)}</p>
+        <h3 className="eyebrow font-sans text-[12px] text-foreground">Dossier · Cliente ideale</h3>
+        <p className="figure shrink-0 text-[12px] text-muted-foreground">N. {codiceAvatar(numero)}</p>
       </header>
 
       {!pronto ? (
         <div className="grid gap-2 px-6 py-14 text-center">
-          <p className="font-display text-[22px] italic text-muted-foreground">Il dossier si scrive durante la conversazione.</p>
+          <p className="font-display text-[22px] text-muted-foreground">Il dossier si scrive durante la conversazione.</p>
           <p className="text-sm text-muted-foreground">Dolori, credenze, desideri, linguaggio, canali, obiezioni e trigger compariranno qui man mano.</p>
         </div>
       ) : (
-        <div className="grid gap-6 p-5 sm:p-6">
-          {avatar.snapshot ? <p className="font-display text-[20px] leading-snug">{avatar.snapshot}</p> : null}
-          <div className="grid gap-5 sm:grid-cols-2">
+        <div className={ampio ? "grid gap-8 p-6 sm:p-8" : "grid gap-6 p-5 sm:p-6"}>
+          {avatar.snapshot ? <p className={ampio ? "max-w-[900px] font-display text-[20px] leading-snug lg:text-[24px]" : "font-display text-[20px] leading-snug"}>{avatar.snapshot}</p> : null}
+          {haMappa(avatar) ? <MappaAvatar avatar={avatar} ampio={ampio} /> : null}
+          <div className={`grid gap-5 ${due}`}>
             <SezioneDossier titolo="Chi è">
               <TestoDossier v={[avatar.eta && `${avatar.eta} anni`, avatar.genere, avatar.situazione].filter(Boolean).join(" · ") || null} />
             </SezioneDossier>
@@ -67,7 +73,7 @@ export function DossierAvatar({ avatar, numero, onGira }: DossierAvatarProps) {
               <TestoDossier v={avatar.contesto} />
             </SezioneDossier>
             <SezioneDossier titolo="Frase-simbolo">
-              {avatar.frase ? <p className="font-display text-[17px] italic">«{avatar.frase}»</p> : <p className="text-muted-foreground/60">—</p>}
+              {avatar.frase ? <p className="font-display text-[17px]">«{avatar.frase}»</p> : <p className="text-muted-foreground/60">—</p>}
             </SezioneDossier>
             <SezioneDossier titolo="Dolori di superficie (li dice)">
               <ElencoDossier voci={avatar.dolori_superficie} />
@@ -101,7 +107,7 @@ export function DossierAvatar({ avatar, numero, onGira }: DossierAvatarProps) {
               <TestoDossier v={avatar.dove_cerca} />
             </SezioneDossier>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className={`grid gap-5 ${due}`}>
             <SezioneDossier titolo="Obiezioni">
               <ElencoDossier voci={avatar.obiezioni} />
             </SezioneDossier>
@@ -113,7 +119,7 @@ export function DossierAvatar({ avatar, numero, onGira }: DossierAvatarProps) {
       )}
 
       {onGira ? (
-        <footer className="flex items-center justify-end border-t bg-muted/40 px-5 py-2.5">
+        <footer className="flex items-center justify-end border-t bg-muted/40 px-5 py-2.5 sm:px-6">
           <button type="button" onClick={onGira} className="group inline-flex items-center gap-1 text-[12px] font-medium text-foreground transition-colors hover:text-foreground/70 pointer-coarse:-my-2.5 pointer-coarse:py-2.5">
             <ArrowLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" aria-hidden />
             Torna alla carta

@@ -21,7 +21,7 @@ export function DaFareOggi({ clienti, lead, caricamento, errore }: DaFareOggiPro
     <ListaCard
       titolo="Da fare oggi"
       sottotitolo="Compiti tuoi negli hub e lead da ricontattare"
-      link={{ href: "/pipeline", testo: "Pipeline" }}
+      link={{ href: "/leads", testo: "Leads" }}
       caricamento={caricamento}
       errore={errore}
       vuoto={vuoto}
@@ -41,7 +41,7 @@ export function DaFareOggi({ clienti, lead, caricamento, errore }: DaFareOggiPro
       {leadDaFare.map((l) => (
         <li key={`l-${l.id}`}>
           {/* Telefono: nome e stage sulla prima riga, la data sotto. */}
-          <Link to="/pipeline" className="flex flex-wrap items-center gap-x-3 gap-y-0.5 py-2 hover:bg-muted/50 sm:flex-nowrap sm:gap-3">
+          <Link to="/leads" className="flex flex-wrap items-center gap-x-3 gap-y-0.5 py-2 hover:bg-muted/50 sm:flex-nowrap sm:gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{l.nome}</p>
               {l.prossima_azione ? <p className="truncate text-xs text-muted-foreground">{l.prossima_azione}</p> : null}

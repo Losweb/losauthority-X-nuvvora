@@ -59,7 +59,7 @@ function DettaglioStile({ clienteId, stile, onChiudi }: { clienteId: string; sti
   return (
     <>
       <SheetHeader className="border-b px-4 py-[18px] pr-12 sm:px-6">
-        <SheetTitle className="font-display text-xl font-medium">{stile.titolo}</SheetTitle>
+        <SheetTitle className="font-display text-xl font-semibold">{stile.titolo}</SheetTitle>
         <SheetDescription>{stile.descrizione ?? "Come si costruisce un video in questo stile nel tuo nicho, secondo Aura."}</SheetDescription>
       </SheetHeader>
 
@@ -108,7 +108,7 @@ function DettaglioStile({ clienteId, stile, onChiudi }: { clienteId: string; sti
                 <ol className="grid gap-3 pt-1">
                   {stile.script_fonte.map((s, i) => (
                     <li key={i} className="grid gap-1">
-                      <p className="eyebrow text-[10px]">Script {i + 1}</p>
+                      <p className="eyebrow text-[12px]">Script {i + 1}</p>
                       <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-muted-foreground">{s}</p>
                     </li>
                   ))}

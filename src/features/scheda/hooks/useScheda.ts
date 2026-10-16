@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { domandeAttive } from "@onboarding/definizione.ts";
 import { chiaviScheda, patchDaRisposte, risposteDaRiga, statoDaRiga } from "../mappa";
@@ -45,7 +45,7 @@ export function useScheda(clienteId: string | undefined) {
   });
 }
 
-const COLONNE_STATO = "stato, inviato_il, sezione_indice, updated_at";
+const COLONNE_STATO = "stato, inviato_il, sezione_indice, updated_at, benvenuto_il";
 
 /** Solo lo stato (mancante / bozza / inviata) della scheda di un cliente. */
 export function useStatoScheda(clienteId: string | undefined) {
@@ -60,6 +60,29 @@ export function useStatoScheda(clienteId: string | undefined) {
         .maybeSingle();
       if (error) throw error;
       return statoDaRiga(data);
+    },
+  });
+}
+
+/**
+ * Il cliente ha finito la schermata di benvenuto: si segna sulla sua riga (che
+ * nasce qui se ancora non c'è) e lo stato in cache si aggiorna subito, così i
+ * gate di /area e /area/onboarding non lo rimandano al benvenuto.
+ */
+export function useSegnaBenvenuto(clienteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (): Promise<string> => {
+      const adesso = new Date().toISOString();
+      const { error } = await supabase.from("data_onboarding").upsert({ id: clienteId, benvenuto_il: adesso }, { onConflict: "id" });
+      if (error) throw error;
+      return adesso;
+    },
+    onSuccess: (adesso) => {
+      queryClient.setQueryData<StatoSchedaInfo>(chiaviScheda.stato(clienteId), (vecchio) =>
+        vecchio ? { ...vecchio, benvenutoIl: adesso } : { stato: "bozza", fase: "bozza", inviatoIl: null, sezioneIndice: null, aggiornatoIl: adesso, benvenutoIl: adesso },
+      );
+      void queryClient.invalidateQueries({ queryKey: chiaviScheda.tutte(clienteId) });
     },
   });
 }

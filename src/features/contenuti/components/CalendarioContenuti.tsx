@@ -86,7 +86,7 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
     <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
       <section aria-label="Calendario dei contenuti" className="grid gap-3">
         <header className="flex items-center justify-between gap-2">
-          <h3 className="font-display text-2xl font-medium capitalize">{titoloMese}</h3>
+          <h3 className="font-display text-2xl font-semibold capitalize">{titoloMese}</h3>
           <div className="flex items-center gap-1">
             <Button size="sm" variant="outline" onClick={() => setMese(startOfMonth(new Date()))}>
               Oggi
@@ -105,7 +105,7 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
         <div className="hidden md:block md:overflow-x-auto">
           <div className="grid min-w-[720px] grid-cols-7 overflow-hidden rounded-lg border bg-border gap-px">
             {giorni.slice(0, 7).map((g) => (
-              <div key={g.toISOString()} className="eyebrow bg-muted px-2 py-1.5 text-center text-[10px]">
+              <div key={g.toISOString()} className="eyebrow bg-muted px-2 py-1.5 text-center text-[12px]">
                 {format(g, "EEE", { locale: it })}
               </div>
             ))}
@@ -127,7 +127,7 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
                 >
                   <span
                     className={cn(
-                      "figure self-end text-[11px] leading-none",
+                      "figure self-end text-[12px] leading-none",
                       isToday(g) && "rounded-full bg-primary px-1.5 py-1 text-primary-foreground",
                     )}
                   >
@@ -153,7 +153,7 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
           sopra === "senza-data" && "border-primary bg-sidebar-accent",
         )}
       >
-        <h3 className="eyebrow text-[10px]">Senza data · {senzaData.length}</h3>
+        <h3 className="eyebrow text-[12px]">Senza data · {senzaData.length}</h3>
         {senzaData.length === 0 ? (
           <p className="text-xs text-muted-foreground">Tutti i contenuti hanno una data. Trascina qui per toglierla.</p>
         ) : (

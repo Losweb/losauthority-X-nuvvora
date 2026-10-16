@@ -119,7 +119,7 @@ export default function OffertaDettaglioPage() {
           aria-label="Conversazione con Aura"
           className={cn(
             // Telefono: alta quanto lo schermo libero, così il campo per scrivere resta sempre a vista.
-            "order-2 min-h-[360px] min-w-0 flex-col rounded-2xl border bg-card/70 h-[calc(100dvh-var(--header-h)-13.25rem)] md:h-auto md:min-h-[460px] lg:order-1 lg:h-[calc(100dvh-var(--header-h)-9rem)]",
+            "order-2 min-h-[360px] min-w-0 flex-col rounded-2xl border bg-card/70 h-[calc(var(--vh-finestra)-var(--header-h)-13.25rem)] md:h-auto md:min-h-[460px] lg:order-1 lg:h-[calc(var(--vh-finestra)-var(--header-h)-9rem)]",
             vista === "chat" ? "flex" : "hidden md:flex",
           )}
         >
@@ -152,7 +152,7 @@ export default function OffertaDettaglioPage() {
         </section>
 
         {/* La carta cresce con la struttura: resta appiccicata in alto e scorre da sola se è più alta dello schermo. */}
-        <aside className={cn("order-1 min-w-0 lg:order-2", vista === "carta" ? "block" : "hidden md:block", "lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:max-h-[calc(100dvh-var(--header-h)-3rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin]")}>
+        <aside className={cn("order-1 min-w-0 lg:order-2", vista === "carta" ? "block" : "hidden md:block", "lg:sticky lg:top-0 lg:max-h-[calc(var(--vh-finestra)-var(--header-h)-3rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin]")}>
           <CartaOfferta offerta={o} numero={numero} titolare={utente.nombre} inCompilazione={!completa} linkPdf={linkPdfOfferta(o.id)} />
         </aside>
       </div>

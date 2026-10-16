@@ -53,10 +53,10 @@ export function PuntoTappa({ tappa, numero, distanza, ultimo, onScegli }: PuntoT
         />
       </button>
 
-      <span className={cn("eyebrow mt-3 text-[10px]", corrente ? "text-foreground" : "text-muted-foreground")}>Tappa {numero}</span>
+      <span className={cn("eyebrow mt-3 text-[12px]", corrente ? "text-foreground" : "text-muted-foreground")}>Tappa {numero}</span>
       <span className={cn("mt-1 line-clamp-2 px-2 text-center text-xs leading-snug", corrente ? "font-medium" : "text-muted-foreground")}>{tappa.testo}</span>
       {corrente && !fatta ? (
-        <span className="figure mt-1 text-[11px] text-muted-foreground">
+        <span className="figure mt-1 text-[12px] text-muted-foreground">
           {fatti}/{totale}
         </span>
       ) : null}

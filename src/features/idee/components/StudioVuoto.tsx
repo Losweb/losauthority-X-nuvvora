@@ -13,7 +13,7 @@ export function StudioVuoto({ nome, onSpunto }: StudioVuotoProps) {
       <AuraSfera dimensione={120} />
       <div className="grid gap-3">
         <p className="eyebrow">Crea idee</p>
-        <h2 className="font-display text-[clamp(26px,3.6vw,38px)] leading-[1.2] font-normal tracking-[-0.01em] italic">
+        <h2 className="font-display text-[clamp(26px,3.6vw,38px)] leading-[1.2] font-bold tracking-[-0.01em]">
           {nome ? `${nome}, di cosa parla il tuo prossimo video?` : "Di cosa parla il tuo prossimo video?"}
         </h2>
         <p className="mx-auto max-w-[460px] text-[15px] leading-relaxed text-muted-foreground">

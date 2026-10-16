@@ -4,6 +4,8 @@ export { CartaAvatar } from "./components/CartaAvatar";
 export { CartaGirevole } from "./components/CartaGirevole";
 export { DiagnosiAvatar } from "./components/DiagnosiAvatar";
 export { DossierAvatar, ElencoDossier, SezioneDossier, TestoDossier } from "./components/DossierAvatar";
+export { DossierPagina } from "./components/DossierPagina";
+export { MappaAvatar, haMappa } from "./components/MappaAvatar";
 export { FlussoAvatar, type MessaggioChat } from "./components/FlussoAvatar";
 export { SceltaVista, type VistaMobile } from "./components/SceltaVista";
 export { chiaviAvatar, useAvatar, useAvatars, useCreaAvatar, useDiagnosiAvatar, useEliminaAvatar, useInviaAvatar, useMessaggiAvatar } from "./hooks/useAvatar";

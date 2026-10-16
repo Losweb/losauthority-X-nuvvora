@@ -111,7 +111,7 @@ export function FotografiaAura({ clienteId, scheda }: { clienteId: string; sched
                     <p>
                       <span className="text-muted-foreground">I dati dicono:</span> {o.i_dati_dicono ?? "—"}
                     </p>
-                    {o.campi && o.campi.length > 0 ? <p className="mt-1 font-mono text-[11px] break-words text-muted-foreground">{o.campi.join(" · ")}</p> : null}
+                    {o.campi && o.campi.length > 0 ? <p className="mt-1 font-mono text-[12px] break-words text-muted-foreground">{o.campi.join(" · ")}</p> : null}
                   </li>
                 ))}
               </ul>

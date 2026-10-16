@@ -8,7 +8,7 @@ interface MenuMobileProps {
   testata: ReactNode;
   /** Le voci di navigazione: un clic su un link chiude il pannello da solo. */
   children: ReactNode;
-  /** Il piede del pannello: utente ed «Esci». */
+  /** Il piede del pannello: la card utente con «Esci». */
   piede?: ReactNode;
   etichetta?: string;
 }
@@ -28,7 +28,7 @@ export function MenuMobile({ testata, children, piede, etichetta = "Apri il menu
       <SheetContent side="left" className="w-[min(86vw,320px)] gap-0 bg-sidebar p-0">
         <SheetTitle className="sr-only">Menu</SheetTitle>
         <SheetDescription className="sr-only">Le sezioni del sistema</SheetDescription>
-        <div className="flex h-(--header-h) shrink-0 items-center border-b border-border-faint px-5">{testata}</div>
+        <div className="flex h-(--header-h) shrink-0 items-center px-7 text-foreground">{testata}</div>
         <div
           className="flex-1 overflow-y-auto overscroll-contain"
           onClick={(e) => {
@@ -37,7 +37,7 @@ export function MenuMobile({ testata, children, piede, etichetta = "Apri il menu
         >
           {children}
         </div>
-        {piede ? <div className="shrink-0 border-t border-border-faint p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))]">{piede}</div> : null}
+        {piede ? <div className="shrink-0 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{piede}</div> : null}
       </SheetContent>
     </Sheet>
   );

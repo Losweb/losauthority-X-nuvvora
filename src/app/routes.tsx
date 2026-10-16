@@ -22,12 +22,12 @@ const TagPage = lazy(() => import("@/features/tag/pages/TagPage"));
 const ErroriPage = lazy(() => import("@/features/errori/pages/ErroriPage"));
 const AreaPage = lazy(() => import("@/features/area/pages/AreaPage"));
 const SchedaPage = lazy(() => import("@/features/area/pages/SchedaPage"));
+const BenvenutoPage = lazy(() => import("@/features/area/pages/BenvenutoPage"));
 const DashboardClientePage = lazy(() => import("@/features/area/pages/DashboardClientePage"));
 const WorkflowPage = lazy(() => import("@/features/area/pages/WorkflowPage"));
 const PubblicazioniPage = lazy(() => import("@/features/area/pages/PubblicazioniPage"));
 const StiliPage = lazy(() => import("@/features/area/pages/StiliPage"));
 const CreaIdeePage = lazy(() => import("@/features/area/pages/CreaIdeePage"));
-const RicercaTiktokPage = lazy(() => import("@/features/area/pages/RicercaTiktokPage"));
 const WesleyCoachPage = lazy(() => import("@/features/area/pages/WesleyCoachPage"));
 const CervelloPage = lazy(() => import("@/features/area/pages/CervelloPage"));
 const AvatarPage = lazy(() => import("@/features/area/pages/AvatarPage"));
@@ -44,6 +44,8 @@ const OffertaStampaPage = lazy(() => import("@/features/area/pages/OffertaStampa
 const ConcorrentiPage = lazy(() => import("@/features/area/pages/ConcorrentiPage"));
 const ClientiAreaPage = lazy(() => import("@/features/area/pages/ClientiAreaPage"));
 const KitBrandPage = lazy(() => import("@/features/area/pages/KitBrandPage"));
+const SkoolVideoPage = lazy(() => import("@/features/skool-video/pages/SkoolVideoPage"));
+const SkoolVideoDettaglioPage = lazy(() => import("@/features/skool-video/pages/SkoolVideoDettaglioPage"));
 
 function Attesa({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<CaricamentoPagina />}>{children}</Suspense>;
@@ -83,7 +85,8 @@ export function AppRoutes() {
           }
         >
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/pipeline" element={<PipelinePage />} />
+          <Route path="/leads" element={<PipelinePage />} />
+          <Route path="/pipeline" element={<Navigate to="/leads" replace />} />
           <Route path="/clienti" element={<ClientiPage />} />
           <Route path="/clienti/nuovo" element={<NuovoClientePage />} />
           <Route path="/clienti/:id" element={<SchedaClientePage />} />
@@ -142,6 +145,22 @@ export function AppRoutes() {
             }
           />
           <Route
+            path="/skool-video"
+            element={
+              <ProtectedRoute requiredRole={["admin"]}>
+                <SkoolVideoPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skool-video/:id"
+            element={
+              <ProtectedRoute requiredRole={["admin"]}>
+                <SkoolVideoDettaglioPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/staff"
             element={
               <ProtectedRoute requiredRole={["admin"]}>
@@ -158,6 +177,16 @@ export function AppRoutes() {
             }
           />
         </Route>
+
+        {/* Primo accesso del cliente: benvenuto a schermo pieno, fuori dalle shell (video, requisiti, Instagram → onboarding) */}
+        <Route
+          path="/area/benvenuto"
+          element={
+            <ProtectedRoute requiredRole={["cliente"]}>
+              <BenvenutoPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Area cliente */}
         <Route
@@ -187,7 +216,6 @@ export function AppRoutes() {
           <Route path="/area/clienti" element={<ClientiAreaPage />} />
           <Route path="/area/stili" element={<StiliPage />} />
           <Route path="/area/crea-idee" element={<CreaIdeePage />} />
-          <Route path="/area/crea-idee/ricerca-tiktok" element={<RicercaTiktokPage />} />
           <Route path="/area/coach" element={<WesleyCoachPage />} />
           {/* Cervello del tuo branding: mappa + quattro sottopagine (i link vecchi /area/avatar e /area/offerta rimandano qui) */}
           <Route path="/area/cervello" element={<CervelloPage />} />

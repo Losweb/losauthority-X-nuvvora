@@ -25,21 +25,20 @@ type ColonnaMeta =
   | "materiali_testo";
 export type ColonnaRisposta = Exclude<keyof RigaOnboarding, ColonnaMeta>;
 
-/** La sezione Materiali non ha colonna: i file vivono in files_onboarding. */
-export const ID_ALLEGATI = "allegati";
-
 /**
- * Ogni id della definizione condivisa DEVE essere una colonna (o `allegati`):
- * se Wesley aggiunge una domanda senza colonna, qui non compila.
+ * Ogni id della definizione condivisa DEVE essere una colonna di data_onboarding:
+ * se Wesley aggiunge una domanda senza colonna, qui non compila. (Fino al
+ * 16/10/2026 l'eccezione era «allegati», il blocco Materiali: non c'è più.)
  */
-type IdSenzaColonna = Exclude<IdCampo, ColonnaRisposta | typeof ID_ALLEGATI>;
+type IdSenzaColonna = Exclude<IdCampo, ColonnaRisposta>;
 const _verificaColonne: IdSenzaColonna extends never ? true : never = true;
 void _verificaColonne;
 
 export type IdDomanda = IdCampo;
 
-export function eColonnaRisposta(id: IdDomanda): id is Exclude<IdDomanda, typeof ID_ALLEGATI> {
-  return id !== ID_ALLEGATI;
+/** Oggi ogni domanda scrive in una colonna: il filtro resta per il tipo (e per una futura eccezione). */
+export function eColonnaRisposta(id: IdDomanda): id is IdDomanda & ColonnaRisposta {
+  return typeof id === "string";
 }
 
 export type { Blocco, Condizione, Domanda, Opzione, Parole, Risposte, TipoDomanda, ValoreRisposta } from "@onboarding/tipi.ts";
@@ -57,6 +56,8 @@ export interface StatoSchedaInfo {
   inviatoIl: string | null;
   sezioneIndice: number | null;
   aggiornatoIl: string | null;
+  /** Quando ha finito la schermata di benvenuto (null = da mostrare prima dell'onboarding). */
+  benvenutoIl: string | null;
 }
 
 export function comeStatoRiga(v: string): StatoRiga {

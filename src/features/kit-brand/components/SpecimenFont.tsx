@@ -37,7 +37,7 @@ function Campione({ font, clienteId, nomeBrand }: { font: FontBrand; clienteId: 
         <p className={cn("mt-4 max-w-[60ch] leading-relaxed break-words", font.ruolo === "testo" ? "text-[17px]" : "text-[15px] text-muted-foreground")} style={stile}>
           {ruolo.specimen} ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789
         </p>
-        {!famiglia && font.storage_path ? <p className="mt-2 text-[11px] text-muted-foreground">Carico il file del font…</p> : null}
+        {!famiglia && font.storage_path ? <p className="mt-2 text-[12px] text-muted-foreground">Carico il file del font…</p> : null}
       </div>
       <div className="grid content-start gap-2 text-[13px] md:border-l md:pl-6">
         <TestoInLinea valore={font.nome} segnaposto="Nome del font" etichetta="Nome del font" maxLength={120} className="font-medium" onSalva={(nome) => nome && aggiorna.mutate({ id: font.id, nome })} />
@@ -131,7 +131,7 @@ export function SpecimenFont({ clienteId, font, nomeBrand }: SpecimenFontProps) 
   return (
     <section aria-labelledby="kit-font" className="grid gap-5">
       <div className="flex items-baseline justify-between gap-4">
-        <h3 id="kit-font" className="eyebrow shrink-0 text-[10px]">
+        <h3 id="kit-font" className="eyebrow shrink-0 text-[12px]">
           Tipografia · {font.length}
         </h3>
         <span className="text-[12px] text-muted-foreground">{nomeBrand?.trim() ? "Composta con il nome del tuo brand" : "Scrivi il nome del brand in alto per vederlo composto qui"}</span>

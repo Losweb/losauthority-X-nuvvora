@@ -1,6 +1,6 @@
-import { useState, type KeyboardEvent } from "react";
-import { ArrowUp, Palette, TrendingUp, X } from "lucide-react";
-import { AuraSfera } from "@/shared/components/brand/AuraSfera";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { ArrowUp, Palette, X } from "lucide-react";
+import { Aura, useAuraStatus } from "@/shared/components/aura";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Stile } from "../types";
@@ -16,11 +16,10 @@ interface ComposerAuraProps {
   stili?: Stile[];
   stileScelto?: Stile | null;
   onStileChange?: (stile: Stile | null) => void;
-  /** Ricerca TikTok agganciata al prossimo messaggio («Usa in Crea idee»): solo il tema per la chip. */
-  ricercaScelta?: { tema: string } | null;
-  onTogliRicerca?: () => void;
   /** Testo guida del campo quando è vuoto (default: quello di Crea idee). */
   placeholder?: string;
+  /** Questa è l'Aura viva della schermata (una sola per pagina). Falso quando c'è il volto grande della schermata vuota. */
+  auraViva?: boolean;
   className?: string;
 }
 
@@ -39,6 +38,8 @@ const X_CHIP =
   "rounded-full p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground pointer-coarse:-my-[11px] pointer-coarse:-mr-1 pointer-coarse:p-[11px]";
 
 const MAX = 4000;
+/** Quanto Aura «parla» quando la risposta è arrivata (compare tutta insieme). */
+const PARLA_MS = 1600;
 
 /** "/" all'inizio, senza a capo → il testo dopo la barra è la ricerca tra gli stili. */
 function queryComando(testo: string): string | null {
@@ -46,7 +47,11 @@ function queryComando(testo: string): string | null {
   return testo.slice(1).trim().toLowerCase();
 }
 
-/** Barra di scrittura: Aura respira accanto al campo e "parla" mentre lavora. Invio manda, Shift+Invio a capo, "/" richiama uno stile. */
+/**
+ * Il composer di Seto con il volto di Aura (AURA_MANUALE): Aura ascolta mentre si scrive (un'onda a
+ * ogni tasto), fa un cenno e «pensa» all'invio, pulsa quando la risposta arriva e torna a riposo.
+ * Invio manda, Shift+Invio a capo, "/" richiama uno stile.
+ */
 export function ComposerAura({
   inAttesa,
   onInvia,
@@ -55,13 +60,28 @@ export function ComposerAura({
   stili = [],
   stileScelto = null,
   onStileChange,
-  ricercaScelta = null,
-  onTogliRicerca,
   placeholder = PLACEHOLDER_IDEE,
+  auraViva = true,
   className,
 }: ComposerAuraProps) {
   const [testo, setTesto] = useState("");
   const [attiva, setAttiva] = useState(0);
+  const aura = useAuraStatus();
+  const { sent, speaking, done } = aura;
+  const attesaPrecedente = useRef(inAttesa);
+
+  // Lo stato di Aura segue quello che succede davvero: inizio dell'attesa → cenno + pensa; fine → parla, poi riposo.
+  useEffect(() => {
+    if (inAttesa === attesaPrecedente.current) return;
+    attesaPrecedente.current = inAttesa;
+    if (inAttesa) {
+      sent();
+      return;
+    }
+    speaking();
+    const timer = window.setTimeout(done, PARLA_MS);
+    return () => window.clearTimeout(timer);
+  }, [inAttesa, sent, speaking, done]);
 
   if (suggerito && testo !== suggerito) {
     setTesto(suggerito);
@@ -77,9 +97,7 @@ export function ComposerAura({
     ? "Aura sta pensando…"
     : stileScelto
       ? `Di cosa parla il video in stile «${stileScelto.titolo}»?`
-      : ricercaScelta
-        ? `Cosa vuoi creare partendo dalla ricerca «${ricercaScelta.tema}»?`
-        : onStileChange
+      : onStileChange
           ? `${placeholder.replace(/…$/, "")}, scrivi / per usare un tuo stile…`
           : placeholder;
 
@@ -126,54 +144,13 @@ export function ComposerAura({
   }
 
   return (
-    <div className={cn("relative rounded-2xl border bg-card/90 p-2 pl-3 shadow-sm backdrop-blur-md", className)}>
+    <div className={cn("relative grid gap-3 rounded-xl border border-line bg-surface-input p-4 shadow-xs", className)}>
       {menuAperto ? (
         <MenuStili voci={voci} query={query ?? ""} attiva={indiceAttivo} onScegli={scegli} onPassaSopra={setAttiva} nessunoStile={pronti.length === 0} />
       ) : null}
 
-      {stileScelto || ricercaScelta ? (
-        <div className="flex flex-wrap items-center gap-2 px-1 pt-1 pb-2">
-          {ricercaScelta ? (
-            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border bg-muted/60 py-1 pr-1 pl-2.5 text-xs">
-              <TrendingUp className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-              <span className="truncate">
-                <span className="text-muted-foreground">Ricerca TikTok · </span>
-                <span className="font-medium">{ricercaScelta.tema}</span>
-              </span>
-              <button
-                type="button"
-                aria-label="Togli la ricerca TikTok"
-                disabled={inAttesa}
-                onClick={() => onTogliRicerca?.()}
-                className={X_CHIP}
-              >
-                <X className="size-3.5" aria-hidden />
-              </button>
-            </span>
-          ) : null}
-          {stileScelto ? (
-            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border bg-muted/60 py-1 pr-1 pl-2.5 text-xs">
-              <Palette className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-              <span className="truncate">
-                <span className="text-muted-foreground">Stile · </span>
-                <span className="font-medium">{stileScelto.titolo}</span>
-              </span>
-              <button
-                type="button"
-                aria-label="Togli lo stile"
-                disabled={inAttesa}
-                onClick={() => onStileChange?.(null)}
-                className={X_CHIP}
-              >
-                <X className="size-3.5" aria-hidden />
-              </button>
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className="flex items-end gap-3">
-        <AuraSfera dimensione={40} conNome={false} parla={inAttesa} className="mb-1.5" />
+      <div className="flex items-start gap-3">
+        <Aura ref={aura.ref} state={aura.status} live={auraViva} size={40} count={64} reduced={false} label="Aura" className="mt-0.5 shrink-0" />
         <label className="sr-only" htmlFor="composer-aura">
           Scrivi ad Aura
         </label>
@@ -185,23 +162,44 @@ export function ComposerAura({
           onChange={(e) => {
             setTesto(e.target.value);
             setAttiva(0);
+            if (!queryComando(e.target.value)) aura.typing();
+          }}
+          onFocus={() => {
+            if (!inAttesa) aura.focus();
           }}
           onKeyDown={onKeyDown}
-          rows={1}
+          rows={2}
           role={menuAperto ? "combobox" : undefined}
           aria-expanded={menuAperto || undefined}
           aria-controls={menuAperto ? "menu-stili" : undefined}
           placeholder={testoGuida}
-          className="field-sizing-content max-h-40 min-h-10 min-w-0 flex-1 resize-none bg-transparent py-2 text-base leading-relaxed outline-none placeholder:text-muted-foreground/70 disabled:opacity-60 md:text-[15px]"
+          className="field-sizing-content max-h-40 min-h-10 min-w-0 flex-1 resize-none bg-transparent py-2 text-base leading-relaxed text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60 md:text-sm"
         />
-        <Button size="icon" aria-label="Invia ad Aura" disabled={inAttesa || menuAperto || testo.trim().length < 3} onClick={invia} className="rounded-full">
-          <ArrowUp aria-hidden />
-        </Button>
       </div>
-      {/* Scorciatoie da tastiera: sul telefono touch non servono e rubano una riga al composer. */}
-      <p className="px-1 pt-1 text-[11px] text-muted-foreground max-md:pointer-coarse:hidden">
-        Invio per mandare · Shift+Invio per andare a capo{onStileChange ? " · / per usare un tuo stile" : ""}
-      </p>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {stileScelto ? (
+          <span className="inline-flex h-10 max-w-full items-center gap-2 rounded-full border border-line bg-card py-0 pr-1.5 pl-3 text-sm font-medium text-foreground">
+            <Palette className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            <span className="truncate">
+              <span className="text-muted-foreground">Stile · </span>
+              {stileScelto.titolo}
+            </span>
+            <button type="button" aria-label="Togli lo stile" disabled={inAttesa} onClick={() => onStileChange?.(null)} className={X_CHIP}>
+              <X className="size-3.5" aria-hidden />
+            </button>
+          </span>
+        ) : null}
+        {/* Scorciatoie da tastiera: sul telefono touch non servono. */}
+        <p className="text-[12px] leading-4 font-medium text-muted-foreground max-md:pointer-coarse:hidden">
+          Invio per mandare · Shift+Invio per andare a capo{onStileChange ? " · / per usare un tuo stile" : ""}
+        </p>
+        <div className="ml-auto flex items-center gap-2">
+          <Button size="icon" aria-label="Invia ad Aura" disabled={inAttesa || menuAperto || testo.trim().length < 3} onClick={invia}>
+            <ArrowUp aria-hidden />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

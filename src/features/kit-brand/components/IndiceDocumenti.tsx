@@ -45,7 +45,7 @@ export function IndiceDocumenti({ clienteId, documenti }: IndiceDocumentiProps) 
   return (
     <section aria-labelledby="kit-documenti" className="grid gap-5">
       <div className="flex items-baseline justify-between gap-4">
-        <h3 id="kit-documenti" className="eyebrow shrink-0 text-[10px]">
+        <h3 id="kit-documenti" className="eyebrow shrink-0 text-[12px]">
           Documenti · {documenti.length}
         </h3>
         <span className="text-[12px] text-muted-foreground">Brand book, linee guida, presentazioni: Aura legge PDF e immagini</span>

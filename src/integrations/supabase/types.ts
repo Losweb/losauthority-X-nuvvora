@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -161,10 +161,12 @@ export type Database = {
       }
       avatar: {
         Row: {
+          arrivo: string | null
           chi_segue: string[]
           cliente_id: string
           completato_il: string | null
           contesto: string | null
+          cosa_manca: string | null
           created_at: string
           credenze_limitanti: string[]
           desiderio_emotivo: string | null
@@ -179,10 +181,12 @@ export type Database = {
           linguaggio: string[]
           modello: string | null
           momento: string | null
+          nemico: string | null
           nome: string | null
           obiezioni: string[]
           origine: string | null
           piattaforme: string[]
+          ponte: string | null
           settore: string | null
           situazione: string | null
           snapshot: string | null
@@ -191,10 +195,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          arrivo?: string | null
           chi_segue?: string[]
           cliente_id: string
           completato_il?: string | null
           contesto?: string | null
+          cosa_manca?: string | null
           created_at?: string
           credenze_limitanti?: string[]
           desiderio_emotivo?: string | null
@@ -209,10 +215,12 @@ export type Database = {
           linguaggio?: string[]
           modello?: string | null
           momento?: string | null
+          nemico?: string | null
           nome?: string | null
           obiezioni?: string[]
           origine?: string | null
           piattaforme?: string[]
+          ponte?: string | null
           settore?: string | null
           situazione?: string | null
           snapshot?: string | null
@@ -221,10 +229,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          arrivo?: string | null
           chi_segue?: string[]
           cliente_id?: string
           completato_il?: string | null
           contesto?: string | null
+          cosa_manca?: string | null
           created_at?: string
           credenze_limitanti?: string[]
           desiderio_emotivo?: string | null
@@ -239,10 +249,12 @@ export type Database = {
           linguaggio?: string[]
           modello?: string | null
           momento?: string | null
+          nemico?: string | null
           nome?: string | null
           obiezioni?: string[]
           origine?: string | null
           piattaforme?: string[]
+          ponte?: string | null
           settore?: string | null
           situazione?: string | null
           snapshot?: string | null
@@ -875,6 +887,7 @@ export type Database = {
           firmato_il: string | null
           id: string
           informativa_letta_il: string | null
+          lead_id: string | null
           modello: string | null
           modello_contratto: string
           note: string | null
@@ -916,6 +929,7 @@ export type Database = {
           firmato_il?: string | null
           id?: string
           informativa_letta_il?: string | null
+          lead_id?: string | null
           modello?: string | null
           modello_contratto: string
           note?: string | null
@@ -957,6 +971,7 @@ export type Database = {
           firmato_il?: string | null
           id?: string
           informativa_letta_il?: string | null
+          lead_id?: string | null
           modello?: string | null
           modello_contratto?: string
           note?: string | null
@@ -1002,6 +1017,13 @@ export type Database = {
             columns: ["fattura_id"]
             isOneToOne: false
             referencedRelation: "fatture"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratti_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "lead"
             referencedColumns: ["id"]
           },
           {
@@ -1284,6 +1306,7 @@ export type Database = {
           attivita_breve: string | null
           attivita_pesanti: Json | null
           avatar_ipotesi: string | null
+          benvenuto_il: string | null
           blocco_partenza: Json | null
           blocco_partenza_testo: string | null
           camera_agio: number | null
@@ -1295,6 +1318,7 @@ export type Database = {
           clienti: string | null
           clienti_da_social: number | null
           collo_bottiglia: string | null
+          come_conosciuto: string | null
           competenza_obiettivo: string | null
           consegna: string | null
           contenuti_migliori: string | null
@@ -1319,6 +1343,7 @@ export type Database = {
           materiali_testo: string | null
           mercato: string | null
           messaggi_tipici: string | null
+          messaggio_wesley: string | null
           nome: string | null
           nome_attivita: string | null
           non_delegabile: string | null
@@ -1333,6 +1358,7 @@ export type Database = {
           parole: Json | null
           paure: string | null
           perche_ora: string | null
+          perche_wesley: string | null
           presentazione: string | null
           priorita_crescita: string | null
           processo_vendita: string | null
@@ -1362,6 +1388,7 @@ export type Database = {
           attivita_breve?: string | null
           attivita_pesanti?: Json | null
           avatar_ipotesi?: string | null
+          benvenuto_il?: string | null
           blocco_partenza?: Json | null
           blocco_partenza_testo?: string | null
           camera_agio?: number | null
@@ -1373,6 +1400,7 @@ export type Database = {
           clienti?: string | null
           clienti_da_social?: number | null
           collo_bottiglia?: string | null
+          come_conosciuto?: string | null
           competenza_obiettivo?: string | null
           consegna?: string | null
           contenuti_migliori?: string | null
@@ -1397,6 +1425,7 @@ export type Database = {
           materiali_testo?: string | null
           mercato?: string | null
           messaggi_tipici?: string | null
+          messaggio_wesley?: string | null
           nome?: string | null
           nome_attivita?: string | null
           non_delegabile?: string | null
@@ -1411,6 +1440,7 @@ export type Database = {
           parole?: Json | null
           paure?: string | null
           perche_ora?: string | null
+          perche_wesley?: string | null
           presentazione?: string | null
           priorita_crescita?: string | null
           processo_vendita?: string | null
@@ -1440,6 +1470,7 @@ export type Database = {
           attivita_breve?: string | null
           attivita_pesanti?: Json | null
           avatar_ipotesi?: string | null
+          benvenuto_il?: string | null
           blocco_partenza?: Json | null
           blocco_partenza_testo?: string | null
           camera_agio?: number | null
@@ -1451,6 +1482,7 @@ export type Database = {
           clienti?: string | null
           clienti_da_social?: number | null
           collo_bottiglia?: string | null
+          come_conosciuto?: string | null
           competenza_obiettivo?: string | null
           consegna?: string | null
           contenuti_migliori?: string | null
@@ -1475,6 +1507,7 @@ export type Database = {
           materiali_testo?: string | null
           mercato?: string | null
           messaggi_tipici?: string | null
+          messaggio_wesley?: string | null
           nome?: string | null
           nome_attivita?: string | null
           non_delegabile?: string | null
@@ -1489,6 +1522,7 @@ export type Database = {
           parole?: Json | null
           paure?: string | null
           perche_ora?: string | null
+          perche_wesley?: string | null
           presentazione?: string | null
           priorita_crescita?: string | null
           processo_vendita?: string | null
@@ -2159,7 +2193,6 @@ export type Database = {
           errore: string | null
           id: string
           modello: string | null
-          ricerca_id: string | null
           ruolo: string
           sessione_id: string
           stato: string
@@ -2172,7 +2205,6 @@ export type Database = {
           errore?: string | null
           id?: string
           modello?: string | null
-          ricerca_id?: string | null
           ruolo: string
           sessione_id: string
           stato?: string
@@ -2185,7 +2217,6 @@ export type Database = {
           errore?: string | null
           id?: string
           modello?: string | null
-          ricerca_id?: string | null
           ruolo?: string
           sessione_id?: string
           stato?: string
@@ -2193,13 +2224,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "idee_messaggi_ricerca_id_fkey"
-            columns: ["ricerca_id"]
-            isOneToOne: false
-            referencedRelation: "ricerche_tiktok"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "idee_messaggi_sessione_id_fkey"
             columns: ["sessione_id"]
@@ -2482,6 +2506,7 @@ export type Database = {
       }
       lead: {
         Row: {
+          cliente_id: string | null
           contatto: string | null
           created_at: string
           fonte: string | null
@@ -2495,6 +2520,7 @@ export type Database = {
           valore: number
         }
         Insert: {
+          cliente_id?: string | null
           contatto?: string | null
           created_at?: string
           fonte?: string | null
@@ -2508,6 +2534,7 @@ export type Database = {
           valore?: number
         }
         Update: {
+          cliente_id?: string | null
           contatto?: string | null
           created_at?: string
           fonte?: string | null
@@ -2520,7 +2547,22 @@ export type Database = {
           updated_at?: string
           valore?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lead_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vista_clienti"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lezioni: {
         Row: {
@@ -3099,160 +3141,206 @@ export type Database = {
           },
         ]
       }
-      ricerche_tiktok: {
+      skool_sessione: {
         Row: {
-          apify_run_id: string | null
-          avviso: string | null
-          cliente_id: string
-          completata_il: string | null
+          aggiornata_il: string
+          cookies: string
+          id: boolean
+        }
+        Insert: {
+          aggiornata_il?: string
+          cookies: string
+          id?: boolean
+        }
+        Update: {
+          aggiornata_il?: string
+          cookies?: string
+          id?: boolean
+        }
+        Relationships: []
+      }
+      skool_video: {
+        Row: {
+          apertura: string | null
+          avviato_il: string | null
+          blocchi: number
+          cartella_id: string | null
+          cartella_titolo: string | null
+          corso_id: string
+          corso_nome: string
+          corso_titolo: string
           created_at: string
+          creato_da: string | null
+          dimensione_byte: number | null
+          durata_sec: number
           errore: string | null
           id: string
-          keyword: string[]
-          lingua_target: string
-          lingue: string[]
-          metodo: string
           modello: string | null
-          osservazioni: string[]
-          quanti: number
-          raccolti: number | null
-          recenti: number | null
-          soglia_dal: string | null
+          nome_file: string | null
+          parole_chiave: string[]
+          pubblicato_il: string | null
+          riassunto: string | null
+          skool_page_id: string | null
+          skool_url: string | null
           stato: string
-          tema: string
+          tentativi: number
+          tipo_testo: string | null
+          titolo: string
+          trascrizione: string | null
           updated_at: string
         }
         Insert: {
-          apify_run_id?: string | null
-          avviso?: string | null
-          cliente_id: string
-          completata_il?: string | null
+          apertura?: string | null
+          avviato_il?: string | null
+          blocchi: number
+          cartella_id?: string | null
+          cartella_titolo?: string | null
+          corso_id: string
+          corso_nome: string
+          corso_titolo: string
           created_at?: string
+          creato_da?: string | null
+          dimensione_byte?: number | null
+          durata_sec: number
           errore?: string | null
           id?: string
-          keyword: string[]
-          lingua_target?: string
-          lingue?: string[]
-          metodo?: string
           modello?: string | null
-          osservazioni?: string[]
-          quanti?: number
-          raccolti?: number | null
-          recenti?: number | null
-          soglia_dal?: string | null
+          nome_file?: string | null
+          parole_chiave?: string[]
+          pubblicato_il?: string | null
+          riassunto?: string | null
+          skool_page_id?: string | null
+          skool_url?: string | null
           stato?: string
-          tema: string
+          tentativi?: number
+          tipo_testo?: string | null
+          titolo: string
+          trascrizione?: string | null
           updated_at?: string
         }
         Update: {
-          apify_run_id?: string | null
-          avviso?: string | null
-          cliente_id?: string
-          completata_il?: string | null
+          apertura?: string | null
+          avviato_il?: string | null
+          blocchi?: number
+          cartella_id?: string | null
+          cartella_titolo?: string | null
+          corso_id?: string
+          corso_nome?: string
+          corso_titolo?: string
           created_at?: string
+          creato_da?: string | null
+          dimensione_byte?: number | null
+          durata_sec?: number
           errore?: string | null
           id?: string
-          keyword?: string[]
-          lingua_target?: string
-          lingue?: string[]
-          metodo?: string
           modello?: string | null
-          osservazioni?: string[]
-          quanti?: number
-          raccolti?: number | null
-          recenti?: number | null
-          soglia_dal?: string | null
+          nome_file?: string | null
+          parole_chiave?: string[]
+          pubblicato_il?: string | null
+          riassunto?: string | null
+          skool_page_id?: string | null
+          skool_url?: string | null
           stato?: string
-          tema?: string
+          tentativi?: number
+          tipo_testo?: string | null
+          titolo?: string
+          trascrizione?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "ricerche_tiktok_cliente_id_fkey"
-            columns: ["cliente_id"]
+            foreignKeyName: "skool_video_creato_da_fkey"
+            columns: ["creato_da"]
             isOneToOne: false
-            referencedRelation: "clienti"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ricerche_tiktok_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "vista_clienti"
+            referencedRelation: "user_roles"
             referencedColumns: ["id"]
           },
         ]
       }
-      ricerche_tiktok_video: {
+      skool_video_blocchi: {
         Row: {
-          autore: string | null
+          avviato_il: string | null
           created_at: string
-          da_non_replicare: boolean
-          di_cosa_parla: string | null
-          didascalia: string | null
-          fuori_tema: boolean
+          durata_sec: number
+          errore: string | null
           id: string
-          lingua: string | null
-          mi_piace: number | null
-          posizione: number
-          pubblicato_il: string | null
-          query: string | null
-          ricerca_id: string
-          senza_didascalia: boolean
-          sezione: string
-          solo_hashtag: boolean
-          sponsorizzato: boolean
-          url: string
-          visualizzazioni: number | null
+          indice: number
+          inizio_sec: number
+          stato: string
+          storage_path: string
+          tentativi: number
+          testo: string | null
+          video_id: string
         }
         Insert: {
-          autore?: string | null
+          avviato_il?: string | null
           created_at?: string
-          da_non_replicare?: boolean
-          di_cosa_parla?: string | null
-          didascalia?: string | null
-          fuori_tema?: boolean
+          durata_sec: number
+          errore?: string | null
           id?: string
-          lingua?: string | null
-          mi_piace?: number | null
-          posizione: number
-          pubblicato_il?: string | null
-          query?: string | null
-          ricerca_id: string
-          senza_didascalia?: boolean
-          sezione: string
-          solo_hashtag?: boolean
-          sponsorizzato?: boolean
-          url: string
-          visualizzazioni?: number | null
+          indice: number
+          inizio_sec: number
+          stato?: string
+          storage_path: string
+          tentativi?: number
+          testo?: string | null
+          video_id: string
         }
         Update: {
-          autore?: string | null
+          avviato_il?: string | null
           created_at?: string
-          da_non_replicare?: boolean
-          di_cosa_parla?: string | null
-          didascalia?: string | null
-          fuori_tema?: boolean
+          durata_sec?: number
+          errore?: string | null
           id?: string
-          lingua?: string | null
-          mi_piace?: number | null
-          posizione?: number
-          pubblicato_il?: string | null
-          query?: string | null
-          ricerca_id?: string
-          senza_didascalia?: boolean
-          sezione?: string
-          solo_hashtag?: boolean
-          sponsorizzato?: boolean
-          url?: string
-          visualizzazioni?: number | null
+          indice?: number
+          inizio_sec?: number
+          stato?: string
+          storage_path?: string
+          tentativi?: number
+          testo?: string | null
+          video_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "ricerche_tiktok_video_ricerca_id_fkey"
-            columns: ["ricerca_id"]
+            foreignKeyName: "skool_video_blocchi_video_id_fkey"
+            columns: ["video_id"]
             isOneToOne: false
-            referencedRelation: "ricerche_tiktok"
+            referencedRelation: "skool_video"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skool_video_capitoli: {
+        Row: {
+          id: string
+          inizio_sec: number
+          ordine: number
+          testo: string | null
+          titolo: string
+          video_id: string
+        }
+        Insert: {
+          id?: string
+          inizio_sec: number
+          ordine: number
+          testo?: string | null
+          titolo: string
+          video_id: string
+        }
+        Update: {
+          id?: string
+          inizio_sec?: number
+          ordine?: number
+          testo?: string | null
+          titolo?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skool_video_capitoli_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "skool_video"
             referencedColumns: ["id"]
           },
         ]

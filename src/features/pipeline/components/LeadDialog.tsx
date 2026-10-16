@@ -45,7 +45,7 @@ export function LeadDialog({ open, onOpenChange, lead }: LeadDialogProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full gap-0 overflow-y-auto sm:max-w-[440px]">
         <SheetHeader className="border-b px-4 py-[18px] pr-12 sm:px-6">
-          <SheetTitle className="font-display text-xl font-medium">{lead ? "Modifica lead" : "Nuovo lead"}</SheetTitle>
+          <SheetTitle className="font-display text-xl font-semibold">{lead ? "Modifica lead" : "Nuovo lead"}</SheetTitle>
           <SheetDescription>
             {lead ? "Aggiorna i dati e la prossima azione." : "Aggiungi un contatto alla pipeline."}
           </SheetDescription>

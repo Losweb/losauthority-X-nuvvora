@@ -49,7 +49,7 @@ export function ContenutoDialog({ clienteId, open, onOpenChange, contenuto }: Co
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full gap-0 overflow-x-hidden overflow-y-auto sm:max-w-[720px]">
         <SheetHeader className="border-b px-6 py-[18px]">
-          <SheetTitle className="font-display text-xl font-medium">{contenuto ? "Modifica contenuto" : "Nuova idea"}</SheetTitle>
+          <SheetTitle className="font-display text-xl font-semibold">{contenuto ? "Modifica contenuto" : "Nuova idea"}</SheetTitle>
           <SheetDescription>
             {contenuto ? "Aggiorna stato, date e materiali del video." : "Un'idea di video da portare fino alla pubblicazione."}
           </SheetDescription>

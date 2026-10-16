@@ -38,7 +38,7 @@ export default function KitBrandPage() {
         <>
           {/* Frontespizio: occhiello a sinistra, colophon a destra, poi il nome del brand composto grande. */}
           <header className="grid gap-6">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b pb-3 text-[11px] tracking-[0.18em] text-muted-foreground uppercase">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b pb-3 text-[12px] tracking-[0.18em] text-muted-foreground uppercase">
               <span>Kit Brand{nome ? ` · ${nome}` : ""}</span>
               <span className="figure normal-case tracking-normal">{kit?.updated_at ? `Aggiornato il ${formatDate(kit.updated_at)}` : "Prima stesura"}</span>
             </div>
@@ -77,7 +77,7 @@ export default function KitBrandPage() {
           {/* Tono di voce: una citazione lunga, in serif, come l'apertura di un capitolo. */}
           <section aria-labelledby="kit-tono" className="grid gap-4 md:grid-cols-[200px_minmax(0,1fr)] md:gap-10">
             <div className="grid content-start gap-1">
-              <h3 id="kit-tono" className="eyebrow text-[10px]">
+              <h3 id="kit-tono" className="eyebrow text-[12px]">
                 Tono di voce
               </h3>
               <p className="text-[12px] text-muted-foreground">Come parla il brand: parole che usa, parole che evita, come si rivolge a chi legge.</p>
@@ -99,7 +99,7 @@ export default function KitBrandPage() {
 
           {/* Note: il colophon in fondo al libro. */}
           <section aria-labelledby="kit-note" className="grid gap-3 border-t pt-6">
-            <h3 id="kit-note" className="eyebrow text-[10px]">
+            <h3 id="kit-note" className="eyebrow text-[12px]">
               Note
             </h3>
             <TestoInLinea

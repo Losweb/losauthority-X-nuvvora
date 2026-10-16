@@ -110,7 +110,7 @@ Columnas que quedaron sin uso y puedes ignorar: `contracts.penale`, `contracts.r
 | `GET /api/contratto/[token]/pdf` | Devuelve el PDF firmado como adjunto |
 | `GET /api/admin/contratti/[id]/pdf` | Lo mismo desde el panel, con sesión |
 
-Una firma tiene esta forma: `{ w, h, tratti: number[][] }`, con cada trazo como `x0,y0,x1,y1…`. La de Wesley lleva además `pieno: true`: sus trazos son contornos cerrados que se rellenan, porque se sacó de una imagen (`scripts/salva-firma-fornitore.mjs`).
+Una firma tiene esta forma: `{ w, h, tratti: number[][] }`, con cada trazo como `x0,y0,x1,y1…`. La de Wesley lleva además `pieno: true`: sus trazos son contornos cerrados que se rellenan, porque se sacó de una imagen. En la v2 la genera `scripts/firma-da-immagine.mjs <png> <json> --larghezza 1200` (sin dependencias: decodifica el PNG, traza los contornos del trazo negro y los simplifica); el JSON se guarda en `contratti_impostazioni.firma` con un `update` en SQL (no por la Edge Function, porque `validaFirma` descarta `pieno`). Cargada el 16/10/2026 desde `firma-wesley-nera.png` (1200×536, 7 contornos, 1.541 puntos). Vale solo para los inviti nuevos: cada invito copia la firma al crearse.
 
 ## Decisiones de Wesley que conviene no reabrir
 

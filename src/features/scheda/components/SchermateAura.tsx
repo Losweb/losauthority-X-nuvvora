@@ -36,7 +36,7 @@ export function SchermataLettura({ errore, inCorso, onRiprova, onTornaAlleRispos
       <AuraSfera dimensione={112} parla={inCorso} />
       {errore ? (
         <div className="grid gap-4">
-          <p className="font-display text-[clamp(20px,3vw,26px)] leading-[1.4] font-normal italic">Non sono riuscita a leggere tutto.</p>
+          <p className="font-display text-[clamp(20px,3vw,26px)] leading-[1.4] font-bold">Non sono riuscita a leggere tutto.</p>
           <p className="text-sm text-muted-foreground">{errore}</p>
           <div className="flex flex-wrap justify-center gap-2">
             <Button type="button" onClick={onRiprova}>
@@ -62,7 +62,7 @@ export function SchermataLettura({ errore, inCorso, onRiprova, onTornaAlleRispos
       ) : (
         <div className="grid gap-3">
           <p className="eyebrow">Aura legge il tuo onboarding</p>
-          <p className="font-display text-[clamp(20px,3vw,26px)] leading-[1.4] font-normal italic">{FRASI_LETTURA[i]}</p>
+          <p className="font-display text-[clamp(20px,3vw,26px)] leading-[1.4] font-bold">{FRASI_LETTURA[i]}</p>
           <p className="text-sm text-muted-foreground">Ci vuole circa un minuto. Lascia aperta la pagina.</p>
         </div>
       )}
@@ -87,7 +87,7 @@ export function SchermataChiarimenti({ chiarimenti, inviando, onInvia }: Scherma
         <AuraSfera dimensione={56} />
         <div className="min-w-0 flex-1 pt-1">
           <p className="eyebrow">Ancora {chiarimenti.length === 1 ? "una cosa" : `${chiarimenti.length} cose`}</p>
-          <p className="mt-3 font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-normal italic">
+          <p className="mt-3 font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-bold">
             Ho letto tutto. Mi manca qualche dato per capirti davvero: rispondi con i fatti, come vengono.
           </p>
         </div>
@@ -134,7 +134,7 @@ export function SchermataRiepilogo({ riepilogo, correzioneIniziale, confermando,
         <AuraSfera dimensione={56} />
         <div className="min-w-0 flex-1 pt-1">
           <p className="eyebrow">Il tuo riepilogo</p>
-          <p className="mt-3 font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-normal italic">Ecco cosa ho capito di te. Leggilo con calma.</p>
+          <p className="mt-3 font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-bold">Ecco cosa ho capito di te. Leggilo con calma.</p>
         </div>
       </div>
       <div className="grid gap-5 rounded-lg border bg-card p-4 sm:p-6">

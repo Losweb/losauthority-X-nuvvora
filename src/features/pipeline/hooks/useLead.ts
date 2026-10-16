@@ -6,6 +6,19 @@ import { stageLabel, type Lead, type LeadInsert, type LeadStage } from "../types
 
 export const CHIAVE_LEAD = ["pipeline", "lead"] as const;
 
+/** Un lead per id (per l'invito al contratto intestato a lui). */
+export function useLeadPerId(id: string | null) {
+  return useQuery({
+    queryKey: [...CHIAVE_LEAD, id],
+    enabled: !!id,
+    queryFn: async (): Promise<Lead | null> => {
+      const { data, error } = await supabase.from("lead").select("*").eq("id", id as string).maybeSingle();
+      if (error) throw error;
+      return data ? { ...data, valore: Number(data.valore) || 0 } : null;
+    },
+  });
+}
+
 /** Tutti i lead (RLS: solo team), i più aggiornati per primi. */
 export function useLeads() {
   return useQuery({
@@ -69,6 +82,11 @@ export function useSpostaLead() {
       return { precedenti };
     },
     onSuccess: (_, { stage }) => {
+      if (stage === "cliente") {
+        toast.success("Lead diventato cliente", { description: "Lo trovi in Clienti, in attesa di contratto: da lì crei l'invito intestato a lui." });
+        void queryClient.invalidateQueries({ queryKey: ["clienti"] });
+        return;
+      }
       toast.success(`Lead spostato in "${stageLabel(stage)}"`);
     },
     onError: (error, _, contesto) => {

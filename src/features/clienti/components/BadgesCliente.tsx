@@ -15,7 +15,7 @@ export function BadgeTag({ labels }: { labels: string[] | null | undefined }) {
   return (
     <span className="flex flex-wrap gap-1">
       {labels.map((t) => (
-        <Badge key={t} variant="outline" className="h-4 px-1.5 text-[10px]">
+        <Badge key={t} variant="outline" className="h-4 px-1.5 text-[12px]">
           {t}
         </Badge>
       ))}

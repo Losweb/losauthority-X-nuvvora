@@ -6,6 +6,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { StatoVuoto } from "@/shared/components/layout/StatoCaricamento";
 import { euroContratto } from "@contratti/documento.ts";
+import type { Lead } from "@/features/pipeline";
 import { useCreaInvito, type EsitoInvito } from "../../hooks/useContrattoAzioni";
 import { linkContratto, messaggioInvito, type Offerta } from "../../types";
 
@@ -27,7 +28,7 @@ export function InvitoPronto({ esito }: { esito: EsitoInvito }) {
         <CopiaButton testo={link} etichetta="Solo link" />
       </div>
       <div className="flex gap-2.5 border-t pt-4">
-        <Button variant="outline" size="sm" nativeButton={false} render={<Link to={`/contratti/`} />}>
+        <Button variant="outline" size="sm" nativeButton={false} render={<Link to={`/contratti/${esito.id}`} />}>
           Apri il contratto
         </Button>
         <Button variant="ghost" size="sm" nativeButton={false} render={<Link to="/contratti" />}>
@@ -38,8 +39,8 @@ export function InvitoPronto({ esito }: { esito: EsitoInvito }) {
   );
 }
 
-/** Nuovo invito: si sceglie l'offerta e basta. I dati del cliente li inserisce lui dal link. */
-export function NuovoInvitoForm({ offerte, haFirma }: { offerte: Offerta[]; haFirma: boolean }) {
+/** Nuovo invito: si sceglie l'offerta e basta. I dati del cliente li inserisce lui dal link; se l'invito nasce da un lead (Clienti → «Crea il contratto») nome e contatto sono già nel modulo. */
+export function NuovoInvitoForm({ offerte, haFirma, lead = null }: { offerte: Offerta[]; haFirma: boolean; lead?: Lead | null }) {
   const attive = offerte.filter((o) => o.attiva);
   const [offertaId, setOffertaId] = useState(attive[0]?.id ?? "");
   const [note, setNote] = useState("");
@@ -63,17 +64,26 @@ export function NuovoInvitoForm({ offerte, haFirma }: { offerte: Offerta[]; haFi
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        crea.mutate({ offerta_id: offertaId || attive[0].id, note }, { onSuccess: setEsito });
+        crea.mutate({ offerta_id: offertaId || attive[0].id, note, lead_id: lead?.id }, { onSuccess: setEsito });
       }}
       className="grid gap-4 rounded-lg border bg-card p-5 shadow-xs"
     >
+      {lead ? (
+        <div className="grid gap-0.5 rounded-lg border border-line bg-muted/40 px-4 py-3">
+          <p className="eyebrow">Per</p>
+          <p className="text-[15px] font-semibold">{lead.nome}</p>
+          <p className="text-[13px] text-muted-foreground">
+            {lead.contatto ? `${lead.contatto} · ` : ""}dal lead{lead.fonte ? ` (${lead.fonte})` : ""}. Nome e contatto compaiono già nel modulo del cliente.
+          </p>
+        </div>
+      ) : null}
       <div className="grid gap-1.5">
         <Label htmlFor="invito-offerta">Offerta</Label>
         <select
           id="invito-offerta"
           value={offertaId || attive[0].id}
           onChange={(e) => setOffertaId(e.target.value)}
-          className="h-9 rounded-sm border border-input bg-card px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-10 rounded-full border border-line bg-card px-4 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {attive.map((o) => (
             <option key={o.id} value={o.id}>

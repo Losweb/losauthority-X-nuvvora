@@ -2,7 +2,7 @@ export { SCHEDA_ONBOARDING, DOMANDE_ONBOARDING, domandaPerId, type Scheda } from
 export { SchedaFlow } from "./components/SchedaFlow";
 export { RiepilogoRisposte } from "./components/RiepilogoRisposte";
 export { ListaFiles } from "./components/ListaFiles";
-export { useStatoScheda } from "./hooks/useScheda";
+export { useStatoScheda, useSegnaBenvenuto } from "./hooks/useScheda";
 export { chiaviScheda, risposteDaRiga, statoDaRiga, ETICHETTA_STATO_SCHEDA } from "./mappa";
 export { formattaValore, haRisposte, paroleDi, primoNome, conParole } from "./format";
 export { comeStatoRiga } from "./types";

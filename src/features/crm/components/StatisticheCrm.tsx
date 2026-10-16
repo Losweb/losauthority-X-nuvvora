@@ -46,7 +46,7 @@ export function StatisticheCrm({ contatti }: { contatti: LeadCrm[] }) {
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {riquadri.map((q) => (
             <div key={q.etichetta} className="rounded-lg border bg-muted/40 px-3 py-2.5">
-              <dt className="eyebrow text-[10px]">{q.etichetta}</dt>
+              <dt className="eyebrow text-[12px]">{q.etichetta}</dt>
               <dd className="figure mt-1 text-xl leading-tight">{q.valore}</dd>
             </div>
           ))}
@@ -69,7 +69,7 @@ export function StatisticheCrm({ contatti }: { contatti: LeadCrm[] }) {
                   <TableRow key={canale} className="[&>td]:max-sm:px-2.5">
                     <TableCell className="text-[13px]">
                       {ETICHETTA_FONTE_LEAD[canale]}
-                      {numeri.valore > 0 ? <span className="figure block text-[11px] text-muted-foreground sm:hidden">{valore(numeri)}</span> : null}
+                      {numeri.valore > 0 ? <span className="figure block text-[12px] text-muted-foreground sm:hidden">{valore(numeri)}</span> : null}
                     </TableCell>
                     <TableCell className="figure text-right text-[13px]">{numeri.arrivati}</TableCell>
                     <TableCell className="figure text-right text-[13px]">{numeri.chiusi}</TableCell>

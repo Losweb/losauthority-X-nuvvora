@@ -37,15 +37,15 @@ export function CardStile({ stile, indice = 0, occupato = false, onApri, onRipro
             {nScript === 1 ? "1 script" : `${nScript} script`}
           </span>
         </div>
-        <span className="text-[11px] text-muted-foreground">{formatDateShort(stile.created_at)}</span>
+        <span className="text-[12px] text-muted-foreground">{formatDateShort(stile.created_at)}</span>
       </div>
 
-      <h3 className="font-display text-[24px] leading-tight font-medium">{stile.titolo}</h3>
+      <h3 className="font-display text-[24px] leading-tight font-semibold">{stile.titolo}</h3>
 
       {stato === "in_corso" ? (
         <div className="flex items-center gap-2.5" role="status" aria-live="polite">
           <AuraSfera dimensione={24} conNome={false} parla />
-          <p className="font-display text-[15px] text-muted-foreground italic">Leggo i tuoi script e scrivo come rifarli nel tuo nicho…</p>
+          <p className="text-[14px] leading-5 text-muted-foreground">Leggo i tuoi script e scrivo come rifarli nel tuo nicho…</p>
         </div>
       ) : null}
 
@@ -87,10 +87,10 @@ export function CardStileInArrivo({ titolo }: { titolo: string }) {
   return (
     <article className="flex flex-col gap-3 rounded-2xl border border-dashed bg-card/60 p-5 animate-in fade-in duration-300 motion-reduce:animate-none">
       <Badge variant="expiring" dot>Aura sta studiando</Badge>
-      <h3 className="font-display text-[24px] leading-tight font-medium">{titolo}</h3>
+      <h3 className="font-display text-[24px] leading-tight font-semibold">{titolo}</h3>
       <div className="flex items-center gap-2.5" role="status" aria-live="polite">
         <AuraSfera dimensione={24} conNome={false} parla />
-        <p className="font-display text-[15px] text-muted-foreground italic">Mando i tuoi script ad Aura…</p>
+        <p className="text-[14px] leading-5 text-muted-foreground">Mando i tuoi script ad Aura…</p>
       </div>
     </article>
   );

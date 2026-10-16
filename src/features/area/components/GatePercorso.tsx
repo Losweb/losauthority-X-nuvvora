@@ -15,7 +15,7 @@ export function GatePercorso({ children }: { children: ReactNode }) {
 
   if (!utente || isLoading || (isFetching && data?.stato !== "inviato")) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6">
+      <div className="flex min-h-[60dvh] items-center justify-center p-6">
         <SkeletonBlocco altezza="h-48" />
       </div>
     );

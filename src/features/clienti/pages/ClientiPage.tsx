@@ -7,7 +7,9 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { ClientiInAttesa } from "../components/ClientiInAttesa";
 import { TabellaClienti } from "../components/TabellaClienti";
+import { useClientiInAttesa } from "../hooks/useClientiInAttesa";
 import { FASI } from "../fasi";
 import { useClienti } from "../hooks/useClienti";
 
@@ -16,6 +18,7 @@ const VOCI_FASE = [{ value: TUTTE, label: "Tutte le fasi" }, ...FASI.map((f) => 
 
 export default function ClientiPage() {
   const { data, isLoading, isError } = useClienti();
+  const inAttesa = useClientiInAttesa();
   const [testo, setTesto] = useState("");
   const [fase, setFase] = useState<string>(TUTTE);
 
@@ -32,7 +35,11 @@ export default function ClientiPage() {
     <div>
       <PageHeader
         titolo="Clienti"
-        sottotitolo={data ? `${data.length} ${data.length === 1 ? "cliente" : "clienti"} · ordinati per prossima call` : undefined}
+        sottotitolo={
+          data
+            ? `${data.length} ${data.length === 1 ? "cliente" : "clienti"} · ordinati per prossima call${inAttesa.data?.length ? ` · ${inAttesa.data.length} in attesa di contratto` : ""}`
+            : undefined
+        }
         azioni={
           <>
             <Button variant="ghost" size="sm" render={<Link to="/tag" />}>
@@ -69,6 +76,8 @@ export default function ClientiPage() {
           </Select>
         </div>
       </div>
+
+      {inAttesa.data && inAttesa.data.length > 0 && fase === TUTTE ? <ClientiInAttesa righe={inAttesa.data} testo={testo} /> : null}
 
       {isLoading ? <SkeletonRighe righe={6} /> : null}
       {isError ? <ErroreCaricamento /> : null}

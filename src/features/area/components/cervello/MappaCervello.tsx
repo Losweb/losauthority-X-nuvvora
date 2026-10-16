@@ -37,7 +37,7 @@ function NodoCervello({ nodo, indice }: { nodo: Nodo; indice: number }) {
         <Icon className="size-[18px]" strokeWidth={1.5} aria-hidden />
       </span>
       <span className="min-w-0">
-        <span className="block font-display text-[22px] leading-tight font-medium">{nodo.titolo}</span>
+        <span className="block font-display text-[22px] leading-tight font-semibold">{nodo.titolo}</span>
         <span className="mt-1 block text-[13px] leading-snug text-muted-foreground">{nodo.testo}</span>
       </span>
       <span className="col-start-2 mt-auto inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">

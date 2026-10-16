@@ -64,7 +64,7 @@ export function AgendaContenuti({ mese, perGiorno, onApri, onRipianifica }: Agen
         const giorno = parseISO(chiave);
         return (
           <li key={chiave} className="grid gap-2">
-            <p className="eyebrow flex items-center gap-2 text-[10px]">
+            <p className="eyebrow flex items-center gap-2 text-[12px]">
               {format(giorno, "EEEE d MMMM", { locale: it })}
               {isToday(giorno) ? (
                 <span className="rounded-full bg-primary px-1.5 py-0.5 tracking-normal text-primary-foreground normal-case">Oggi</span>

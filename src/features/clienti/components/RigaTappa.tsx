@@ -72,10 +72,10 @@ export function RigaTappa({ tappa, numero, clienteId, onCambia, onElimina, disab
           aria-label={conFigli ? "Stato derivato dai sotto-compiti" : fatta ? "Segna da fare" : "Segna fatta"}
         />
         <label htmlFor={id} className="min-w-0 flex-1">
-          <span className="eyebrow flex items-center gap-2 text-[10px]">
+          <span className="eyebrow flex items-center gap-2 text-[12px]">
             Tappa {numero}
             {tappa.origine === "aura" ? (
-              <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-normal normal-case tracking-normal">
+              <Badge variant="outline" className="h-4 px-1.5 text-[12px] font-normal normal-case tracking-normal">
                 Aura
               </Badge>
             ) : null}

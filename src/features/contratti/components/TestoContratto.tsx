@@ -55,7 +55,7 @@ export function TestoContratto({ blocchi }: { blocchi: Blocco[] }) {
             );
           case "nota":
             return (
-              <p key={i} className="text-[12.5px] italic text-muted-foreground">
+              <p key={i} className="text-[12.5px] text-muted-foreground">
                 {b.testo}
               </p>
             );

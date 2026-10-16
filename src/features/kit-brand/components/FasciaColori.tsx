@@ -34,7 +34,7 @@ function PannelloColore({ colore, clienteId }: { colore: ColoreBrand; clienteId:
   return (
     <div className="grid w-64 gap-3">
       <label className="grid gap-1.5">
-        <span className="eyebrow text-[10px]">Colore</span>
+        <span className="eyebrow text-[12px]">Colore</span>
         <span className="flex items-center gap-2">
           <input
             type="color"
@@ -57,7 +57,7 @@ function PannelloColore({ colore, clienteId }: { colore: ColoreBrand; clienteId:
         </span>
       </label>
       <label className="grid gap-1.5">
-        <span className="eyebrow text-[10px]">Ruolo</span>
+        <span className="eyebrow text-[12px]">Ruolo</span>
         <select
           value={colore.ruolo}
           onChange={(e) => aggiorna.mutate({ id: colore.id, ruolo: e.target.value as RuoloColore })}
@@ -101,7 +101,7 @@ export function FasciaColori({ clienteId, colori }: FasciaColoriProps) {
   return (
     <section aria-labelledby="kit-colori" className="grid gap-3">
       <div className="flex items-baseline justify-between gap-4">
-        <h3 id="kit-colori" className="eyebrow shrink-0 text-[10px]">
+        <h3 id="kit-colori" className="eyebrow shrink-0 text-[12px]">
           Colori · {colori.length}
         </h3>
         <span className="text-[12px] text-muted-foreground">Tocca una banda per cambiarla</span>
@@ -130,7 +130,7 @@ export function FasciaColori({ clienteId, colori }: FasciaColoriProps) {
               >
                 <span className="absolute top-3 left-3 figure text-[12px] tracking-wide opacity-90">{c.hex}</span>
                 {c.ruolo !== "altro" ? (
-                  <span className="absolute right-3 bottom-3 text-[10px] tracking-[0.18em] uppercase opacity-80">{RUOLO_ETICHETTA[c.ruolo]}</span>
+                  <span className="absolute right-3 bottom-3 text-[12px] tracking-[0.18em] uppercase opacity-80">{RUOLO_ETICHETTA[c.ruolo]}</span>
                 ) : null}
               </PopoverTrigger>
               <PopoverContent align="start" className="p-4">

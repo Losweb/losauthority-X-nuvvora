@@ -15,7 +15,7 @@ export function CardConcorrente({ concorrente: c, onModifica }: CardConcorrenteP
     <Card className="h-full">
       <CardHeader className="justify-items-center gap-3 text-center">
         <Monogramma nome={c.nome} dimensione="xl" className="rounded-full" />
-        <CardTitle className="font-display text-2xl leading-tight font-medium wrap-anywhere">{c.nome}</CardTitle>
+        <CardTitle className="font-display text-2xl leading-tight font-semibold wrap-anywhere">{c.nome}</CardTitle>
         {c.social.length > 0 ? (
           <ul className="flex flex-wrap justify-center gap-2">
             {c.social.map((url) => {
@@ -41,7 +41,7 @@ export function CardConcorrente({ concorrente: c, onModifica }: CardConcorrenteP
 
       <CardContent className="grid flex-1 content-start gap-5">
         <section className="grid gap-1.5">
-          <h3 className="eyebrow text-[10px]">Cosa fa</h3>
+          <h3 className="eyebrow text-[12px]">Cosa fa</h3>
           {c.cosa_fa ? (
             <p className="text-sm leading-relaxed whitespace-pre-line wrap-anywhere">{c.cosa_fa}</p>
           ) : (
@@ -50,7 +50,7 @@ export function CardConcorrente({ concorrente: c, onModifica }: CardConcorrenteP
         </section>
 
         <section className="grid gap-2">
-          <h3 className="eyebrow text-[10px]">Video · {c.video.length}</h3>
+          <h3 className="eyebrow text-[12px]">Video · {c.video.length}</h3>
           {c.video.length === 0 ? <p className="text-sm text-muted-foreground">Nessun video. Aggiungine uno da «Modifica».</p> : null}
           <ol className="grid gap-2.5">
             {c.video.map((v, i) => {

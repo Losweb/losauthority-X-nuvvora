@@ -56,7 +56,7 @@ function FattureCella({ c }: { c: ClienteRiga }) {
 }
 
 /** Etichetta piccola come l'intestazione della colonna (lista del telefono). */
-const ETICHETTA_MOBILE = "text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase";
+const ETICHETTA_MOBILE = "text-[12px] font-semibold tracking-[0.08em] text-muted-foreground uppercase";
 
 function VoceMobile({ etichetta, children }: { etichetta: string; children: ReactNode }) {
   return (

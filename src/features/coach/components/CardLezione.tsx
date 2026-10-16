@@ -19,8 +19,8 @@ export function CardLezione({ lezione, capitolo = null, indice = 0 }: CardLezion
       <div className="flex items-start gap-3">
         <PlayCircle className="mt-0.5 size-5 shrink-0 text-muted-foreground" strokeWidth={1.5} aria-hidden />
         <div className="min-w-0 flex-1">
-          {lezione.corso ? <p className="eyebrow truncate text-[10px]">{lezione.corso}</p> : null}
-          <h3 className="font-display text-[21px] leading-tight font-medium">{lezione.titolo}</h3>
+          {lezione.corso ? <p className="eyebrow truncate text-[12px]">{lezione.corso}</p> : null}
+          <h3 className="font-display text-[21px] leading-tight font-semibold">{lezione.titolo}</h3>
         </div>
       </div>
       {capitolo ? (

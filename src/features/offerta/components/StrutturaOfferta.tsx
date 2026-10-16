@@ -56,7 +56,7 @@ export function StrutturaOfferta({ offerta, larga = false, className }: Struttur
     <div className={cn("grid gap-7", className)}>
       {sezioni.map((s) => (
         <section key={s.titolo} aria-label={s.titolo} className="grid gap-3 break-inside-avoid">
-          <h4 className="font-display text-[20px] leading-tight font-medium">{s.titolo}</h4>
+          <h4 className="font-display text-[20px] leading-tight font-semibold">{s.titolo}</h4>
           <div className={cn("grid gap-4", larga && s.voci.length > 1 && "sm:grid-cols-2")}>
             {s.voci.map((v) => (
               <SezioneDossier key={v.etichetta} titolo={v.etichetta}>

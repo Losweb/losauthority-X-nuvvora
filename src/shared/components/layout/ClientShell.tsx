@@ -3,19 +3,13 @@ import { BarChart3, Brain, GraduationCap, LayoutGrid, Palette, Route, Users, Wan
 import { useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
-import { Monogramma } from "@/shared/components/brand/Monogramma";
 import { ContenutoPagina } from "@/shared/components/layout/ContenutoPagina";
 import { MenuMobile } from "@/shared/components/layout/MenuMobile";
+import { CardUtente, FinestraSeto, SidebarSeto, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
 import { cn } from "@/lib/utils";
 
-interface VocePercorso {
-  href: string;
-  label: string;
-  icon: typeof LayoutGrid;
-}
-
 /** Sezioni del percorso; il "Cervello del tuo branding" è a parte, con una voce in evidenza. */
-const VOCI_PERCORSO: VocePercorso[] = [
+const VOCI_PERCORSO: VoceNavBase[] = [
   { href: "/area/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/area/stili", label: "Stili", icon: Palette },
   { href: "/area/crea-idee", label: "Crea idee", icon: WandSparkles },
@@ -27,27 +21,7 @@ const VOCI_PERCORSO: VocePercorso[] = [
 
 const HREF_CERVELLO = "/area/cervello";
 
-function VoceNav({ voce }: { voce: VocePercorso }) {
-  const Icon = voce.icon;
-  return (
-    <NavLink
-      to={voce.href}
-      className={({ isActive }) =>
-        cn(
-          "flex shrink-0 items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
-          isActive
-            ? "bg-sidebar-accent font-semibold text-sidebar-foreground [&_svg]:opacity-100"
-            : "font-medium text-muted-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-foreground [&_svg]:opacity-70",
-        )
-      }
-    >
-      <Icon className="size-[17px]" strokeWidth={1.5} aria-hidden />
-      {voce.label}
-    </NavLink>
-  );
-}
-
-/** La voce "Cervello del tuo branding": più importante delle altre, quindi una card con il cervello e il titolo in serif (attiva anche nelle sottopagine). */
+/** La voce "Cervello del tuo branding": più importante delle altre, quindi una card (Seto action card) con il cervello su disco `action`; attiva anche nelle sottopagine. */
 function VoceCervello() {
   return (
     <NavLink
@@ -55,18 +29,16 @@ function VoceCervello() {
       className={({ isActive }) =>
         cn(
           "group flex items-center gap-3 rounded-lg border px-3 py-3 transition-[border-color,background-color,box-shadow] duration-300",
-          isActive
-            ? "border-foreground/40 bg-sidebar-accent shadow-xs"
-            : "border-border bg-card hover:border-foreground/25 hover:bg-sidebar-accent/60 hover:shadow-xs",
+          isActive ? "border-line bg-surface-active shadow-sm" : "border-line bg-card shadow-xs hover:bg-surface-hover",
         )
       }
     >
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-foreground text-background transition-transform duration-300 group-hover:scale-105">
-        <Brain className="size-[18px]" strokeWidth={1.5} aria-hidden />
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-transform duration-300 group-hover:scale-105">
+        <Brain className="size-[18px]" strokeWidth={2} aria-hidden />
       </span>
       <span className="min-w-0">
-        <span className="eyebrow block text-[9px]">Il tuo branding</span>
-        <span className="block font-display text-[17px] leading-tight font-medium text-sidebar-foreground">Cervello del tuo branding</span>
+        <span className="eyebrow block">Il tuo branding</span>
+        <span className="block text-[15px] leading-tight font-bold tracking-[-0.01em] text-foreground">Cervello del tuo branding</span>
       </span>
     </NavLink>
   );
@@ -74,27 +46,14 @@ function VoceCervello() {
 
 function NavPercorso() {
   return (
-    <nav aria-label="Il tuo percorso" className="flex flex-1 flex-col gap-0.5 px-3.5 pt-4 pb-4">
+    <nav aria-label="Il tuo percorso" className="flex flex-1 flex-col gap-0.5 px-4 pt-2 pb-4 md:px-0 md:pt-0">
       {VOCI_PERCORSO.map((v) => (
-        <VoceNav key={v.href} voce={v} />
+        <VoceNavSeto key={v.href} voce={v} />
       ))}
       <div className="pt-5">
         <VoceCervello />
       </div>
     </nav>
-  );
-}
-
-function UtentePercorso() {
-  const { utente } = useAuth();
-  return (
-    <div className="flex min-w-0 items-center gap-[11px] px-2.5 py-2">
-      <Monogramma nome={utente?.nombre || utente?.email} inverso />
-      <span className="min-w-0">
-        <span className="block truncate text-[13px] font-semibold text-sidebar-foreground">{utente?.nombre || "Cliente"}</span>
-        <span className="block max-w-[150px] truncate text-[11px] text-muted-foreground">{utente?.email}</span>
-      </span>
-    </div>
   );
 }
 
@@ -104,81 +63,64 @@ const logoArea = (
   </Link>
 );
 
-function SidebarPercorso() {
-  return (
-    <aside className="sticky top-0 hidden h-screen w-(--sidebar-w) shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
-      <div className="flex h-(--header-h) items-center border-b border-border-faint px-5">{logoArea}</div>
-      <NavPercorso />
-      <div className="border-t border-border-faint p-3.5">
-        <UtentePercorso />
-      </div>
-    </aside>
-  );
-}
-
 interface ClientShellProps {
   /** true nello spazio cliente (dopo l'onboarding): sidebar a sinistra con le sezioni. */
   conNav?: boolean;
 }
 
 /**
- * Sotto md la sidebar diventa il pannello ☰ (`MenuMobile`): voci, Cervello, utente ed «Esci».
- * Shell dell'area cliente (Marmo). Durante l'onboarding: solo logo + "Esci" e
- * colonna centrale da 820px. Con `conNav`: sidebar a sinistra (Dashboard, Stili,
- * Crea idee, Workflow, Pubblicazioni, Wesley Coach) e, in evidenza, la card
- * "Cervello del tuo branding" (Avatar, Offerta, Clienti, Kit Brand); topbar con "Esci".
+ * Shell dell'area cliente (Seto). Durante l'onboarding: solo marchio + «Esci» e colonna centrale
+ * da 820px. Con `conNav`: sidebar a sinistra (Dashboard, Stili, Crea idee, Workflow, Pubblicazioni,
+ * Clienti, Wesley Coach) e, in evidenza, la card "Cervello del tuo branding"; in fondo la card utente
+ * con «Esci». Sotto md la sidebar diventa il pannello ☰ (`MenuMobile`).
  */
 export function ClientShell({ conNav = false }: ClientShellProps) {
-  const { signOut } = useAuth();
-  const esci = (
-    <Button size="sm" variant="ghost" onClick={() => void signOut()}>
-      Esci
-    </Button>
-  );
+  const { utente, signOut } = useAuth();
+  const cardUtente = <CardUtente nome={utente?.nombre || "Cliente"} sotto={utente?.email} onEsci={() => void signOut()} />;
 
   if (!conNav) {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-3 sm:px-6 sm:py-4">
-          <Link to="/area" aria-label="La tua area" className="text-foreground">
-            <MarmoLogo altezza={22} />
-          </Link>
-          {esci}
-        </header>
-        <main className="mx-auto w-full max-w-[820px] min-w-0 flex-1 px-4 pt-7 pb-16 sm:px-6 sm:pt-11 sm:pb-20">
-          <ContenutoPagina />
-        </main>
-      </div>
+      <FinestraSeto
+        classeMain="mx-auto w-full max-w-[820px] sm:px-6 sm:pt-8 sm:pb-16"
+        header={
+          <>
+            <Link to="/area" aria-label="La tua area" className="text-foreground">
+              <MarmoLogo altezza={20} />
+            </Link>
+            <Button size="sm" variant="ghost" onClick={() => void signOut()}>
+              Esci
+            </Button>
+          </>
+        }
+      >
+        <ContenutoPagina />
+      </FinestraSeto>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <SidebarPercorso />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-(--header-h) shrink-0 items-center justify-between gap-3 border-b bg-card/85 px-4 backdrop-blur-md md:justify-end md:px-8">
+    <FinestraSeto
+      classeMain="md:pt-2"
+      sidebar={
+        <SidebarSeto marchio={logoArea} piede={cardUtente}>
+          <NavPercorso />
+        </SidebarSeto>
+      }
+      header={
+        <>
           <div className="flex min-w-0 items-center gap-1 md:hidden">
-            <MenuMobile
-              testata={logoArea}
-              piede={
-                <div className="grid gap-2">
-                  <UtentePercorso />
-                  <Button variant="outline" className="w-full" onClick={() => void signOut()}>
-                    Esci
-                  </Button>
-                </div>
-              }
-            >
+            <MenuMobile testata={logoArea} piede={cardUtente}>
               <NavPercorso />
             </MenuMobile>
             {logoArea}
           </div>
-          <div className="hidden md:block">{esci}</div>
-        </header>
-        <main className="mx-auto w-full max-w-[1280px] min-w-0 flex-1 px-4 pt-6 pb-16 sm:px-6 md:px-8 md:pt-10 md:pb-20">
-          <ContenutoPagina />
-        </main>
+          <span className="hidden md:block" />
+        </>
+      }
+    >
+      <div className="mx-auto w-full max-w-[1280px]">
+        <ContenutoPagina />
       </div>
-    </div>
+    </FinestraSeto>
   );
 }

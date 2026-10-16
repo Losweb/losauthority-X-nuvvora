@@ -46,12 +46,12 @@ export function OffertaTab({ cliente }: { cliente: ClienteDettaglio }) {
               )}
             >
               <span className="flex items-center justify-between gap-2">
-                <span className="figure text-[10px] tracking-[0.12em] text-muted-foreground">{codiceOfferta(i + 1)}</span>
+                <span className="figure text-[12px] tracking-[0.12em] text-muted-foreground">{codiceOfferta(i + 1)}</span>
                 <Badge variant={o.stato === "completo" ? "active" : "neutral"} dot>
                   {o.stato === "completo" ? "Completa" : "In costruzione"}
                 </Badge>
               </span>
-              <span className="line-clamp-2 font-display text-[19px] leading-tight font-medium">{o.nome ?? "Senza nome"}</span>
+              <span className="line-clamp-2 font-display text-[19px] leading-tight font-semibold">{o.nome ?? "Senza nome"}</span>
               <span className="truncate text-xs text-muted-foreground">{[o.prezzo, o.per_chi].filter(Boolean).join(" · ") || `Creata il ${formatDate(o.created_at)}`}</span>
             </button>
           );

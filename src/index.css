@@ -2,27 +2,20 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Font del design system "Marmo" (stessi del gestionale precedente). */
-@import "@fontsource/cormorant-garamond/400.css";
-@import "@fontsource/cormorant-garamond/500.css";
-@import "@fontsource/cormorant-garamond/600.css";
-@import "@fontsource/cormorant-garamond/400-italic.css";
-@import "@fontsource/cormorant-garamond/500-italic.css";
-@import "@fontsource-variable/hanken-grotesk";
-@import "@fontsource-variable/jetbrains-mono";
-
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
-   MARMO · CONSOLE — tema chiaro "carta", monocromo, con tre toni
-   di stato sobri (sage / ochre / clay). I componenti usano SOLO
-   questi token: niente colori fissi nel TSX.
+   SETO — design system (tema chiaro). Tutti i valori vengono da
+   SETO_DESIGN_SYSTEM.md (tokens.css): i componenti usano SOLO
+   questi token tramite le utility di Tailwind, niente colori
+   fissi nel TSX. Il font è Inter (caricato in index.html).
    ============================================================ */
 @theme inline {
-  --font-sans: "Hanken Grotesk Variable", -apple-system, "Segoe UI", system-ui, sans-serif;
-  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, Menlo, monospace;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Una sola famiglia: i "titoli in serif" di prima sono ora Inter in grassetto. */
+  --font-display: var(--font-sans);
   --font-heading: var(--font-sans);
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -58,7 +51,28 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* Stati (badge, delta finanziari, avvisi) */
+  /* Seto: superfici e colori "dell'AI" */
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-active: var(--surface-active);
+  --color-surface-input: var(--surface-input);
+  --color-surface-hover: var(--surface-hover);
+  --color-line: var(--line);
+  --color-control-border: var(--control-border);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-action: var(--action);
+  --color-on-action: var(--on-action);
+  --color-glow-peach: var(--glow-peach);
+  --color-glow-lilac: var(--glow-lilac);
+  --color-tint-rose: var(--tint-rose);
+  --color-tint-lilac: var(--tint-lilac);
+  --color-card-glass: var(--card-glass);
+  --color-card-glass-button: var(--card-glass-button);
+  --color-online: var(--online);
+  --color-frame-start: var(--frame-start);
+  --color-frame-end: var(--frame-end);
+
+  /* Stati (badge, delta finanziari, avvisi): non esistono in Seto, restano i tre toni sobri. */
   --color-status-active: var(--status-active-fg);
   --color-status-active-soft: var(--status-active-bg);
   --color-status-expiring: var(--status-expiring-fg);
@@ -70,24 +84,26 @@
   --color-danger: var(--status-churn-fg);
 
   /* Pannello scuro (login) */
-  --color-ink: var(--ink-950);
-  --color-ink-deep: var(--ink-1000);
-  --color-paper: var(--ink-25);
+  --color-ink: var(--ink);
+  --color-ink-deep: var(--silhouette);
+  --color-paper: var(--surface-raised);
 
-  --radius-xs: 3px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 13px;
-  --radius-2xl: 16px;
-  --radius-3xl: 20px;
+  /* Raggi Seto: le cose che si toccano sono pillole (full), quelle che contengono sono morbide. */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-3xl: 28px;
   --radius-4xl: 999px;
 
-  --shadow-xs: 0 1px 2px rgba(12, 14, 18, 0.04);
-  --shadow-sm: 0 1px 2px rgba(12, 14, 18, 0.05), 0 1px 3px rgba(12, 14, 18, 0.04);
-  --shadow-md: 0 4px 12px rgba(12, 14, 18, 0.06), 0 1px 3px rgba(12, 14, 18, 0.05);
-  --shadow-lg: 0 12px 32px rgba(12, 14, 18, 0.1), 0 2px 8px rgba(12, 14, 18, 0.06);
-  --shadow-xl: 0 24px 64px rgba(12, 14, 18, 0.16), 0 6px 16px rgba(12, 14, 18, 0.08);
+  /* Ombre Seto: quasi invisibili; l'unica forte è quella della finestra. */
+  --shadow-xs: var(--shadow-card);
+  --shadow-sm: var(--shadow-active);
+  --shadow-md: var(--shadow-panel);
+  --shadow-lg: 0 16px 40px -16px #11131824;
+  --shadow-xl: var(--shadow-window);
 
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
@@ -96,28 +112,43 @@
 :root {
   color-scheme: light;
 
-  /* Ramp neutra "ink" */
-  --ink-1000: #000000;
-  --ink-975: #06070a;
-  --ink-950: #0c0e12;
-  --ink-900: #131519;
-  --ink-850: #1a1d22;
-  --ink-800: #21242a;
-  --ink-700: #2d3138;
-  --ink-600: #3e434b;
-  --ink-500: #565c65;
-  --ink-400: #767d87;
-  --ink-300: #9ba1ab;
-  --ink-250: #b4b9c1;
-  --ink-200: #cdd1d7;
-  --ink-150: #dee1e5;
-  --ink-100: #eceef0;
-  --ink-75: #f2f3f5;
-  --ink-50: #f7f8f9;
-  --ink-25: #fbfcfc;
-  --ink-0: #ffffff;
+  /* ---- Seto tokens (tokens.css, tema chiaro) ---- */
+  --frame-start: #c8cccf; /* Tela dietro la finestra: grigio freddo in alto a sinistra */
+  --frame-end: #fc8a6f; /* Tela dietro la finestra: pesca in basso a destra */
+  --bleed: #fc8a6f24; /* Velo pesca al 14% sulla metà bassa della finestra */
+  --surface: #f5f5f5; /* Fondo della finestra: sidebar e area principale */
+  --surface-raised: #fcfcfc; /* Tutto ciò che sta sopra surface: pannelli, card, chip, campi */
+  --surface-active: #fbfbfb; /* La pillola della voce di menu attiva (con shadow-active) */
+  --surface-input: #f7f3f4; /* Il composer: bianco caldo perché sta sopra il velo pesca */
+  --surface-hover: #ededef; /* Hover di voci di menu, chip e righe */
+  --line: #ececec; /* Divisori sottili e bordo 1px di campi, chip e card */
+  --control-border: #8f939b; /* Bordo di una checkbox non spuntata e dei controlli il cui bordo ha un significato */
+  --ink: #111318; /* Testo principale e voce attiva */
+  --ink-secondary: #5c5f66; /* Descrizioni delle card e delle righe */
+  --ink-muted: #6b6e75; /* Voci inattive, placeholder, orari, sottotitoli */
+  --action: #0f1921; /* L'unico fill forte: bottone primary, invio, badge, dischetto */
+  --on-action: #ffffff; /* Testo e icone su action */
+  --focus-ring: #0f1921; /* Focus da tastiera: anello pieno 2px, 2px fuori dal controllo */
+  --glow-peach: #f4b79b; /* Metà calda del bagliore: cuore della stella, glifi delle card */
+  --glow-lilac: #cbbccf; /* Metà fredda del bagliore: punte della stella */
+  --tint-rose: #f7ddd4; /* Tinta pesca morbida: fondo delle iniziali, riga selezionata */
+  --tint-lilac: #e4dbe6; /* Tinta lilla morbida: fondo delle iniziali, riquadri icona */
+  --card-glass: #aeb5bc; /* La card utente smerigliata in fondo alla sidebar */
+  --card-glass-button: #d2d5da; /* Il bottone dentro la card utente */
+  --on-glass: #ffffff; /* Nel mockup bianco (2.1:1): qui si usa --ink, come consiglia il manuale */
+  --silhouette: #121a1f; /* La figura scura delle miniature e il pannello scuro del login */
+  --online: #1f9d4a; /* Il pallino di presenza sull'avatar */
 
-  /* Toni di stato */
+  --shadow-window: 0 40px 80px -32px #5a2a2066, 0 0 0 1px #ffffff80;
+  --shadow-active: 0 1px 2px #11131810, 0 6px 16px -4px #11131814;
+  --shadow-card: 0 1px 2px #1113180a;
+  --shadow-panel: 0 8px 24px -12px #11131814;
+
+  /* Derivati (non in tokens.css): un bordo appena più forte e uno appena più debole di --line. */
+  --line-strong: #dfe1e4;
+  --line-faint: #f1f1f2;
+
+  /* Toni di stato (sage / ochre / clay), fuori dal sistema Seto. */
   --sage-700: #34503e;
   --sage-500: #5e7d6b;
   --sage-100: #e6ede8;
@@ -136,86 +167,56 @@
   --status-churn-fg: var(--clay-700);
   --status-churn-bg: var(--clay-100);
 
-  /* Semantica shadcn */
-  --background: var(--ink-50);
-  --foreground: var(--ink-950);
-  --card: var(--ink-0);
-  --card-foreground: var(--ink-950);
-  --popover: var(--ink-0);
-  --popover-foreground: var(--ink-950);
-  --primary: var(--ink-950);
-  --primary-foreground: var(--ink-0);
-  --secondary: var(--ink-100);
-  --secondary-foreground: var(--ink-800);
-  --muted: var(--ink-75);
-  --muted-foreground: var(--ink-500);
-  --accent: var(--ink-75);
-  --accent-foreground: var(--ink-950);
+  /* ---- Semantica shadcn, mappata sui token Seto ---- */
+  --background: var(--surface);
+  --foreground: var(--ink);
+  --card: var(--surface-raised);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--ink);
+  --primary: var(--action);
+  --primary-foreground: var(--on-action);
+  --secondary: var(--surface-hover);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-hover);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--surface-hover);
+  --accent-foreground: var(--ink);
   --destructive: var(--clay-700);
-  --border: var(--ink-150);
-  --border-strong: var(--ink-200);
-  --border-faint: var(--ink-100);
-  --input: var(--ink-200);
-  --ring: var(--ink-400);
-  --chart-1: var(--ink-950);
-  --chart-2: var(--ink-500);
-  --chart-3: var(--ink-300);
+  --border: var(--line);
+  --border-strong: var(--line-strong);
+  --border-faint: var(--line-faint);
+  --input: var(--line);
+  --ring: var(--focus-ring);
+  --chart-1: var(--ink);
+  --chart-2: var(--ink-muted);
+  --chart-3: var(--glow-lilac);
   --chart-4: var(--sage-500);
-  --chart-5: var(--clay-500);
-  --sidebar: var(--ink-0);
-  --sidebar-foreground: var(--ink-950);
-  --sidebar-primary: var(--ink-950);
-  --sidebar-primary-foreground: var(--ink-0);
-  --sidebar-accent: var(--ink-75);
-  --sidebar-accent-foreground: var(--ink-950);
-  --sidebar-border: var(--ink-150);
-  --sidebar-ring: var(--ink-400);
+  --chart-5: var(--glow-peach);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--action);
+  --sidebar-primary-foreground: var(--on-action);
+  --sidebar-accent: var(--surface-hover);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--focus-ring);
 
-  --radius: 10px;
-  --sidebar-w: 256px;
+  --radius: 16px;
+  --sidebar-w: 232px;
   --header-h: 64px;
-}
 
-.dark {
-  color-scheme: dark;
-  --background: var(--ink-950);
-  --foreground: var(--ink-25);
-  --card: var(--ink-900);
-  --card-foreground: var(--ink-25);
-  --popover: var(--ink-900);
-  --popover-foreground: var(--ink-25);
-  --primary: var(--ink-0);
-  --primary-foreground: var(--ink-950);
-  --secondary: var(--ink-800);
-  --secondary-foreground: var(--ink-100);
-  --muted: var(--ink-850);
-  --muted-foreground: var(--ink-300);
-  --accent: var(--ink-850);
-  --accent-foreground: var(--ink-25);
-  --destructive: var(--clay-500);
-  --border: var(--ink-800);
-  --border-strong: var(--ink-700);
-  --border-faint: var(--ink-850);
-  --input: var(--ink-700);
-  --ring: var(--ink-400);
-  --sidebar: var(--ink-900);
-  --sidebar-foreground: var(--ink-25);
-  --sidebar-accent: var(--ink-850);
-  --sidebar-accent-foreground: var(--ink-25);
-  --sidebar-border: var(--ink-800);
-  --status-active-bg: color-mix(in srgb, var(--sage-500) 22%, transparent);
-  --status-active-fg: var(--sage-100);
-  --status-expiring-bg: color-mix(in srgb, var(--ochre-500) 22%, transparent);
-  --status-expiring-fg: var(--ochre-100);
-  --status-churn-bg: color-mix(in srgb, var(--clay-500) 22%, transparent);
-  --status-churn-fg: var(--clay-100);
+  /* La finestra Seto riempie tutto lo schermo (decisione dell'utente, 16/10/2026: niente tela sfumata
+     né "finestra" sollevata dietro alla pagina). --vh-finestra resta per le pagine che si misurano sullo schermo. */
+  --canvas-pad: 0px;
+  --vh-finestra: 100dvh;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
-    scrollbar-color: var(--ink-200) transparent;
+    scrollbar-color: var(--line-strong) transparent;
   }
   html {
     @apply font-sans;
@@ -236,27 +237,28 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+  /* Seto: una sola famiglia, i titoli in grassetto con spaziatura stretta. */
   h1,
   h2,
   h3 {
-    @apply font-display;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    @apply font-sans;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
   p {
     text-wrap: pretty;
   }
   ::selection {
-    background: var(--ink-950);
-    color: var(--ink-0);
+    background: var(--action);
+    color: var(--on-action);
   }
   *::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   *::-webkit-scrollbar-thumb {
-    background: var(--ink-200);
+    background: var(--line-strong);
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -292,83 +294,167 @@
     .marmo-carta-gira {
       animation-duration: 320ms !important;
     }
+    /* Benvenuto dell'area cliente: la cornice e i passi entrano ed escono comunque, più in fretta. */
+    .marmo-benvenuto-cornice {
+      animation-duration: 350ms !important;
+    }
+    .marmo-benvenuto-entra {
+      animation-duration: 280ms !important;
+    }
+    .marmo-benvenuto-esce {
+      animation-duration: 200ms !important;
+    }
   }
 }
 
-/* Etichetta "occhiello": piccola, maiuscola, spaziata. */
+/* ============================================================
+   La "finestra" Seto, a tutto schermo: niente tela sfumata, niente
+   angoli né ombra (l'utente non voleva la pagina "sopra una card").
+   Resta il velo pesca che sale dal fondo. Sul telefono scorre la
+   pagina; da md la finestra è alta quanto lo schermo e scorre SOLO
+   il <main> (data-scroll-principale).
+   ============================================================ */
+.st-canvas {
+  min-height: 100dvh;
+  background: var(--surface);
+}
+.st-window {
+  position: relative;
+  min-height: 100dvh;
+  background: var(--surface);
+}
+.st-window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 50%, var(--bleed) 100%);
+}
+.st-window > * {
+  position: relative;
+  z-index: 1;
+}
+@media (min-width: 768px) {
+  .st-canvas {
+    height: 100dvh;
+  }
+  .st-window {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+/* Benvenuto dell'area cliente (/area/benvenuto): prima appare la cornice (logo e sfondo),
+   poi ogni passo entra dal basso e, quando si va avanti, esce verso l'alto. */
+@keyframes marmo-benvenuto-cornice {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes marmo-benvenuto-entra {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes marmo-benvenuto-esce {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+.marmo-benvenuto-cornice {
+  animation: marmo-benvenuto-cornice 900ms ease-out both;
+}
+.marmo-benvenuto-entra {
+  animation: marmo-benvenuto-entra 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.marmo-benvenuto-esce {
+  animation: marmo-benvenuto-esce 420ms ease-in both;
+}
+
+/* Etichetta "occhiello": la caption di Seto (12px, mai sotto) in maiuscolo spaziato. */
 @utility eyebrow {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
 
-/* Cifre: mono, tabulari. */
+/* Cifre: tabulari, stessa famiglia (Seto ha un solo font). */
 @utility figure {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
 
-/* Titoli in serif (Cormorant) fuori dagli h1/h2/h3. */
+/* Lo stile "display" di Seto fuori dagli h1/h2/h3: grassetto, spaziatura stretta. */
 @utility display {
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
 /* ============================================================
-   "Aura" — sfera di energia (guida delle schede). Si anima ANCHE
-   con "riduci movimento": è un elemento di brand.
+   "Aura" — il volto dell'assistente (AURA_MANUALE.md): una sfera
+   di puntini disegnata su canvas (src/shared/components/aura).
+   Qui solo il canvas e i tre puntini del "pensa".
    ============================================================ */
-@keyframes marmo-aura-pulse {
+.aura {
+  display: block;
+  max-width: 100%;
+}
+.aura-typing {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  height: 22px;
+}
+.aura-typing i {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.4;
+  animation: aura-blink 1.2s infinite;
+}
+.aura-typing i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.aura-typing i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes aura-blink {
   0%,
+  80%,
   100% {
-    transform: scale(0.62);
-    opacity: 0.4;
+    opacity: 0.25;
   }
-  50% {
-    transform: scale(1.16);
-    opacity: 1;
+  40% {
+    opacity: 0.9;
   }
 }
-@keyframes marmo-aura-rotate {
-  from {
-    transform: rotate(0deg);
+@media (prefers-reduced-motion: reduce) {
+  .aura-typing i {
+    animation: none;
+    opacity: 0.6;
   }
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes marmo-aura-breathe {
-  0%,
-  100% {
-    transform: scale(0.93);
-  }
-  50% {
-    transform: scale(1.08);
-  }
-}
-.marmo-aura-breathe {
-  transform-box: view-box;
-  transform-origin: 50px 50px;
-  animation: marmo-aura-breathe 6s ease-in-out infinite;
-}
-.marmo-aura-spin {
-  transform-box: view-box;
-  transform-origin: 50px 50px;
-  animation: marmo-aura-rotate 32s linear infinite;
-}
-.marmo-aura-dot {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: marmo-aura-pulse 4.6s ease-in-out infinite;
-}
-.marmo-aura--speaking .marmo-aura-dot {
-  animation-duration: 2.4s;
 }
 
 /* Tre puntini di caricamento pagina (ContenutoPagina). */
@@ -405,21 +491,6 @@
   .marmo-punti i {
     animation: none;
     opacity: 0.6;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marmo-aura-breathe {
-    animation: marmo-aura-breathe 6s ease-in-out infinite !important;
-  }
-  .marmo-aura-spin {
-    animation: marmo-aura-rotate 32s linear infinite !important;
-  }
-  .marmo-aura-dot {
-    animation: marmo-aura-pulse 4.6s ease-in-out infinite !important;
-  }
-  .marmo-aura--speaking .marmo-aura-dot {
-    animation-duration: 2.4s !important;
   }
 }
 
@@ -472,6 +543,6 @@
 
 @media print {
   body {
-    background: var(--ink-0);
+    background: var(--surface-raised);
   }
 }

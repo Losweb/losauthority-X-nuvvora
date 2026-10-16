@@ -26,7 +26,7 @@ export function SchermataBenvenuto({ scheda, nome, riprende, onInizia }: Scherma
         </p>
         <p
           aria-live="polite"
-          className="font-display text-[clamp(20px,3vw,27px)] leading-[1.45] font-normal tracking-[-0.01em] text-foreground italic"
+          className="font-display text-[clamp(20px,3vw,27px)] leading-[1.45] font-bold tracking-[-0.01em] text-foreground"
         >
           {saluto} {scheda.sottotitolo} Sei domande veloci all'inizio decidono cosa ti chiedo dopo: vedrai solo quello che
           riguarda il tuo lavoro. Se hai un dubbio chiedi pure a me. Niente risposte perfette, solo quelle vere.

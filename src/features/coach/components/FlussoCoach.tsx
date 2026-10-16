@@ -55,7 +55,7 @@ export function FlussoCoach({ messaggi, lezioni, pendente, occupato, onRiprova }
                 <AuraSfera dimensione={32} conNome={false} className="mt-0.5" />
                 <div className="min-w-0 flex-1 pt-1">
                   {m.stato === "completato" && m.contenuto ? (
-                    <p className="font-display text-[19px] leading-snug text-foreground whitespace-pre-wrap">{m.contenuto}</p>
+                    <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">{m.contenuto}</p>
                   ) : null}
                   {m.stato === "errore" ? (
                     <div className="flex flex-wrap items-center gap-3">

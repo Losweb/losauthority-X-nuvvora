@@ -68,14 +68,14 @@ export default function OffertaStampaPage() {
         <header className="grid gap-5 border-b pb-6">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <MarmoLogo />
-            <p className="figure text-[11px] text-muted-foreground">
+            <p className="figure text-[12px] text-muted-foreground">
               Offerta · N. {codiceOfferta(numero)} · {formatDate(o.updated_at)}
             </p>
           </div>
           <div className="grid gap-2">
             <p className="eyebrow">{o.stato === "completo" ? "Offerta completa" : "Offerta in costruzione"}</p>
             <h1 className="text-[32px] leading-[1.05] break-words sm:text-[40px]">{o.nome ?? "Offerta in costruzione"}</h1>
-            {o.trasformazione ? <p className="font-display text-[22px] leading-snug italic text-foreground/85">«{o.trasformazione}»</p> : null}
+            {o.trasformazione ? <p className="font-display text-[22px] leading-snug text-foreground/85">«{o.trasformazione}»</p> : null}
           </div>
           <dl className="grid gap-4 sm:grid-cols-4">
             <Dato etichetta="Per chi" valore={o.per_chi} />
@@ -87,7 +87,7 @@ export default function OffertaStampaPage() {
           </dl>
           {o.snapshot ? (
             <section className="grid gap-1.5">
-              <h2 className="eyebrow font-sans text-[10px]">In ascensore</h2>
+              <h2 className="eyebrow font-sans text-[12px]">In ascensore</h2>
               <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{o.snapshot}</p>
             </section>
           ) : null}
@@ -95,7 +95,7 @@ export default function OffertaStampaPage() {
 
         <StrutturaOfferta offerta={o} larga />
 
-        <footer className="border-t pt-4 text-[11px] text-muted-foreground">
+        <footer className="border-t pt-4 text-[12px] text-muted-foreground">
           Costruita con Aura · Upscale, il percorso di Wesley Caicedo. Le voci in "Da confermare" sono proposte ancora da validare in call.
         </footer>
       </article>
@@ -106,7 +106,7 @@ export default function OffertaStampaPage() {
 function Dato({ etichetta, valore, className }: { etichetta: string; valore: string | null | undefined; className?: string }) {
   return (
     <div className={className}>
-      <dt className="eyebrow text-[10px]">{etichetta}</dt>
+      <dt className="eyebrow text-[12px]">{etichetta}</dt>
       <dd className="mt-0.5 text-[15px] leading-snug">{valore ?? "—"}</dd>
     </div>
   );

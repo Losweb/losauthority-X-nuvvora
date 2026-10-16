@@ -45,12 +45,12 @@ export function AvatarTab({ cliente }: { cliente: ClienteDettaglio }) {
               )}
             >
               <span className="flex items-center justify-between gap-2">
-                <span className="figure text-[10px] tracking-[0.12em] text-muted-foreground">{codiceAvatar(i + 1)}</span>
+                <span className="figure text-[12px] tracking-[0.12em] text-muted-foreground">{codiceAvatar(i + 1)}</span>
                 <Badge variant={a.stato === "completo" ? "active" : "neutral"} dot>
                   {a.stato === "completo" ? "Completo" : "In compilazione"}
                 </Badge>
               </span>
-              <span className="truncate font-display text-[20px] leading-tight font-medium">{a.nome ?? "Senza nome"}</span>
+              <span className="truncate font-display text-[20px] leading-tight font-semibold">{a.nome ?? "Senza nome"}</span>
               <span className="truncate text-xs text-muted-foreground">
                 {[a.eta, a.genere, a.situazione].filter(Boolean).join(" · ") || `Creato il ${formatDate(a.created_at)}`}
               </span>

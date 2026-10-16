@@ -39,7 +39,7 @@ function RigaPiattaforma({ p, piattaforma, onRileva }: { p: Pubblicazione; piatt
           <IconaPiattaforma piattaforma={piattaforma} className="size-4" />
           {ETICHETTA_PIATTAFORMA[piattaforma]}
         </span>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-[12px] text-muted-foreground">
           {ultima ? `Rilevato ${formatMomento(ultima.rilevata_il)}${ultima.origine === "instagram" ? " · automatico" : ""}` : "Nessun dato"}
         </span>
       </div>
@@ -49,10 +49,10 @@ function RigaPiattaforma({ p, piattaforma, onRileva }: { p: Pubblicazione; piatt
           const delta = ultima ? formatDelta(ultima[c], precedente?.[c]) : null;
           return (
             <div key={c} className="min-w-0">
-              <dt className="eyebrow text-[10px] max-sm:tracking-[0.1em]">{ETICHETTA_CAMPO_METRICA[c]}</dt>
+              <dt className="eyebrow text-[12px] max-sm:tracking-[0.1em]">{ETICHETTA_CAMPO_METRICA[c]}</dt>
               <dd className="figure text-lg leading-tight">{formatConteggio(ultima?.[c])}</dd>
               {delta ? (
-                <dd className={cn("text-[11px]", delta.startsWith("+") ? "text-status-active" : "text-muted-foreground")}>
+                <dd className={cn("text-[12px]", delta.startsWith("+") ? "text-status-active" : "text-muted-foreground")}>
                   {delta} dall'ultima
                 </dd>
               ) : null}

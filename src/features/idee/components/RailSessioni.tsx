@@ -17,7 +17,7 @@ export function RailSessioni({ sessioni, correnteId, onApri, onNuova, onChiudi }
   return (
     <aside aria-label="Conversazioni" className="flex h-full flex-col gap-3 animate-in fade-in slide-in-from-left-2 duration-300 motion-reduce:animate-none">
       <div className="flex items-center justify-between gap-2">
-        <p className="eyebrow px-1 text-[10px]">Conversazioni</p>
+        <p className="eyebrow px-1 text-[12px]">Conversazioni</p>
         <Button size="icon" variant="ghost" className="size-7 text-muted-foreground" aria-label="Nascondi conversazioni" onClick={onChiudi}>
           <PanelLeftClose className="size-4" aria-hidden />
         </Button>
@@ -41,7 +41,7 @@ export function RailSessioni({ sessioni, correnteId, onApri, onNuova, onChiudi }
                 )}
               >
                 <span className="block truncate text-[13.5px]">{s.titolo}</span>
-                <span className="block text-[11px] text-muted-foreground">{formatDateShort(s.updated_at)}</span>
+                <span className="block text-[12px] text-muted-foreground">{formatDateShort(s.updated_at)}</span>
               </button>
             </li>
           ))}

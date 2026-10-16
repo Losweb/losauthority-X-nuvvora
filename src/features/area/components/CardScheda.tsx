@@ -40,8 +40,8 @@ export function CardScheda({ clienteId }: { clienteId: string }) {
           {q.icona}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="eyebrow block text-[11px] tracking-[0.08em]">{q.occhiello}</span>
-          <span className="mt-0.5 mb-1 block font-display text-[22px] leading-tight font-medium text-foreground">{q.titolo}</span>
+          <span className="eyebrow block text-[12px] tracking-[0.08em]">{q.occhiello}</span>
+          <span className="mt-0.5 mb-1 block font-display text-[22px] leading-tight font-semibold text-foreground">{q.titolo}</span>
           <span className="block text-[13.5px] leading-relaxed text-muted-foreground">{q.sottotitolo}</span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-2.5 max-sm:w-full max-sm:flex-row max-sm:items-center max-sm:justify-between">
@@ -73,8 +73,8 @@ export function CardHub({ url }: { url: string }) {
         🏠
       </span>
       <span className="min-w-[200px] flex-1">
-        <span className="block text-[11px] font-semibold tracking-[0.08em] text-primary-foreground/65 uppercase">Il tuo spazio di lavoro</span>
-        <span className="mt-0.5 mb-1 block font-display text-[22px] leading-tight font-medium">Hub Los Authority</span>
+        <span className="block text-[12px] font-semibold tracking-[0.08em] text-primary-foreground/65 uppercase">Il tuo spazio di lavoro</span>
+        <span className="mt-0.5 mb-1 block font-display text-[22px] leading-tight font-semibold">Hub Los Authority</span>
         <span className="block text-[13.5px] leading-relaxed text-primary-foreground/75">
           Strategia, documenti e materiali del tuo percorso, sempre aggiornati su Notion.
         </span>

@@ -18,14 +18,15 @@ export interface EsitoInvito {
   programma: string;
 }
 
-/** Nuovo invito: si sceglie l'offerta e basta. I dati del cliente li inserisce lui dal link. */
+/** Nuovo invito: si sceglie l'offerta e basta. I dati del cliente li inserisce lui dal link (o arrivano dal lead, se l'invito nasce da Clienti). */
 export function useCreaInvito() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { offerta_id: string; note: string }) => invocaEdge<EsitoInvito>("contratti-admin", { azione: "crea_invito", ...input }),
+    mutationFn: async (input: { offerta_id: string; note: string; lead_id?: string }) => invocaEdge<EsitoInvito>("contratti-admin", { azione: "crea_invito", ...input }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: chiaviContratti.lista });
       void queryClient.invalidateQueries({ queryKey: chiaviOfferte.lista });
+      void queryClient.invalidateQueries({ queryKey: chiaviClienti.tutti });
     },
     onError: erroreMutation("Non sono riuscito a creare l'invito"),
   });

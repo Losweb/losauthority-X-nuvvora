@@ -6,8 +6,9 @@ import { SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { CardScheda } from "../components/CardScheda";
 
 /**
- * Ingresso dell'area cliente: finché la scheda onboarding non è inviata mostra
- * solo quella. Dopo l'invio il cliente entra nel suo spazio (/area/dashboard).
+ * Ingresso dell'area cliente: al primo accesso manda al benvenuto (/area/benvenuto);
+ * finché la scheda onboarding non è inviata mostra solo quella. Dopo l'invio il
+ * cliente entra nel suo spazio (/area/dashboard).
  */
 export default function AreaPage() {
   const { utente } = useAuth();
@@ -15,6 +16,8 @@ export default function AreaPage() {
   if (!utente) return null;
   if (stato.isLoading) return <SkeletonBlocco altezza="h-40" />;
   if (stato.data?.stato === "inviato") return <Navigate to="/area/dashboard" replace />;
+  // Primo accesso: prima il benvenuto (video, requisiti, Instagram), poi la scheda.
+  if (stato.data && !stato.data.benvenutoIl) return <Navigate to="/area/benvenuto" replace />;
 
   const nome = primoNome(utente.nombre);
 

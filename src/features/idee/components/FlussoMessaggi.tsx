@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Palette, RotateCcw, TrendingUp } from "lucide-react";
+import { Palette, RotateCcw } from "lucide-react";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
 import { Button } from "@/shared/components/ui/button";
 import { scorriChatInFondo } from "../scorriChat";
@@ -16,10 +16,6 @@ interface FlussoMessaggiProps {
   pendente: string | null;
   /** Stile agganciato al messaggio pendente. */
   pendenteStile?: string | null;
-  /** Le ricerche TikTok del cliente (id → tema), per mostrare quale è stata usata in un messaggio. */
-  ricerche?: Array<{ id: string; tema: string }>;
-  /** Tema della ricerca TikTok agganciata al messaggio pendente. */
-  pendenteRicerca?: string | null;
   occupato: boolean;
   onRiprova: (messaggio: Messaggio) => void;
   onSalva: (idea: Idea) => void;
@@ -27,16 +23,11 @@ interface FlussoMessaggiProps {
   onWorkflow: (idea: Idea) => void;
 }
 
-function BollaCliente({ testo, stile, ricerca }: { testo: string; stile?: string | null; ricerca?: string | null }) {
+function BollaCliente({ testo, stile }: { testo: string; stile?: string | null }) {
   return (
     <div className="flex flex-col items-end gap-1">
-      {ricerca ? (
-        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-          <TrendingUp className="size-3" aria-hidden /> Ricerca TikTok · {ricerca}
-        </span>
-      ) : null}
       {stile ? (
-        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground">
           <Palette className="size-3" aria-hidden /> Stile · {stile}
         </span>
       ) : null}
@@ -54,8 +45,6 @@ export function FlussoMessaggi({
   stili = [],
   pendente,
   pendenteStile = null,
-  ricerche = [],
-  pendenteRicerca = null,
   occupato,
   onRiprova,
   onSalva,
@@ -63,7 +52,6 @@ export function FlussoMessaggi({
   onWorkflow,
 }: FlussoMessaggiProps) {
   const titoloStile = (id: string | null) => (id ? (stili.find((s) => s.id === id)?.titolo ?? null) : null);
-  const temaRicerca = (id: string | null) => (id ? (ricerche.find((r) => r.id === id)?.tema ?? null) : null);
   const fineRef = useRef<HTMLDivElement>(null);
   const ultimoId = messaggi.at(-1)?.id;
   const ultimoStato = messaggi.at(-1)?.stato;
@@ -76,7 +64,7 @@ export function FlussoMessaggi({
   return (
     <div className="grid gap-6">
       {messaggi.map((m) => {
-        if (m.ruolo === "cliente") return <BollaCliente key={m.id} testo={m.contenuto} stile={titoloStile(m.stile_id)} ricerca={temaRicerca(m.ricerca_id)} />;
+        if (m.ruolo === "cliente") return <BollaCliente key={m.id} testo={m.contenuto} stile={titoloStile(m.stile_id)} />;
         const proposte = idee.filter((i) => i.messaggio_id === m.id);
         return (
           <div key={m.id} className="grid gap-4">
@@ -87,7 +75,7 @@ export function FlussoMessaggi({
                 <AuraSfera dimensione={32} conNome={false} className="mt-0.5" />
                 <div className="min-w-0 flex-1 pt-1">
                   {m.stato === "completato" && m.contenuto ? (
-                    <p className="font-display text-[19px] leading-snug text-foreground whitespace-pre-wrap">{m.contenuto}</p>
+                    <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">{m.contenuto}</p>
                   ) : null}
                   {m.stato === "errore" ? (
                     <div className="flex flex-wrap items-center gap-3">
@@ -113,7 +101,7 @@ export function FlussoMessaggi({
 
       {pendente !== null ? (
         <>
-          {pendente ? <BollaCliente testo={pendente} stile={pendenteStile} ricerca={pendenteRicerca} /> : null}
+          {pendente ? <BollaCliente testo={pendente} stile={pendenteStile} /> : null}
           <PensieroAura />
         </>
       ) : null}

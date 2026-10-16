@@ -107,7 +107,7 @@ export function LienzoLogo({ clienteId, kit, colorePrimario }: LienzoLogoProps) 
             className="group relative grid size-full place-items-center p-10 md:p-16"
           >
             {url ? <img src={url} alt="Logo del brand" className="max-h-[220px] max-w-full object-contain drop-shadow-sm" /> : null}
-            <span className={cn("absolute bottom-4 text-[11px] tracking-[0.18em] uppercase opacity-0 transition-opacity group-hover:opacity-70 pointer-coarse:opacity-70", chiaroSuSfondo ? "text-white" : "text-foreground")}>
+            <span className={cn("absolute bottom-4 text-[12px] tracking-[0.18em] uppercase opacity-0 transition-opacity group-hover:opacity-70 pointer-coarse:opacity-70", chiaroSuSfondo ? "text-white" : "text-foreground")}>
               Tocca per sostituire
             </span>
           </SceltaFile>
@@ -120,13 +120,13 @@ export function LienzoLogo({ clienteId, kit, colorePrimario }: LienzoLogoProps) 
           >
             <ImagePlus className="size-7" aria-hidden />
             <span className="font-display text-2xl">Il tuo logo</span>
-            <span className="text-[11px] tracking-[0.18em] uppercase opacity-70">PNG, JPG, WebP o SVG · tocca per caricare</span>
+            <span className="text-[12px] tracking-[0.18em] uppercase opacity-70">PNG, JPG, WebP o SVG · tocca per caricare</span>
           </SceltaFile>
         )}
       </div>
 
       <figcaption className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-[12px] text-muted-foreground">
-        <span className="eyebrow text-[10px]">Logo</span>
+        <span className="eyebrow text-[12px]">Logo</span>
         <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {haLogo ? (
             <>

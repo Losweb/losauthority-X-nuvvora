@@ -1,26 +1,24 @@
-import { useState } from "react";
 import { haDossier, type Avatar } from "../types";
 import { CartaAvatar } from "./CartaAvatar";
-import { DossierAvatar } from "./DossierAvatar";
 
 interface CartaGirevoleProps {
   avatar: Avatar;
   numero: number;
   titolare: string;
   inCompilazione: boolean;
+  /** «Gira per il dossier»: la pagina mostra il dossier al posto di chat e carta (DossierPagina). */
+  onApriDossier: () => void;
 }
 
-/** Fronte (carta d'identità) e retro (dossier): "Gira" ruota la carta con una piccola animazione. */
-export function CartaGirevole({ avatar, numero, titolare, inCompilazione }: CartaGirevoleProps) {
-  const [lato, setLato] = useState<"fronte" | "dossier">("fronte");
-  const gira = () => setLato((l) => (l === "fronte" ? "dossier" : "fronte"));
+/**
+ * Il fronte della carta nella colonna di destra. Dal 16/10/2026 il retro non
+ * gira più qui dentro (stava stretto): «Gira per il dossier» lo apre nell'area
+ * dei contenuti, a tutta larghezza, e la pagina decide quando tornare.
+ */
+export function CartaGirevole({ avatar, numero, titolare, inCompilazione, onApriDossier }: CartaGirevoleProps) {
   return (
-    <div key={lato} className="marmo-carta-gira">
-      {lato === "fronte" ? (
-        <CartaAvatar avatar={avatar} numero={numero} titolare={titolare} inCompilazione={inCompilazione} onGira={gira} dossierPronto={haDossier(avatar)} />
-      ) : (
-        <DossierAvatar avatar={avatar} numero={numero} onGira={gira} />
-      )}
+    <div className="marmo-carta-gira">
+      <CartaAvatar avatar={avatar} numero={numero} titolare={titolare} inCompilazione={inCompilazione} onGira={onApriDossier} dossierPronto={haDossier(avatar)} />
     </div>
   );
 }

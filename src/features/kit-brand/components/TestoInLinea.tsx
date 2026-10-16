@@ -92,7 +92,7 @@ export function TestoInLinea({ valore, segnaposto, onSalva, multiriga = false, m
         "block w-full cursor-text rounded-sm text-left transition-colors hover:bg-foreground/[0.04] disabled:cursor-default disabled:hover:bg-transparent",
         "-mx-1 box-content px-1",
         !multiriga && "pointer-coarse:min-h-9",
-        vuoto && "text-muted-foreground/70 italic",
+        vuoto && "text-muted-foreground/70 ",
         multiriga && "whitespace-pre-wrap",
         className,
       )}

@@ -14,8 +14,8 @@ export function OffertaVuota({ nome, occupato, onCrea }: OffertaVuotaProps) {
       {/* La carta ancora bianca: tratteggiata, con il titolo e il prezzo al posto delle righe. */}
       <div aria-hidden className="w-full max-w-[420px] rounded-lg border border-dashed border-input bg-card/60 p-5 shadow-xs animate-in fade-in zoom-in-95 fill-mode-both duration-700">
         <div className="mb-4 flex items-center justify-between">
-          <span className="eyebrow text-[9px]">Offerta · La tua proposta</span>
-          <span className="figure text-[10px] text-muted-foreground/60">N. OF-0001</span>
+          <span className="eyebrow text-[12px]">Offerta · La tua proposta</span>
+          <span className="figure text-[12px] text-muted-foreground/60">N. OF-0001</span>
         </div>
         <div className="grid gap-3">
           <div className="h-7 w-3/4 rounded-sm bg-muted" />
@@ -35,7 +35,7 @@ export function OffertaVuota({ nome, occupato, onCrea }: OffertaVuotaProps) {
 
       <div className="grid gap-3">
         <p className="eyebrow">Offerta</p>
-        <h2 className="font-display text-[clamp(26px,3.4vw,36px)] leading-[1.15] font-normal italic">
+        <h2 className="font-display text-[clamp(26px,3.4vw,36px)] leading-[1.15] font-bold">
           {nome ? `${nome}, cosa vendi esattamente?` : "Cosa vendi esattamente?"}
         </h2>
         <p className="mx-auto max-w-[460px] text-[15px] leading-relaxed text-muted-foreground">

@@ -25,8 +25,8 @@ export function MenuStili({ voci, query, attiva, onScegli, onPassaSopra, nessuno
       className="absolute inset-x-0 bottom-[calc(100%+8px)] z-20 overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-md animate-in fade-in slide-in-from-bottom-2 duration-150 motion-reduce:animate-none"
     >
       <div className="flex items-center justify-between border-b px-3 py-2">
-        <p className="eyebrow text-[10px]">I tuoi stili</p>
-        <span className="text-[11px] text-muted-foreground">↑↓ scegli · Invio usa · Esc chiudi</span>
+        <p className="eyebrow text-[12px]">I tuoi stili</p>
+        <span className="text-[12px] text-muted-foreground">↑↓ scegli · Invio usa · Esc chiudi</span>
       </div>
       {nessunoStile ? (
         <p className="px-3 py-3 text-sm text-muted-foreground">

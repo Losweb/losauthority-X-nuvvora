@@ -25,14 +25,14 @@ export function CardOffertaMini({ offerta, numero, indice }: CardOffertaMiniProp
       </div>
       <div className="grid min-w-0 flex-1 content-start gap-1.5">
         <div className="flex items-start justify-between gap-2">
-          <p className="figure text-[10px] tracking-[0.12em] text-muted-foreground">{codiceOfferta(numero)}</p>
+          <p className="figure text-[12px] tracking-[0.12em] text-muted-foreground">{codiceOfferta(numero)}</p>
           <Badge variant={completa ? "active" : "neutral"} dot>
             {completa ? "Completa" : `In costruzione · ${fatti}/${totale}`}
           </Badge>
         </div>
-        <h3 className="line-clamp-2 font-display text-[22px] leading-tight font-medium">{offerta.nome ?? "Nuova offerta"}</h3>
+        <h3 className="line-clamp-2 font-display text-[22px] leading-tight font-semibold">{offerta.nome ?? "Nuova offerta"}</h3>
         <p className="truncate text-[13px] text-muted-foreground">{meta || offerta.per_chi || "Aura sta ancora raccogliendo i dati"}</p>
-        {offerta.trasformazione ? <p className="mt-1 line-clamp-2 font-display text-[15px] italic text-foreground/80">«{offerta.trasformazione}»</p> : null}
+        {offerta.trasformazione ? <p className="mt-1 line-clamp-2 font-display text-[15px] text-foreground/80">«{offerta.trasformazione}»</p> : null}
         <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">
           {completa ? "Apri la carta" : "Continua con Aura"}
           <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />

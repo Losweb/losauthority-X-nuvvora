@@ -25,7 +25,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   if (caricamento) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6">
+      <div className="flex min-h-[60dvh] items-center justify-center p-6">
         <Skeleton className="h-48 w-full max-w-md" />
       </div>
     );
@@ -38,7 +38,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   // Sessione valida ma profilo non ancora caricato o mancante: non lasciare la pagina in bianco.
   if (!utente) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6">
+      <div className="flex min-h-[60dvh] items-center justify-center p-6">
         <Skeleton className="h-48 w-full max-w-md" />
       </div>
     );

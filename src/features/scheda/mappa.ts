@@ -71,11 +71,11 @@ export function patchDaRisposte(risposte: Risposte, domande: Domanda[]): PatchOn
   return patch as PatchOnboarding;
 }
 
-type RigaStato = Pick<RigaOnboarding, "stato" | "inviato_il" | "sezione_indice" | "updated_at">;
+type RigaStato = Pick<RigaOnboarding, "stato" | "inviato_il" | "sezione_indice" | "updated_at" | "benvenuto_il">;
 
 /** Stato della scheda a partire dalla riga (o dalla sua assenza). */
 export function statoDaRiga(riga: RigaStato | null | undefined): StatoSchedaInfo {
-  if (!riga) return { stato: "mancante", fase: null, inviatoIl: null, sezioneIndice: null, aggiornatoIl: null };
+  if (!riga) return { stato: "mancante", fase: null, inviatoIl: null, sezioneIndice: null, aggiornatoIl: null, benvenutoIl: null };
   const fase = comeStatoRiga(riga.stato);
   return {
     stato: fase === "inviato" ? "inviato" : "bozza",
@@ -83,6 +83,7 @@ export function statoDaRiga(riga: RigaStato | null | undefined): StatoSchedaInfo
     inviatoIl: riga.inviato_il,
     sezioneIndice: riga.sezione_indice,
     aggiornatoIl: riga.updated_at,
+    benvenutoIl: riga.benvenuto_il,
   };
 }
 

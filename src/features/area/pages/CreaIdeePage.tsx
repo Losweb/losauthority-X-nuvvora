@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { PanelLeftOpen, Plus, TrendingUp } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { PanelLeftOpen, Plus } from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { primoNome } from "@/features/scheda";
 import {
@@ -20,7 +20,6 @@ import {
   type Idea,
   type Messaggio,
 } from "@/features/idee";
-import { LINK_RICERCA_TIKTOK, useRicerche } from "@/features/ricerca-tiktok";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,8 +29,6 @@ import { cn } from "@/lib/utils";
  * conversazione con le proposte sotto ogni risposta, in basso il composer.
  * Con "/" nel composer (o arrivando da /area/stili con ?stile=) si aggancia
  * uno stile della pagina Stili: Aura scrive le proposte in quel format.
- * In alto a destra «Ricerca idee social» porta alla subpagina dei video top; da lì
- * «Usa in Crea idee» torna qui con ?ricerca= e la ricerca si aggancia al prossimo messaggio.
  */
 export default function CreaIdeePage() {
   const { utente } = useAuth();
@@ -43,23 +40,20 @@ export default function CreaIdeePage() {
   const [railAperto, setRailAperto] = useState(false);
   /** Stile agganciato al prossimo messaggio (da "/" o dal link "Usa in Crea idee"). */
   const [stileId, setStileId] = useState<string | null>(() => searchParams.get("stile"));
-  /** Ricerca TikTok agganciata al prossimo messaggio (dal bottone «Usa in Crea idee»). */
-  const [ricercaId, setRicercaId] = useState<string | null>(() => searchParams.get("ricerca"));
-  /** Invio in corso: testo del cliente ("" per una riprova), stile e ricerca agganciati e id della risposta Aura attesa. */
-  const [pendente, setPendente] = useState<{ testo: string; stileId: string | null; ricercaId: string | null; auraId: string | null } | null>(null);
+  /** Invio in corso: testo del cliente ("" per una riprova), stile agganciato e id della risposta Aura attesa. */
+  const [pendente, setPendente] = useState<{ testo: string; stileId: string | null; auraId: string | null } | null>(null);
 
   const sessioni = useSessioni(utente?.id);
   const sessione = useSessione(sessioneId);
   const salvate = useIdeeSalvate(utente?.id);
   const stili = useStili(utente?.id);
-  const ricerche = useRicerche(utente?.id);
   const invia = useInviaAdAura(clienteId);
   const cambia = useCambiaStatoIdea(clienteId);
   const porta = usePortaNelWorkflow(clienteId);
 
-  // ?stile= e ?ricerca= servono solo all'arrivo: li togliamo dall'URL per non riagganciarli a ogni ricarica.
+  // ?stile= serve solo all'arrivo: lo togliamo dall'URL per non riagganciarlo a ogni ricarica.
   useEffect(() => {
-    if (searchParams.has("stile") || searchParams.has("ricerca")) setSearchParams({}, { replace: true });
+    if (searchParams.has("stile")) setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams]);
 
   // Il segnaposto "Aura pensa" resta finché la risposta vera non compare tra i messaggi caricati (derivato, niente effetti).
@@ -72,26 +66,21 @@ export default function CreaIdeePage() {
   const auraScrive = pendenteVisibile !== null || invia.isPending || (sessione.data?.messaggi.some((m) => m.stato === "in_corso") ?? false);
   const listaStili = stili.data ?? [];
   const stileScelto = stileId ? (listaStili.find((s) => s.id === stileId && s.stato === "pronta") ?? null) : null;
-  const listaRicerche = ricerche.data ?? [];
-  const ricercaScelta = ricercaId ? (listaRicerche.find((r) => r.id === ricercaId && r.stato === "pronta") ?? null) : null;
 
   function manda(testo: string) {
     const conStile = stileScelto?.id ?? null;
-    const conRicerca = ricercaScelta?.id ?? null;
-    setPendente({ testo, stileId: conStile, ricercaId: conRicerca, auraId: null });
+    setPendente({ testo, stileId: conStile, auraId: null });
     setStileId(null);
-    setRicercaId(null);
     invia.mutate(
-      { sessioneId, messaggio: testo, stileId: conStile, ricercaId: conRicerca },
+      { sessioneId, messaggio: testo, stileId: conStile },
       {
         onSuccess: (r) => {
           setSessioneId(r.sessione_id);
-          setPendente({ testo, stileId: conStile, ricercaId: conRicerca, auraId: r.messaggio_id });
+          setPendente({ testo, stileId: conStile, auraId: r.messaggio_id });
         },
         onError: () => {
           setPendente(null);
           setStileId(conStile);
-          setRicercaId(conRicerca);
           // Il testo torna nel composer: non si perde quello che il cliente ha scritto.
           setSpunto(testo);
         },
@@ -99,10 +88,10 @@ export default function CreaIdeePage() {
     );
   }
   function riprova(m: Messaggio) {
-    setPendente({ testo: "", stileId: null, ricercaId: null, auraId: null });
+    setPendente({ testo: "", stileId: null, auraId: null });
     invia.mutate(
       { riprovaId: m.id, sessioneId: m.sessione_id },
-      { onSuccess: (r) => setPendente({ testo: "", stileId: null, ricercaId: null, auraId: r.messaggio_id }), onError: () => setPendente(null) },
+      { onSuccess: (r) => setPendente({ testo: "", stileId: null, auraId: r.messaggio_id }), onError: () => setPendente(null) },
     );
   }
   const salva = (idea: Idea) => cambia.mutate({ idea, stato: "salvata" });
@@ -116,7 +105,6 @@ export default function CreaIdeePage() {
   // Una riprova mostra solo Aura che pensa (il messaggio del cliente è già nel flusso).
   const testoPendente = pendenteVisibile === null ? null : pendenteVisibile.testo;
   const stilePendente = pendenteVisibile?.stileId ? (listaStili.find((s) => s.id === pendenteVisibile.stileId)?.titolo ?? null) : null;
-  const ricercaPendente = pendenteVisibile?.ricercaId ? (listaRicerche.find((r) => r.id === pendenteVisibile.ricercaId)?.tema ?? null) : null;
 
   return (
     // Pagina fissa: scorre solo la conversazione. Il main dello shell ha pt-10 + pb-20: con -mt-4 e -mb-16
@@ -125,7 +113,7 @@ export default function CreaIdeePage() {
     <div
       className={cn(
         // grid-rows minmax(0,1fr): la riga è alta quanto il contenitore anche se la chat è lunga (Safari incluso).
-        "-mb-16 grid gap-6 md:-mt-4 md:h-[calc(100dvh-var(--header-h)-2.5rem)] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden",
+        "-mb-16 grid gap-6 md:-mb-10 md:h-[calc(var(--vh-finestra)-var(--header-h)-1.5rem)] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden",
         railAperto && "lg:grid-cols-[220px_minmax(0,1fr)]",
       )}
     >
@@ -181,9 +169,6 @@ export default function CreaIdeePage() {
                 </option>
               ))}
             </select>
-            <Button size="sm" variant="outline" nativeButton={false} render={<Link to={LINK_RICERCA_TIKTOK} />} aria-label="Ricerca idee social" title="Ricerca idee social">
-              <TrendingUp aria-hidden /> <span className="hidden sm:inline">Ricerca idee social</span>
-            </Button>
             <SheetIdeeSalvate idee={salvate.data ?? []} occupato={occupato} onScarta={scarta} onWorkflow={workflow} />
           </div>
         </header>
@@ -199,8 +184,6 @@ export default function CreaIdeePage() {
               stili={listaStili}
               pendente={testoPendente}
               pendenteStile={stilePendente}
-              ricerche={listaRicerche}
-              pendenteRicerca={ricercaPendente}
               occupato={occupato}
               onRiprova={riprova}
               onSalva={salva}
@@ -212,6 +195,7 @@ export default function CreaIdeePage() {
 
         <div className={BARRA_COMPOSER}>
           <ComposerAura
+            auraViva={!vuota}
             inAttesa={auraScrive}
             onInvia={manda}
             suggerito={spunto}
@@ -219,8 +203,6 @@ export default function CreaIdeePage() {
             stili={listaStili}
             stileScelto={stileScelto}
             onStileChange={(s) => setStileId(s?.id ?? null)}
-            ricercaScelta={ricercaScelta}
-            onTogliRicerca={() => setRicercaId(null)}
           />
         </div>
       </section>

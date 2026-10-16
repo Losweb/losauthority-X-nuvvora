@@ -50,7 +50,7 @@ function SelectStato({ lead, onCambiaStato }: { lead: LeadCrm; onCambiaStato: Ta
 /** Valore della vendita, solo per i contatti chiusi. */
 function Valore({ lead, className }: { lead: LeadCrm; className?: string }) {
   if (lead.stato !== "chiuso" || lead.valore == null) return null;
-  return <span className={cn("figure text-[11px] text-muted-foreground", className)}>{formatCurrency(lead.valore)}</span>;
+  return <span className={cn("figure text-[12px] text-muted-foreground", className)}>{formatCurrency(lead.valore)}</span>;
 }
 
 /** Il CRM del cliente: contatto (nome + email e telefono), da dove è arrivato, offerta, stato cambiabile dalla riga (+ valore se chiuso). */

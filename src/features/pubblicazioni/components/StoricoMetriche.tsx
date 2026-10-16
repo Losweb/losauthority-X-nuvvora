@@ -59,7 +59,7 @@ export function StoricoMetriche({ pubblicazione, onElimina, eliminaInCorso }: St
               <div className="flex min-h-9 items-center justify-between gap-2">
                 <p className="text-xs text-muted-foreground">
                   {formatMomento(m.rilevata_il)} · <span className="text-foreground">{dove(m)}</span>
-                  {eRilevazioneAutomatica(m) ? <span className="text-[10px]"> · auto</span> : null}
+                  {eRilevazioneAutomatica(m) ? <span className="text-[12px]"> · auto</span> : null}
                 </p>
                 {elimina(m, "-mr-2 text-muted-foreground hover:text-destructive")}
               </div>
@@ -68,10 +68,10 @@ export function StoricoMetriche({ pubblicazione, onElimina, eliminaInCorso }: St
                   const delta = formatDelta(m[c], prec?.[c]);
                   return (
                     <div key={c} className="min-w-0">
-                      <dt className="eyebrow text-[10px] tracking-[0.1em]">{ETICHETTA_CAMPO_METRICA[c]}</dt>
+                      <dt className="eyebrow text-[12px] tracking-[0.1em]">{ETICHETTA_CAMPO_METRICA[c]}</dt>
                       <dd>
                         <span className="figure text-sm">{formatConteggio(m[c])}</span>
-                        {delta ? <span className="ml-1.5 text-[11px] text-muted-foreground">{delta}</span> : null}
+                        {delta ? <span className="ml-1.5 text-[12px] text-muted-foreground">{delta}</span> : null}
                       </dd>
                     </div>
                   );
@@ -103,14 +103,14 @@ export function StoricoMetriche({ pubblicazione, onElimina, eliminaInCorso }: St
                   <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{formatMomento(m.rilevata_il)}</TableCell>
                   <TableCell className="text-xs">
                     {dove(m)}
-                    {eRilevazioneAutomatica(m) ? <span className="ml-1 text-[10px] text-muted-foreground">· auto</span> : null}
+                    {eRilevazioneAutomatica(m) ? <span className="ml-1 text-[12px] text-muted-foreground">· auto</span> : null}
                   </TableCell>
                   {CAMPI_METRICA.map((c) => {
                     const delta = formatDelta(m[c], prec?.[c]);
                     return (
                       <TableCell key={c} className="text-right">
                         <span className="figure text-sm">{formatConteggio(m[c])}</span>
-                        {delta ? <span className="ml-1.5 text-[11px] text-muted-foreground">{delta}</span> : null}
+                        {delta ? <span className="ml-1.5 text-[12px] text-muted-foreground">{delta}</span> : null}
                       </TableCell>
                     );
                   })}

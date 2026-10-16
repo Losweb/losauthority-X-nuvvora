@@ -26,7 +26,7 @@ export function TransizioneOnboarding() {
       <AuraSfera dimensione={128} parla conNome={false} />
       <div className="grid gap-3 animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-700 delay-500 motion-reduce:animate-none">
         <p className="eyebrow">Scheda inviata</p>
-        <h2 className="font-display text-[clamp(28px,4vw,38px)] leading-tight font-normal tracking-[-0.01em] italic">
+        <h2 className="font-display text-[clamp(28px,4vw,38px)] leading-tight font-bold tracking-[-0.01em]">
           Ottimo lavoro.
         </h2>
         <p className="mx-auto max-w-[420px] text-[15px] leading-relaxed text-muted-foreground">

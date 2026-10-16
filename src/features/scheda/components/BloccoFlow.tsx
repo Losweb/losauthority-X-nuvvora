@@ -37,7 +37,7 @@ export function BloccoFlow(props: BloccoFlowProps) {
           </p>
           <p
             aria-live="polite"
-            className="mt-3 font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-normal tracking-[-0.01em] text-foreground italic"
+            className="mt-3 font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-bold tracking-[-0.01em] text-foreground"
           >
             {conParole(blocco.intro, parole)}
           </p>
@@ -47,7 +47,7 @@ export function BloccoFlow(props: BloccoFlowProps) {
       {/* Sul telefono il padding della card scende a 16px: più spazio alle domande. */}
       <Card className="max-sm:[--card-spacing:--spacing(4)]">
         <CardHeader>
-          <CardTitle className="font-display text-2xl font-medium">
+          <CardTitle className="font-display text-2xl font-semibold">
             <span aria-hidden>{blocco.emoji}</span> {conParole(blocco.titolo, parole)}
           </CardTitle>
         </CardHeader>

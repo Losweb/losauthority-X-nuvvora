@@ -40,12 +40,12 @@ export function RiepiloghiCrescita({ scelte, riepilogo }: RiepiloghiCrescitaProp
         const n = nota(s, r);
         return (
           <div key={s} className="rounded-lg border bg-muted/40 px-3 py-2.5">
-            <dt className="eyebrow inline-flex items-center gap-1.5 text-[10px]">
+            <dt className="eyebrow inline-flex items-center gap-1.5 text-[12px]">
               <span className="size-2 rounded-full" style={{ backgroundColor: COLORE_SERIE[s] }} aria-hidden />
               {ETICHETTA_SERIE[s]}
             </dt>
             <dd className="figure mt-1 text-xl leading-tight">{formatConteggio(r.fine)}</dd>
-            <dd className={cn("text-[11px]", n.positivo ? "text-status-active" : "text-muted-foreground")}>{n.testo}</dd>
+            <dd className={cn("text-[12px]", n.positivo ? "text-status-active" : "text-muted-foreground")}>{n.testo}</dd>
           </div>
         );
       })}
