@@ -30,3 +30,7 @@ supabase/.env.secrets
 /aura-pack.zip
 /losavatar-SKILL.md
 /firma-wesley-nera.png
+
+# Export dei dati reali del progetto v1 (zmisvqovyxlviqsenmyq): MAI nel repo pubblico
+/dati-v1/
+/.claude/settings.local.json
