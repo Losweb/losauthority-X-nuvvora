@@ -8,8 +8,10 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { HttpError } from "../_shared/http.ts";
 import { logError } from "../_shared/log.ts";
+import { registraAttivita } from "../_shared/attivita.ts";
+import type { Chiamante } from "../_shared/supabase.ts";
 import { contrattoPerId, nuovaPassword, type RigaContratto } from "../_shared/contratti-archivio.ts";
-import { oggiInItalia } from "../_shared/contratti/documento.ts";
+import { euroContratto, oggiInItalia } from "../_shared/contratti/documento.ts";
 import { CONSEGNE_ATTIVAZIONE, type DatiCliente, type DatiSocieta } from "../_shared/contratti/tipi.ts";
 import { nomePartecipante } from "../_shared/contratti/validazione.ts";
 
@@ -60,7 +62,7 @@ export interface EsitoPagamento {
   fattura_id: string;
 }
 
-export async function registraPagamento(admin: SupabaseClient, id: string, pagatoIl: unknown): Promise<EsitoPagamento> {
+export async function registraPagamento(admin: SupabaseClient, chi: Chiamante, id: string, pagatoIl: unknown): Promise<EsitoPagamento> {
   const oggi = oggiInItalia();
   const pagato_il = typeof pagatoIl === "string" && pagatoIl.trim() ? pagatoIl.trim() : oggi;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(pagato_il)) throw new HttpError(400, "Data del pagamento non valida.");
@@ -128,6 +130,14 @@ export async function registraPagamento(admin: SupabaseClient, id: string, pagat
     if (errContr) await logError("contratti:pagamento:contratto", errContr, { id });
     throw new HttpError(409, "Il contratto è cambiato nel frattempo: ricarica la pagina.");
   }
+  // Registro attività: il trigger non vede chi è (service role), lo scriviamo noi.
+  await registraAttivita(admin, chi, {
+    azione: "contratto_pagato",
+    descrizione: `ha segnato come pagato il contratto ${c.programma} di «${nomePartecipante(c.tipo, dati)}» (${euroContratto(c.prezzo)} €)`,
+    entita: "contratto",
+    entita_id: id,
+    cliente_id: clienteId,
+  });
   return { cliente_id: clienteId, fattura_id: fatturaId };
 }
 
@@ -141,7 +151,7 @@ export interface EsitoAttivazione {
   recesso_fino_al: string | null;
 }
 
-export async function attivaProgramma(admin: SupabaseClient, id: string, spuntate: unknown): Promise<EsitoAttivazione> {
+export async function attivaProgramma(admin: SupabaseClient, chi: Chiamante, id: string, spuntate: unknown): Promise<EsitoAttivazione> {
   const fatte = Array.isArray(spuntate) ? spuntate.filter((v): v is string => typeof v === "string") : [];
   const mancanti = CONSEGNE_ATTIVAZIONE.filter((k) => !fatte.includes(k.id));
   if (mancanti.length > 0) throw new HttpError(400, `Prima completa le consegne: ${mancanti.map((m) => m.label).join("; ")}.`);
@@ -182,5 +192,12 @@ export async function attivaProgramma(admin: SupabaseClient, id: string, spuntat
 
   const dati = c.dati as DatiCliente;
   const nome = c.tipo === "societa" ? (dati as DatiSocieta).partecipante_nome : (dati as { nome?: string }).nome ?? null;
+  await registraAttivita(admin, chi, {
+    azione: "contratto_attivato",
+    descrizione: `ha attivato il programma ${c.programma} di «${nomePartecipante(c.tipo, dati)}» (scade il ${scade_il})`,
+    entita: "contratto",
+    entita_id: id,
+    cliente_id: c.cliente_id,
+  });
   return { cliente_id: c.cliente_id, email: c.cliente_email, password, nome: nome ?? null, scade_il, recesso_fino_al };
 }

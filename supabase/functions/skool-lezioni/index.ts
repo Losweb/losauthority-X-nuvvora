@@ -1,11 +1,11 @@
 /**
- * skool-lezioni — rinfresca il catalogo lezioni Skool (cron mensile o admin a
+ * skool-lezioni — rinfresca il catalogo lezioni Skool (cron mensile o team a
  * mano; porta di src/lib/skool/sync.ts). Apify → upsert `lezioni` per key,
  * disattiva quelle sparite, sync_stati('skool'). Telegram (solo dal cron, come
  * nel vecchio: a mano Wesley vede l'esito a schermo) se ci sono nuove lezioni o
  * se i cookie sono scaduti. Risposta: { ok, lezioni, nuove }.
  */
-import { errore, gestisciErrore, HttpError, json, preflight } from "../_shared/http.ts";
+import { errore, gestisciErrore, json, preflight } from "../_shared/http.ts";
 import { adminClient, richiediCronOTeam } from "../_shared/supabase.ts";
 import { aggiornaSync, logError } from "../_shared/log.ts";
 import { notifyTelegram } from "../_shared/telegram.ts";
@@ -19,7 +19,6 @@ Deno.serve(async (req: Request) => {
   if (pre) return pre;
   try {
     const chi = await richiediCronOTeam(req);
-    if (chi !== "cron" && chi.rol !== "admin") throw new HttpError(403, "Solo l'admin può sincronizzare Skool.");
     const daCron = chi === "cron";
 
     const r = await fetchSkoolLessons();

@@ -2,25 +2,41 @@
  * contratti-admin — le operazioni del gestionale sul modulo contratti che hanno
  * bisogno del service role o di un controllo lato server. Il resto (offerte,
  * annullare/eliminare un invito, telefono e istruzioni) passa dalla RLS.
- *   { azione: "crea_invito", offerta_id, note?, lead_id? }   admin → { ok, id, token, offerta, programma }
+ *   { azione: "crea_invito", offerta_id, note?, lead_id?, nome?, contatto? }   admin → { ok, id, token, offerta, programma }
  *       lead_id (pagina Leads → Clienti «in attesa di contratto»): l'invito resta agganciato al lead e i suoi
  *       dati (nome, email o telefono) precompilano il modulo del cliente.
+ *       nome/contatto (Clienti → «Nuovo contratto», senza lead): stessa precompilazione, e il contratto compare
+ *       in Clienti «in attesa di contratto» finché non è pagato (poi l'account nasce dai dati che ha compilato lui).
  *   { azione: "salva_firma", firma }               admin    → { ok }   (valida la forma del tratto)
  *   { azione: "segna_pagato", id, pagato_il? }      finance  → { ok, cliente_id, fattura_id }
  *   { azione: "attiva", id, consegne: string[] }    finance  → { ok, cliente_id, email, password?, nome, scade_il, recesso_fino_al }
  *   { azione: "pdf", id }                           finance  → { ok, url, nome_file }  (URL firmato 60 s, PDF rigenerato se manca)
+ *   Registro attività (attivita_team, 20/10/2026): segna_pagato, attiva e salva_firma scrivono la riga per conto del chiamante;
+ *   l'invito lo registra il trigger di `contratti` (attore = creato_da).
  * Contratto completo: docs/edge-functions.md.
  */
 import { errore, gestisciErrore, HttpError, json, leggiBody, preflight } from "../_shared/http.ts";
 import { adminClient, type Chiamante, richiediFinance } from "../_shared/supabase.ts";
 import { logError } from "../_shared/log.ts";
+import { registraAttivita } from "../_shared/attivita.ts";
 import { archiviaPdf, BUCKET_CONTRATTI, contrattoPerId, nomeFilePdf } from "../_shared/contratti-archivio.ts";
 import { MODELLI_CONTRATTO, modelloValido } from "../_shared/contratti/modelli.ts";
 import { STATI_FIRMATI } from "../_shared/contratti/tipi.ts";
 import { validaFirma } from "../_shared/contratti/validazione.ts";
 import { attivaProgramma, registraPagamento } from "./operazioni.ts";
 
-type Body = { azione?: unknown; offerta_id?: unknown; note?: unknown; lead_id?: unknown; firma?: unknown; id?: unknown; pagato_il?: unknown; consegne?: unknown };
+type Body = {
+  azione?: unknown;
+  offerta_id?: unknown;
+  note?: unknown;
+  lead_id?: unknown;
+  nome?: unknown;
+  contatto?: unknown;
+  firma?: unknown;
+  id?: unknown;
+  pagato_il?: unknown;
+  consegne?: unknown;
+};
 
 function richiediAdmin(c: Chiamante): void {
   if (c.rol !== "admin") throw new HttpError(403, "Solo l'admin può fare questa operazione.");
@@ -46,13 +62,13 @@ interface LeadInvito {
   contatto: string | null;
 }
 
-/** Da quel che sappiamo del lead (nome e un contatto libero) i campi del modulo che possiamo già riempire. */
-function datiDalLead(lead: LeadInvito): Record<string, string> {
-  const parole = lead.nome.trim().split(/\s+/).filter(Boolean);
+/** Nome e un contatto libero (dal lead o scritti a mano in «Nuovo contratto»): i campi del modulo che possiamo già riempire. */
+function datiDaNomeContatto(nome: string, contattoLibero: string | null): Record<string, string> {
+  const parole = nome.trim().split(/\s+/).filter(Boolean);
   const dati: Record<string, string> = {};
   if (parole.length > 0) dati.nome = parole[0];
   if (parole.length > 1) dati.cognome = parole.slice(1).join(" ");
-  const contatto = (lead.contatto ?? "").trim();
+  const contatto = (contattoLibero ?? "").trim();
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contatto)) dati.email = contatto.toLowerCase();
   else if (/^\+?[0-9 ().-]{6,30}$/.test(contatto)) dati.telefono = contatto;
   else if (/^@?[A-Za-z0-9._]{2,30}$/.test(contatto)) dati.instagram = contatto;
@@ -65,6 +81,9 @@ async function creaInvito(body: Body, c: Chiamante): Promise<Response> {
   const offertaId = typeof body.offerta_id === "string" ? body.offerta_id : "";
   let note = typeof body.note === "string" ? body.note.trim().slice(0, 1000) || null : null;
   const leadId = typeof body.lead_id === "string" && /^[0-9a-f-]{36}$/.test(body.lead_id) ? body.lead_id : null;
+  // Senza lead (Clienti → «Nuovo contratto») l'admin può scrivere nome e contatto: precompilano il modulo come farebbe un lead.
+  const nomeScritto = typeof body.nome === "string" ? body.nome.trim().slice(0, 120) : "";
+  const contattoScritto = typeof body.contatto === "string" ? body.contatto.trim().slice(0, 120) || null : null;
   if (!offertaId) throw new HttpError(400, "Scegli un'offerta.");
   const admin = adminClient();
   // Invito nato da un lead (Leads → Clienti «in attesa di contratto»): resta agganciato e precompila il modulo.
@@ -75,7 +94,10 @@ async function creaInvito(body: Body, c: Chiamante): Promise<Response> {
     if (!lead) throw new HttpError(404, "Lead non trovato.");
     // Senza nota, nella lista dei contratti si legge il nome del lead finché lui non compila i dati.
     note = note ?? lead.nome;
+  } else if (nomeScritto) {
+    note = note ?? nomeScritto;
   }
+  const dati = lead ? datiDaNomeContatto(lead.nome, lead.contatto) : nomeScritto ? datiDaNomeContatto(nomeScritto, contattoScritto) : {};
   const { data: offerta } = await admin.from("offerte").select("id, nome, modello, prezzo, attiva").eq("id", offertaId).maybeSingle();
   const o = offerta as { id: string; nome: string; modello: string; prezzo: string | number; attiva: boolean } | null;
   if (!o || !o.attiva) throw new HttpError(404, "Offerta non trovata o non più attiva.");
@@ -98,7 +120,7 @@ async function creaInvito(body: Body, c: Chiamante): Promise<Response> {
       prezzo: Number(o.prezzo),
       firma_fornitore: (imp as { firma?: unknown } | null)?.firma ?? null,
       lead_id: lead?.id ?? null,
-      dati: lead ? datiDalLead(lead) : {},
+      dati,
     })
     .select("id")
     .single();
@@ -119,6 +141,7 @@ async function salvaFirma(body: Body, c: Chiamante): Promise<Response> {
     await logError("contratti:salvaFirma", error, {});
     throw new HttpError(500, "Non sono riuscito a salvare la firma. Riprova.");
   }
+  await registraAttivita(adminClient(), c, { azione: "firma_salvata", descrizione: "ha salvato la propria firma per i contratti", entita: "contratti_impostazioni" });
   return json({ ok: true });
 }
 
@@ -155,9 +178,9 @@ Deno.serve(async (req: Request) => {
       case "salva_firma":
         return await salvaFirma(body, c);
       case "segna_pagato":
-        return json({ ok: true, ...(await registraPagamento(adminClient(), idValido(body.id), body.pagato_il)) });
+        return json({ ok: true, ...(await registraPagamento(adminClient(), c, idValido(body.id), body.pagato_il)) });
       case "attiva":
-        return json({ ok: true, ...(await attivaProgramma(adminClient(), idValido(body.id), body.consegne)) });
+        return json({ ok: true, ...(await attivaProgramma(adminClient(), c, idValido(body.id), body.consegne)) });
       case "pdf":
         return await pdf(body);
       default:

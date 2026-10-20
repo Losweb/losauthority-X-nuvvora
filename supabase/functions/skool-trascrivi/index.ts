@@ -1,5 +1,5 @@
 /**
- * skool-trascrivi — la coda dei video Skool (admin o cron secret; la chiamano
+ * skool-trascrivi — la coda dei video Skool (team o cron secret; la chiamano
  * i trigger di `skool_video`/`skool_video_blocchi` e il cron ogni 5 minuti).
  * Ogni invocazione fa UNA cosa, per restare nel tempo massimo della funzione:
  *  1. se ci sono blocchi audio da trascrivere (video in `trascrizione`), ne
@@ -17,7 +17,7 @@ import { HAS_OPENAI } from "../_shared/config.ts";
 import { errore, gestisciErrore, HttpError, json, leggiBody, preflight } from "../_shared/http.ts";
 import { logError } from "../_shared/log.ts";
 import { rigaLink, sitoGestionale } from "../_shared/sito.ts";
-import { adminClient, autorizzatoCron, chiamante } from "../_shared/supabase.ts";
+import { adminClient, autorizzatoCron, chiamante, esTeam } from "../_shared/supabase.ts";
 import { notifyTelegram } from "../_shared/telegram.ts";
 import { creaVideoDiProva } from "./prova.ts";
 import { scriviTesto } from "./scrivi.ts";
@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
   try {
     if (!autorizzatoCron(req)) {
       const c = await chiamante(req);
-      if (!c || c.rol !== "admin") throw new HttpError(403, "Riservato all'admin.");
+      if (!c || !esTeam(c.rol)) throw new HttpError(403, "Riservato al team.");
     }
     if (!HAS_OPENAI) return errore("OPENAI_API_KEY non configurata.", 500);
     if (!HAS_ANTHROPIC) return errore("ANTHROPIC_API_KEY non configurata.", 500);

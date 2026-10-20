@@ -1,6 +1,6 @@
 /**
  * skool-pubblica — scrive su Skool via Apify (`_shared/skool-api.ts`). Solo
- * admin (o il cron secret: la chiama il trigger di `skool_video`). Azioni:
+ * team (o il cron secret: la chiama il trigger di `skool_video`). Azioni:
  *   { azione: "corsi" }             → i corsi della classroom (id, name, titolo, privacy)
  *   { azione: "albero", corso_id }  → le cartelle del corso (per scegliere dove va la lezione)
  *   { azione: "pubblica", video_id? } o {} → pubblica i video in `pubblicazione` (max 2)
@@ -12,7 +12,7 @@ import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { APIFY_TOKEN } from "../_shared/config.ts";
 import { errore, gestisciErrore, HttpError, json, leggiBody, preflight } from "../_shared/http.ts";
 import { type Azione, azione, HAS_SKOOL_API, login, SKOOL_EMAIL, SKOOL_GROUP_SLUG, SKOOL_PASSWORD } from "../_shared/skool-api.ts";
-import { adminClient, autorizzatoCron, chiamante } from "../_shared/supabase.ts";
+import { adminClient, autorizzatoCron, chiamante, esTeam } from "../_shared/supabase.ts";
 import { COLONNE_PUBBLICA, pubblicaVideo, type VideoDaPubblicare } from "./pubblica.ts";
 
 interface Body extends Record<string, unknown> {
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
   try {
     if (!autorizzatoCron(req)) {
       const c = await chiamante(req);
-      if (!c || c.rol !== "admin") throw new HttpError(403, "Riservato all'admin.");
+      if (!c || !esTeam(c.rol)) throw new HttpError(403, "Riservato al team.");
     }
     const body = await leggiBody<Body>(req);
     const admin = adminClient();
