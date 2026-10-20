@@ -1,11 +1,35 @@
 import { Fragment, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, RotateCcw } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
 import { formatDateTime } from "@/shared/utils/formatDate";
+import { useSegnaErroriGestiti } from "../hooks/useErrori";
 import type { ErroreLog } from "../types";
 import { ContextLista } from "./ContextLista";
+
+/** Badge di stato + bottone che lo cambia (Gestito ↔ Da gestire). */
+function StatoGestione({ errore }: { errore: ErroreLog }) {
+  const segna = useSegnaErroriGestiti();
+  const gestito = errore.gestito_il !== null;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Badge variant={gestito ? "active" : "churn"} dot>
+        {gestito ? "Gestito" : "Da gestire"}
+      </Badge>
+      <Button
+        size="sm"
+        variant={gestito ? "ghost" : "outline"}
+        disabled={segna.isPending}
+        aria-label={gestito ? "Riapri l'errore" : "Segna come gestito"}
+        onClick={() => segna.mutate({ ids: [errore.id], gestito: !gestito })}
+      >
+        {gestito ? <RotateCcw aria-hidden /> : <Check aria-hidden />}
+        {gestito ? "Riapri" : "Gestito"}
+      </Button>
+    </div>
+  );
+}
 
 function ErroreRiga({ errore }: { errore: ErroreLog }) {
   const [aperto, setAperto] = useState(false);
@@ -34,15 +58,21 @@ function ErroreRiga({ errore }: { errore: ErroreLog }) {
             <span className="min-w-0 md:hidden">{scope}</span>
           </div>
           <p className="mt-1.5 font-sans text-sm text-foreground wrap-anywhere md:hidden">{errore.message}</p>
+          <div className="mt-2 md:hidden">
+            <StatoGestione errore={errore} />
+          </div>
         </TableCell>
         <TableCell className="hidden align-top md:table-cell">{scope}</TableCell>
         <TableCell className="hidden max-w-xl align-top break-words whitespace-normal md:table-cell">{errore.message}</TableCell>
+        <TableCell className="hidden align-top md:table-cell">
+          <StatoGestione errore={errore} />
+        </TableCell>
       </TableRow>
       {aperto ? (
         <>
           <TableRow className="hidden bg-muted/30 hover:bg-muted/30 md:table-row">
             <TableCell />
-            <TableCell colSpan={3} className="whitespace-normal py-3">
+            <TableCell colSpan={4} className="whitespace-normal py-3">
               <ContextLista context={errore.context} />
             </TableCell>
           </TableRow>
@@ -58,7 +88,7 @@ function ErroreRiga({ errore }: { errore: ErroreLog }) {
   );
 }
 
-/** Tabella degli errori: data/ora, scope, messaggio e dettagli espandibili. Sul telefono messaggio sotto la data. */
+/** Tabella degli errori: data/ora, scope, messaggio, stato (Gestito / Da gestire) e dettagli espandibili. Sul telefono messaggio e stato sotto la data. */
 export function ErroriTabella({ errori }: { errori: ErroreLog[] }) {
   return (
     <div className="overflow-hidden rounded-lg border bg-card">
@@ -69,6 +99,7 @@ export function ErroriTabella({ errori }: { errori: ErroreLog[] }) {
             <TableHead>Quando</TableHead>
             <TableHead>Scope</TableHead>
             <TableHead>Messaggio</TableHead>
+            <TableHead>Stato</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

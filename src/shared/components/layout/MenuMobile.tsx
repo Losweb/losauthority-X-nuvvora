@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/shared/components/ui/sheet";
+import { PiedeUtente } from "./SetoShell";
 
 interface MenuMobileProps {
   /** Testata del pannello (di solito il logo). */
@@ -37,7 +38,7 @@ export function MenuMobile({ testata, children, piede, etichetta = "Apri il menu
         >
           {children}
         </div>
-        {piede ? <div className="shrink-0 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{piede}</div> : null}
+        {piede ? <PiedeUtente className="pb-[max(1rem,env(safe-area-inset-bottom))]">{piede}</PiedeUtente> : null}
       </SheetContent>
     </Sheet>
   );

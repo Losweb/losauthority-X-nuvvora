@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
+import { esFinance, useAuth } from "@/features/auth";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { Button } from "@/shared/components/ui/button";
@@ -31,6 +32,9 @@ function riepilogoPerStage(leads: Lead[]): Record<string, RiepilogoStage> {
 
 /** Leads (la pipeline commerciale): imbuto per stage, ricerca e tabella con cambio stage inline. Allo stage «Cliente» il lead compare in Clienti, in attesa di contratto. */
 export default function PipelinePage() {
+  const { utente } = useAuth();
+  // Gli importi (valore dei lead, valore della pipeline) li vede solo chi vede i soldi; lo staff vede i conteggi.
+  const mostraValore = esFinance(utente?.rol ?? null);
   const { data: leads, isLoading, isError } = useLeads();
   const sposta = useSpostaLead();
   const [dialog, setDialog] = useState<{ open: boolean; lead: Lead | null }>({ open: false, lead: null });
@@ -67,7 +71,7 @@ export default function PipelinePage() {
         titolo="Leads"
         sottotitolo={
           leads
-            ? `${aperti.length} lead ${aperti.length === 1 ? "attivo" : "attivi"} · valore potenziale ${formatCurrency(valorePipeline)}`
+            ? `${aperti.length} lead ${aperti.length === 1 ? "attivo" : "attivi"}${mostraValore ? ` · valore potenziale ${formatCurrency(valorePipeline)}` : ""}`
             : "Lead e trattative in corso"
         }
         azioni={
@@ -83,7 +87,7 @@ export default function PipelinePage() {
 
       {leads ? (
         <>
-          <FunnelPills totale={totale} perStage={perStage} attivo={filtro} onChange={setFiltro} />
+          <FunnelPills totale={totale} perStage={perStage} attivo={filtro} onChange={setFiltro} mostraValore={mostraValore} />
 
           <div className="relative max-w-[420px]">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-[15px] -translate-y-1/2 text-muted-foreground" aria-hidden />
@@ -101,6 +105,7 @@ export default function PipelinePage() {
             testoVuoto={tutti.length === 0 ? "Nessun lead ancora. Aggiungi il primo con “Nuovo lead”." : "Nessun lead con questi filtri."}
             onApri={apriLead}
             onSposta={handleSposta}
+            mostraValore={mostraValore}
           />
         </>
       ) : null}

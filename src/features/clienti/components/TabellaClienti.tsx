@@ -55,6 +55,11 @@ function FattureCella({ c }: { c: ClienteRiga }) {
   );
 }
 
+/** «Wesley ME»: l'account del team, accanto al nome. */
+function BadgePersonale({ c, idPersonale }: { c: ClienteRiga; idPersonale?: string | null }) {
+  return c.id === idPersonale ? <Badge variant="outline">Account personale</Badge> : null;
+}
+
 /** Etichetta piccola come l'intestazione della colonna (lista del telefono). */
 const ETICHETTA_MOBILE = "text-[12px] font-semibold tracking-[0.08em] text-muted-foreground uppercase";
 
@@ -68,7 +73,7 @@ function VoceMobile({ etichetta, children }: { etichetta: string; children: Reac
 }
 
 /** Sotto md: una scheda per cliente con le stesse informazioni delle colonne della tabella. */
-function ListaClientiMobile({ righe }: { righe: ClienteRiga[] }) {
+function ListaClientiMobile({ righe, idPersonale }: { righe: ClienteRiga[]; idPersonale?: string | null }) {
   return (
     <ul className="divide-y divide-border-faint overflow-hidden rounded-lg border bg-card md:hidden">
       {righe.map((c) => (
@@ -81,6 +86,7 @@ function ListaClientiMobile({ righe }: { righe: ClienteRiga[] }) {
             <span className="flex min-w-0 items-start justify-between gap-3">
               <span className="grid min-w-0 gap-1">
                 <span className="truncate font-medium">{c.nombre ?? "—"}</span>
+                <BadgePersonale c={c} idPersonale={idPersonale} />
                 <span className="truncate text-xs text-muted-foreground">{c.email}</span>
                 <BadgeTag labels={c.tag_labels} />
               </span>
@@ -113,11 +119,11 @@ function ListaClientiMobile({ righe }: { righe: ClienteRiga[] }) {
   );
 }
 
-export function TabellaClienti({ righe }: { righe: ClienteRiga[] }) {
+export function TabellaClienti({ righe, idPersonale = null }: { righe: ClienteRiga[]; idPersonale?: string | null }) {
   const navigate = useNavigate();
   return (
     <>
-      <ListaClientiMobile righe={righe} />
+      <ListaClientiMobile righe={righe} idPersonale={idPersonale} />
       <div className="hidden overflow-hidden rounded-lg border bg-card md:block">
         <Table>
           <TableHeader>
@@ -146,6 +152,7 @@ export function TabellaClienti({ righe }: { righe: ClienteRiga[] }) {
                 <TableCell>
                   <span className="flex min-w-0 flex-col gap-1">
                     <span className="max-w-60 truncate font-medium">{c.nombre ?? "—"}</span>
+                    <BadgePersonale c={c} idPersonale={idPersonale} />
                     <span className="max-w-60 truncate text-xs text-muted-foreground">{c.email}</span>
                     <BadgeTag labels={c.tag_labels} />
                   </span>

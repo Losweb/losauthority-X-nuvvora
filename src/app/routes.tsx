@@ -136,30 +136,10 @@ export function AppRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/lezioni"
-            element={
-              <ProtectedRoute requiredRole={["admin"]}>
-                <LezioniPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/skool-video"
-            element={
-              <ProtectedRoute requiredRole={["admin"]}>
-                <SkoolVideoPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/skool-video/:id"
-            element={
-              <ProtectedRoute requiredRole={["admin"]}>
-                <SkoolVideoDettaglioPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Skool (Lezioni e Skool Video): tutto il team, staff compreso (17/10/2026) */}
+          <Route path="/lezioni" element={<LezioniPage />} />
+          <Route path="/skool-video" element={<SkoolVideoPage />} />
+          <Route path="/skool-video/:id" element={<SkoolVideoDettaglioPage />} />
           <Route
             path="/staff"
             element={

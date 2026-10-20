@@ -1,18 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { todayIso } from "@/shared/utils/formatDate";
-import type { ClienteDashboard, ErroreRecente, LeadDaFare, OnboardingRecente } from "../types";
+import { COLONNE_LISTA, conPrezzoNumerico, type ContrattoInLista } from "@/features/contratti/types";
+import type { AttivitaRecente, ClienteDashboard, LeadDaFare, OnboardingRecente } from "../types";
 
 export const CHIAVI_DASHBOARD = {
   clienti: ["dashboard", "clienti"] as const,
   onboarding: ["dashboard", "ultimi-onboarding"] as const,
   lead: ["dashboard", "lead-da-fare"] as const,
-  errori: ["dashboard", "errori-recenti"] as const,
+  attivita: ["dashboard", "attivita-team"] as const,
 };
 
-const GIORNI_ERRORI = 7;
-const MAX_ERRORI = 8;
-const MAX_ONBOARDING = 5;
+const MAX_ATTIVITA = 20;
 
 /** Tutti i clienti (vista_clienti): da qui derivano contatori, prossime call e compiti aperti. */
 export function useClientiDashboard() {
@@ -28,7 +27,7 @@ export function useClientiDashboard() {
   });
 }
 
-/** Ultimi 5 clienti per data di completamento onboarding (o di creazione). */
+/** Clienti per data di completamento onboarding (o di creazione), i più recenti prima: la pagina ne mostra 5. */
 export function useUltimiOnboarding() {
   return useQuery({
     queryKey: CHIAVI_DASHBOARD.onboarding,
@@ -45,8 +44,7 @@ export function useUltimiOnboarding() {
           stato_onboarding: c.stato_onboarding,
           data: c.onboarding_completato_il ?? c.created_at,
         }))
-        .sort((a, b) => b.data.localeCompare(a.data))
-        .slice(0, MAX_ONBOARDING);
+        .sort((a, b) => b.data.localeCompare(a.data));
     },
   });
 }
@@ -68,20 +66,41 @@ export function useLeadDaFare() {
   });
 }
 
-/** Errori applicativi degli ultimi 7 giorni (max 8). */
-export function useErroriRecenti() {
+/** Le ultime azioni di admin e staff (attivita_team, RLS: solo team). */
+export function useAttivitaTeam() {
   return useQuery({
-    queryKey: CHIAVI_DASHBOARD.errori,
-    queryFn: async (): Promise<ErroreRecente[]> => {
-      const da = new Date(Date.now() - GIORNI_ERRORI * 24 * 60 * 60 * 1000).toISOString();
+    queryKey: CHIAVI_DASHBOARD.attivita,
+    queryFn: async (): Promise<AttivitaRecente[]> => {
       const { data, error } = await supabase
-        .from("error_log")
-        .select("id, created_at, scope, message")
-        .gte("created_at", da)
+        .from("attivita_team")
+        .select("id, created_at, utente_nome, azione, descrizione, cliente_id")
         .order("created_at", { ascending: false })
-        .limit(MAX_ERRORI);
+        .limit(MAX_ATTIVITA);
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+/**
+ * I contratti firmati che aspettano il pagamento (stato `firmato`): la card in cima alla dashboard.
+ * La chiave sta sotto ["contratti", "lista"], così «Segna come pagato» (che invalida la lista) la aggiorna
+ * e il contratto sparisce da qui. La RLS li fa leggere solo a chi vede i soldi: per lo staff la query non parte.
+ */
+export function useContrattiFirmati(abilitato: boolean) {
+  return useQuery({
+    queryKey: ["contratti", "lista", "firmati-da-incassare"],
+    enabled: abilitato,
+    // È un avviso: si ricontrolla da solo ogni minuto, anche senza ricaricare la pagina.
+    refetchInterval: 60_000,
+    queryFn: async (): Promise<ContrattoInLista[]> => {
+      const { data, error } = await supabase
+        .from("contratti")
+        .select(COLONNE_LISTA)
+        .eq("stato", "firmato")
+        .order("firmato_il", { ascending: false });
+      if (error) throw error;
+      return ((data ?? []) as unknown as ContrattoInLista[]).map(conPrezzoNumerico);
     },
   });
 }

@@ -35,7 +35,7 @@ export type LeadRapidoValues = z.infer<typeof leadRapidoSchema>;
 
 /** Il lead rapido nasce in stage "nuovo", senza valore né prossima azione. */
 export function rapidoToLead(values: LeadRapidoValues): LeadInsert {
-  return formToLead({ ...values, stage: "nuovo", valore: "", prossima_azione: "", prossima_azione_il: "" });
+  return formToLead({ ...values, stage: "nuovo", valore: "", prossima_azione: "", prossima_azione_il: "" }, false);
 }
 
 /** Valori iniziali del form: da un lead esistente o vuoti per un nuovo lead. */
@@ -52,16 +52,21 @@ export function leadToForm(lead: Lead | null): LeadFormValues {
   };
 }
 
-/** Dal form alla riga da salvare: stringhe vuote → null, valore numerico. */
-export function formToLead(values: LeadFormValues): LeadInsert {
-  return {
+/**
+ * Dal form alla riga da salvare: stringhe vuote → null, valore numerico.
+ * Con `conValore = false` (chi non vede gli importi) il valore NON viene mandato: in creazione resta il
+ * default della tabella, in modifica resta quello che c'era (il trigger `lead_valore_solo_finance` lo pretende).
+ */
+export function formToLead(values: LeadFormValues, conValore = true): LeadInsert {
+  const riga: LeadInsert = {
     nome: values.nome,
     contatto: values.contatto || null,
     fonte: values.fonte || null,
     stage: values.stage,
-    valore: parseImporto(values.valore),
     note: values.note || null,
     prossima_azione: values.prossima_azione || null,
     prossima_azione_il: values.prossima_azione_il || null,
   };
+  if (conValore) riga.valore = parseImporto(values.valore);
+  return riga;
 }

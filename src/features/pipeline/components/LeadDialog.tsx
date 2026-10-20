@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
+import { esFinance, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import {
   Sheet,
@@ -57,6 +58,9 @@ export function LeadDialog({ open, onOpenChange, lead }: LeadDialogProps) {
 }
 
 function LeadForm({ lead, onChiudi }: { lead: Lead | null; onChiudi: () => void }) {
+  const { utente } = useAuth();
+  // Il valore potenziale è un importo: lo vede e lo scrive solo chi vede i soldi (admin, staff_fatture).
+  const mostraValore = esFinance(utente?.rol ?? null);
   const salva = useSalvaLead();
   const elimina = useEliminaLead();
   const [confermaElimina, setConfermaElimina] = useState(false);
@@ -67,7 +71,7 @@ function LeadForm({ lead, onChiudi }: { lead: Lead | null; onChiudi: () => void 
   });
 
   function onSubmit(values: LeadFormValues) {
-    salva.mutate({ id: lead?.id, dati: formToLead(values) }, { onSuccess: onChiudi });
+    salva.mutate({ id: lead?.id, dati: formToLead(values, mostraValore) }, { onSuccess: onChiudi });
   }
 
   function handleElimina() {
@@ -162,19 +166,21 @@ function LeadForm({ lead, onChiudi }: { lead: Lead | null; onChiudi: () => void 
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="valore"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valore potenziale (€)</FormLabel>
-              <FormControl>
-                <Input inputMode="decimal" placeholder="0" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {mostraValore ? (
+          <FormField
+            control={form.control}
+            name="valore"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valore potenziale (€)</FormLabel>
+                <FormControl>
+                  <Input inputMode="decimal" placeholder="0" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
           <FormField
             control={form.control}

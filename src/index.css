@@ -193,7 +193,8 @@
   --chart-3: var(--glow-lilac);
   --chart-4: var(--sage-500);
   --chart-5: var(--glow-peach);
-  --sidebar: var(--surface);
+  /* La barra laterale (e il menu ☰) è bianca, staccata dall'area principale da una linea: richiesta dell'utente, 20/10/2026. */
+  --sidebar: var(--surface-raised);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--action);
   --sidebar-primary-foreground: var(--on-action);

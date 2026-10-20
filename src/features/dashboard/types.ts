@@ -18,7 +18,8 @@ export interface OnboardingRecente {
 
 export type LeadDaFare = Pick<Tables<"lead">, "id" | "nome" | "stage" | "prossima_azione" | "prossima_azione_il">;
 
-export type ErroreRecente = Pick<Tables<"error_log">, "id" | "created_at" | "scope" | "message">;
+/** Riga del registro attività del team (attivita_team). */
+export type AttivitaRecente = Pick<Tables<"attivita_team">, "id" | "created_at" | "utente_nome" | "azione" | "descrizione" | "cliente_id">;
 
 export interface StatisticheDashboard {
   clientiAttivi: number;

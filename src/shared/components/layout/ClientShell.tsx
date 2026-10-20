@@ -1,6 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { BarChart3, Brain, GraduationCap, LayoutGrid, Palette, Route, Users, WandSparkles } from "lucide-react";
-import { useAuth } from "@/features/auth";
+import { TornaAlGestionale, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
 import { ContenutoPagina } from "@/shared/components/layout/ContenutoPagina";
@@ -29,7 +29,7 @@ function VoceCervello() {
       className={({ isActive }) =>
         cn(
           "group flex items-center gap-3 rounded-lg border px-3 py-3 transition-[border-color,background-color,box-shadow] duration-300",
-          isActive ? "border-line bg-surface-active shadow-sm" : "border-line bg-card shadow-xs hover:bg-surface-hover",
+          isActive ? "border-line bg-surface-hover" : "border-line bg-card shadow-xs hover:bg-surface",
         )
       }
     >
@@ -76,7 +76,9 @@ interface ClientShellProps {
  */
 export function ClientShell({ conNav = false }: ClientShellProps) {
   const { utente, signOut } = useAuth();
-  const cardUtente = <CardUtente nome={utente?.nombre || "Cliente"} sotto={utente?.email} onEsci={() => void signOut()} />;
+  const cardUtente = (
+    <CardUtente nome={utente?.nombre || "Cliente"} sotto={utente?.email} onEsci={() => void signOut()} azioni={<TornaAlGestionale />} />
+  );
 
   if (!conNav) {
     return (
@@ -87,9 +89,12 @@ export function ClientShell({ conNav = false }: ClientShellProps) {
             <Link to="/area" aria-label="La tua area" className="text-foreground">
               <MarmoLogo altezza={20} />
             </Link>
-            <Button size="sm" variant="ghost" onClick={() => void signOut()}>
-              Esci
-            </Button>
+            <span className="flex items-center gap-1">
+              <TornaAlGestionale variante="testata" />
+              <Button size="sm" variant="ghost" onClick={() => void signOut()}>
+                Esci
+              </Button>
+            </span>
           </>
         }
       >

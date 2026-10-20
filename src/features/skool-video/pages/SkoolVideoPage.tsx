@@ -13,7 +13,7 @@ const PASSI: Array<[string, string]> = [
   ["3 · Pubblichi su Skool", "La lezione nasce con testo e transcript nel corso scelto: tu ci aggiungi il video."],
 ];
 
-/** Pagina «Skool Video» (solo admin): la lista dei video e il pulsante per caricarne uno. */
+/** Pagina «Skool Video» (tutto il team, staff compreso): la lista dei video e il pulsante per caricarne uno. */
 export default function SkoolVideoPage() {
   const elenco = useElencoVideo();
   const [nuovo, setNuovo] = useState(false);

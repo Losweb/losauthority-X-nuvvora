@@ -9,27 +9,37 @@ import { ErroriTabella } from "../components/ErroriTabella";
 import { useErrori } from "../hooks/useErrori";
 import { TUTTI_GLI_SCOPE } from "../types";
 
+type Vista = "da_gestire" | "gestiti" | "tutti";
+const VISTE: ReadonlyArray<{ key: Vista; label: string }> = [
+  { key: "da_gestire", label: "Da gestire" },
+  { key: "gestiti", label: "Gestiti" },
+  { key: "tutti", label: "Tutti" },
+];
+
 export default function ErroriPage() {
   const { data: errori, isLoading, isError, isFetching, refetch } = useErrori();
+  const [vista, setVista] = useState<Vista>("tutti");
   const [scope, setScope] = useState<string>(TUTTI_GLI_SCOPE);
   const [ricerca, setRicerca] = useState("");
 
   const scopes = useMemo(() => Array.from(new Set((errori ?? []).map((e) => e.scope))).sort(), [errori]);
+  const daGestire = useMemo(() => (errori ?? []).filter((e) => e.gestito_il === null).length, [errori]);
 
   const filtrati = useMemo(() => {
     const termine = ricerca.trim().toLowerCase();
     return (errori ?? []).filter(
       (e) =>
+        (vista === "tutti" || (vista === "da_gestire") === (e.gestito_il === null)) &&
         (scope === TUTTI_GLI_SCOPE || e.scope === scope) &&
         (termine === "" || e.message.toLowerCase().includes(termine)),
     );
-  }, [errori, scope, ricerca]);
+  }, [errori, vista, scope, ricerca]);
 
   return (
     <>
       <PageHeader
         titolo="Errori"
-        sottotitolo="Ultimi 100 errori registrati dalle automazioni (sola lettura)"
+        sottotitolo="Ultimi 100 errori registrati dalle automazioni. Segna «Gestito» quello che hai visto: finché non lo fai resta in cima alla dashboard."
         azioni={
           <Button variant="outline" onClick={() => void refetch()} disabled={isFetching}>
             <RefreshCw className={cn(isFetching && "animate-spin")} aria-hidden />
@@ -46,6 +56,14 @@ export default function ErroriPage() {
         <StatoVuoto titolo="Nessun errore registrato" testo="Le automazioni non hanno segnalato problemi." />
       ) : (
         <>
+          <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Stato">
+            {VISTE.map((v) => (
+              <Button key={v.key} size="sm" variant={vista === v.key ? "default" : "outline"} aria-pressed={vista === v.key} onClick={() => setVista(v.key)}>
+                {v.label}
+                {v.key === "da_gestire" && daGestire > 0 ? ` · ${daGestire}` : ""}
+              </Button>
+            ))}
+          </div>
           <ErroriFiltri
             scopes={scopes}
             scope={scope}
@@ -54,7 +72,10 @@ export default function ErroriPage() {
             onRicercaChange={setRicerca}
           />
           {filtrati.length === 0 ? (
-            <StatoVuoto titolo="Nessun errore corrisponde ai filtri" testo="Prova a cambiare scope o testo di ricerca." />
+            <StatoVuoto
+              titolo={vista === "da_gestire" && daGestire === 0 ? "Niente da gestire" : "Nessun errore corrisponde ai filtri"}
+              testo={vista === "da_gestire" && daGestire === 0 ? "Tutti gli errori registrati sono stati visti." : "Prova a cambiare stato, scope o testo di ricerca."}
+            />
           ) : (
             <>
               <p className="mb-2 text-xs text-muted-foreground">

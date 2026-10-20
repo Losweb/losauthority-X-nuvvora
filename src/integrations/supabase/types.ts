@@ -53,6 +53,57 @@ export type Database = {
           },
         ]
       }
+      attivita_team: {
+        Row: {
+          azione: string
+          cliente_id: string | null
+          created_at: string
+          descrizione: string
+          entita: string | null
+          entita_id: string | null
+          id: number
+          utente_id: string | null
+          utente_nome: string
+        }
+        Insert: {
+          azione: string
+          cliente_id?: string | null
+          created_at?: string
+          descrizione: string
+          entita?: string | null
+          entita_id?: string | null
+          id?: never
+          utente_id?: string | null
+          utente_nome?: string
+        }
+        Update: {
+          azione?: string
+          cliente_id?: string | null
+          created_at?: string
+          descrizione?: string
+          entita?: string | null
+          entita_id?: string | null
+          id?: never
+          utente_id?: string | null
+          utente_nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attivita_team_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attivita_team_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vista_clienti"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aura_conoscenza: {
         Row: {
           ambito: string
@@ -479,6 +530,7 @@ export type Database = {
       }
       clienti: {
         Row: {
+          account_personale: boolean
           created_at: string
           da_attivare: boolean
           data_inizio: string | null
@@ -502,6 +554,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_personale?: boolean
           created_at?: string
           da_attivare?: boolean
           data_inizio?: string | null
@@ -525,6 +578,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_personale?: boolean
           created_at?: string
           da_attivare?: boolean
           data_inizio?: string | null
@@ -1024,6 +1078,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "lead"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratti_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "lead_team"
             referencedColumns: ["id"]
           },
           {
@@ -1740,6 +1801,8 @@ export type Database = {
         Row: {
           context: Json | null
           created_at: string
+          gestito_da: string | null
+          gestito_il: string | null
           id: number
           message: string
           scope: string
@@ -1747,6 +1810,8 @@ export type Database = {
         Insert: {
           context?: Json | null
           created_at?: string
+          gestito_da?: string | null
+          gestito_il?: string | null
           id?: never
           message: string
           scope: string
@@ -1754,6 +1819,8 @@ export type Database = {
         Update: {
           context?: Json | null
           created_at?: string
+          gestito_da?: string | null
+          gestito_il?: string | null
           id?: never
           message?: string
           scope?: string
@@ -3521,6 +3588,66 @@ export type Database = {
       }
     }
     Views: {
+      lead_team: {
+        Row: {
+          cliente_id: string | null
+          contatto: string | null
+          created_at: string | null
+          fonte: string | null
+          id: string | null
+          nome: string | null
+          note: string | null
+          prossima_azione: string | null
+          prossima_azione_il: string | null
+          stage: string | null
+          updated_at: string | null
+          valore: number | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          contatto?: string | null
+          created_at?: string | null
+          fonte?: string | null
+          id?: string | null
+          nome?: string | null
+          note?: string | null
+          prossima_azione?: string | null
+          prossima_azione_il?: string | null
+          stage?: string | null
+          updated_at?: string | null
+          valore?: never
+        }
+        Update: {
+          cliente_id?: string | null
+          contatto?: string | null
+          created_at?: string | null
+          fonte?: string | null
+          id?: string | null
+          nome?: string | null
+          note?: string | null
+          prossima_azione?: string | null
+          prossima_azione_il?: string | null
+          stage?: string | null
+          updated_at?: string | null
+          valore?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vista_clienti"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vista_clienti: {
         Row: {
           call_corrente: number | null

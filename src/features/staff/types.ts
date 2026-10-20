@@ -9,13 +9,13 @@ export type RuoloStaff = "staff" | "staff_fatture";
 export const RUOLI_STAFF: ReadonlyArray<{ valore: RuoloStaff; etichetta: string; descrizione: string }> = [
   {
     valore: "staff",
-    etichetta: "Staff · Clienti",
-    descrizione: "Vede clienti, onboarding e pipeline. Nessun importo, niente Finance.",
+    etichetta: "Staff",
+    descrizione: "Lead, clienti, onboarding, call e tutto Skool (Lezioni, Skool Video). Nessun importo: niente Finance, Contratti né valore dei lead.",
   },
   {
     valore: "staff_fatture",
-    etichetta: "Staff · Clienti + Fatture",
-    descrizione: "Come Staff · Clienti, in più vede Finance e gli importi delle fatture.",
+    etichetta: "Staff + Finance",
+    descrizione: "Come Staff, in più vede Finance, Contratti e gli importi (fatture, valore dei lead).",
   },
 ];
 

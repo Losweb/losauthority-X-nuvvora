@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { LogOut, type LucideIcon } from "lucide-react";
 import { Monogramma } from "@/shared/components/brand/Monogramma";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /*
@@ -19,7 +20,7 @@ export interface VoceNavBase {
   badge?: number;
 }
 
-/** Riga di navigazione di Seto (`st-nav`): 40px, raggio md; attiva = pillola chiara con ombra e testo nero. */
+/** Riga di navigazione di Seto (`st-nav`): 40px, raggio md. Sulla sidebar bianca: attiva = grigio hover con testo nero, hover = grigio della finestra. */
 export function VoceNavSeto({ voce, className }: { voce: VoceNavBase; className?: string }) {
   const Icon = voce.icon;
   return (
@@ -28,7 +29,7 @@ export function VoceNavSeto({ voce, className }: { voce: VoceNavBase; className?
       className={({ isActive }) =>
         cn(
           "flex h-10 w-full shrink-0 items-center gap-3 rounded-md px-3 text-sm leading-5 font-medium transition-colors",
-          isActive ? "bg-surface-active font-semibold text-foreground shadow-sm [&_svg]:text-foreground" : "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
+          isActive ? "bg-surface-hover font-semibold text-foreground [&_svg]:text-foreground" : "text-muted-foreground hover:bg-surface hover:text-foreground",
           className,
         )
       }
@@ -49,36 +50,63 @@ export function TitoloSezioneNav({ children, className }: { children: ReactNode;
   return <p className={cn("flex h-9 items-center px-3 text-sm leading-5 font-bold text-foreground", className)}>{children}</p>;
 }
 
+interface AzioneCardUtenteProps {
+  icona: LucideIcon;
+  children: ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  titolo?: string;
+  /** outline: pillola con bordo (cambio account); ghost: senza bordo («Esci»). */
+  variante?: "outline" | "ghost";
+}
+
+/** Bottone del piede utente: pillola a tutta larghezza, icona e testo a sinistra; un testo lungo si tronca invece di uscire. */
+export function AzioneCardUtente({ icona: Icona, children, onClick, disabled = false, titolo, variante = "outline" }: AzioneCardUtenteProps) {
+  return (
+    <Button type="button" variant={variante} onClick={onClick} disabled={disabled} title={titolo} className="w-full min-w-0 justify-start px-4">
+      <Icona aria-hidden />
+      <span className="min-w-0 truncate">{children}</span>
+    </Button>
+  );
+}
+
 interface CardUtenteProps {
   nome: string;
   /** Riga piccola sotto il nome (email o ruolo). */
   sotto?: string;
   onEsci: () => void;
+  /** Azioni sopra «Esci» (es. «Passa a Wesley ME» / «Torna al gestionale»): se non hanno niente da mostrare restituiscono null. */
+  azioni?: ReactNode;
 }
 
-/** La card utente smerigliata in fondo alla sidebar (`st-usercard`), con il bottone «glass» per uscire. */
-export function CardUtente({ nome, sotto, onEsci }: CardUtenteProps) {
+/**
+ * Chi è collegato, le azioni dell'account e «Esci». Va dentro `PiedeUtente`, che gli dà il fondo
+ * bianco e la linea sopra (sidebar e menu ☰).
+ */
+export function CardUtente({ nome, sotto, onEsci, azioni }: CardUtenteProps) {
   return (
-    <div className="rounded-lg bg-card-glass p-3 text-foreground shadow-sm">
-      <div className="mb-3 flex items-center gap-3">
-        <Monogramma nome={nome} tono="peach" online className="ring-2 ring-card-glass" />
+    <div className="flex min-w-0 flex-col gap-3 text-foreground">
+      <div className="flex min-w-0 items-center gap-3 px-1">
+        <Monogramma nome={nome} tono="peach" online />
         <span className="min-w-0">
           <span className="block truncate text-sm leading-5 font-semibold">{nome}</span>
-          {sotto ? <span className="block truncate text-[12px] leading-4 font-medium opacity-90">{sotto}</span> : null}
+          {sotto ? <span className="block truncate text-[12px] leading-4 font-medium text-muted-foreground">{sotto}</span> : null}
         </span>
       </div>
-      <button
-        type="button"
-        onClick={onEsci}
-        className="flex h-10 w-full items-center gap-2 rounded-full bg-card-glass-button pr-4 pl-1 text-sm font-semibold text-foreground transition-[filter] hover:brightness-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-      >
-        <span className="inline-flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <LogOut className="size-4" aria-hidden />
-        </span>
-        Esci
-      </button>
+      {/* Colonna flex e non grid: in una griglia il testo lungo allargherebbe la colonna oltre il bordo. */}
+      <div className="flex min-w-0 flex-col gap-1.5">
+        {azioni}
+        <AzioneCardUtente icona={LogOut} variante="ghost" onClick={onEsci}>
+          Esci
+        </AzioneCardUtente>
+      </div>
     </div>
   );
+}
+
+/** Il piede dell'utente: fondo bianco a tutta larghezza e una linea sopra che lo separa dalle voci. */
+export function PiedeUtente({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn("shrink-0 border-t border-line bg-card px-4 pt-4 pb-4", className)}>{children}</div>;
 }
 
 interface SidebarSetoProps {
@@ -87,14 +115,18 @@ interface SidebarSetoProps {
   piede?: ReactNode;
 }
 
-/** La colonna sinistra (`st-sidebar`): marchio, voci, spazio, card utente. Solo da md (sotto c'è il pannello ☰). */
+/**
+ * La colonna sinistra (`st-sidebar`): marchio e voci scorrono, il piede utente resta fermo in fondo.
+ * Solo da md (sotto c'è il pannello ☰).
+ */
 export function SidebarSeto({ marchio, children, piede }: SidebarSetoProps) {
   return (
-    <aside className="hidden min-h-0 flex-col gap-2 overflow-y-auto bg-sidebar px-4 pt-6 pb-4 md:flex">
-      <div className="mb-4 flex h-8 shrink-0 items-center px-3 text-foreground">{marchio}</div>
-      {children}
-      <div className="flex-1" />
-      {piede}
+    <aside className="hidden min-h-0 flex-col border-r border-line bg-sidebar md:flex">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 pt-6 pb-4">
+        <div className="mb-4 flex h-8 shrink-0 items-center px-3 text-foreground">{marchio}</div>
+        {children}
+      </div>
+      {piede ? <PiedeUtente>{piede}</PiedeUtente> : null}
     </aside>
   );
 }

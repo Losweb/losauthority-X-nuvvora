@@ -11,7 +11,7 @@ import { useCreaInvito, type EsitoInvito } from "../../hooks/useContrattoAzioni"
 import { linkContratto, messaggioInvito, type Offerta } from "../../types";
 
 /** Il messaggio pronto con il link, da mandare al cliente (dopo la creazione dell'invito). */
-export function InvitoPronto({ esito }: { esito: EsitoInvito }) {
+export function InvitoPronto({ esito, daClienti = false }: { esito: EsitoInvito; daClienti?: boolean }) {
   const link = linkContratto(esito.token);
   const messaggio = messaggioInvito(esito.programma, link);
   return (
@@ -31,23 +31,29 @@ export function InvitoPronto({ esito }: { esito: EsitoInvito }) {
         <Button variant="outline" size="sm" nativeButton={false} render={<Link to={`/contratti/${esito.id}`} />}>
           Apri il contratto
         </Button>
-        <Button variant="ghost" size="sm" nativeButton={false} render={<Link to="/contratti" />}>
-          Tutti i contratti
+        <Button variant="ghost" size="sm" nativeButton={false} render={<Link to={daClienti ? "/clienti" : "/contratti"} />}>
+          {daClienti ? "Torna a Clienti" : "Tutti i contratti"}
         </Button>
       </div>
     </div>
   );
 }
 
-/** Nuovo invito: si sceglie l'offerta e basta. I dati del cliente li inserisce lui dal link; se l'invito nasce da un lead (Clienti → «Crea il contratto») nome e contatto sono già nel modulo. */
-export function NuovoInvitoForm({ offerte, haFirma, lead = null }: { offerte: Offerta[]; haFirma: boolean; lead?: Lead | null }) {
+/**
+ * Nuovo invito: si sceglie l'offerta e basta. I dati del cliente li inserisce lui dal link; se l'invito nasce da un lead
+ * (Clienti → «Crea il contratto») nome e contatto sono già nel modulo. Senza lead si possono scrivere a mano (facoltativi):
+ * precompilano il modulo e danno un nome alla riga «in attesa» di Clienti prima che il cliente compili.
+ */
+export function NuovoInvitoForm({ offerte, haFirma, lead = null, daClienti = false }: { offerte: Offerta[]; haFirma: boolean; lead?: Lead | null; daClienti?: boolean }) {
   const attive = offerte.filter((o) => o.attiva);
   const [offertaId, setOffertaId] = useState(attive[0]?.id ?? "");
+  const [nome, setNome] = useState("");
+  const [contatto, setContatto] = useState("");
   const [note, setNote] = useState("");
   const [esito, setEsito] = useState<EsitoInvito | null>(null);
   const crea = useCreaInvito();
 
-  if (esito) return <InvitoPronto esito={esito} />;
+  if (esito) return <InvitoPronto esito={esito} daClienti={daClienti} />;
 
   if (attive.length === 0) {
     return (
@@ -64,7 +70,12 @@ export function NuovoInvitoForm({ offerte, haFirma, lead = null }: { offerte: Of
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        crea.mutate({ offerta_id: offertaId || attive[0].id, note, lead_id: lead?.id }, { onSuccess: setEsito });
+        crea.mutate(
+          lead
+            ? { offerta_id: offertaId || attive[0].id, note, lead_id: lead.id }
+            : { offerta_id: offertaId || attive[0].id, note, nome: nome.trim() || undefined, contatto: contatto.trim() || undefined },
+          { onSuccess: setEsito },
+        );
       }}
       className="grid gap-4 rounded-lg border bg-card p-5 shadow-xs"
     >
@@ -76,7 +87,18 @@ export function NuovoInvitoForm({ offerte, haFirma, lead = null }: { offerte: Of
             {lead.contatto ? `${lead.contatto} · ` : ""}dal lead{lead.fonte ? ` (${lead.fonte})` : ""}. Nome e contatto compaiono già nel modulo del cliente.
           </p>
         </div>
-      ) : null}
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-1.5">
+            <Label htmlFor="invito-nome">Nome del cliente (facoltativo)</Label>
+            <Input id="invito-nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Es. Mario Rossi" autoComplete="off" maxLength={120} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="invito-contatto">Email, telefono o Instagram (facoltativo)</Label>
+            <Input id="invito-contatto" value={contatto} onChange={(e) => setContatto(e.target.value)} placeholder="Es. mario@email.it" autoComplete="off" maxLength={120} />
+          </div>
+        </div>
+      )}
       <div className="grid gap-1.5">
         <Label htmlFor="invito-offerta">Offerta</Label>
         <select
@@ -98,6 +120,7 @@ export function NuovoInvitoForm({ offerte, haFirma, lead = null }: { offerte: Of
       </div>
       <p className="text-[13px] leading-relaxed text-muted-foreground">
         I dati li inserisce il cliente dal link, e sceglie lui se acquista da privato o con partita IVA.{" "}
+        {lead ? "" : "Se scrivi nome e contatto li trova già compilati, e il contratto compare subito in Clienti «in attesa»."}{" "}
         {haFirma
           ? "Creando l'invito firmi la proposta: la tua firma salvata compare sul contratto."
           : "Non hai ancora salvato la tua firma: il contratto uscirà senza, e dovrai controfirmarlo a mano."}

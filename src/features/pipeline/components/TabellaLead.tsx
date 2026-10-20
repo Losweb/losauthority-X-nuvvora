@@ -13,6 +13,8 @@ interface TabellaLeadProps {
   testoVuoto: string;
   onApri: (lead: Lead) => void;
   onSposta: (id: string, stage: LeadStage) => void;
+  /** false per chi non vede gli importi (staff): niente colonna Valore. */
+  mostraValore: boolean;
 }
 
 /** `compatta` = trigger piccolo della tabella desktop; altrimenti alto e a tutta larghezza (telefono). */
@@ -60,7 +62,7 @@ function ProssimaAzione({ lead, scaduta }: { lead: Lead; scaduta: boolean }) {
 }
 
 /** Tabella CRM dei lead: nome, fonte, stage (cambiabile inline), valore, prossima azione. Sul telefono una colonna sola. */
-export function TabellaLead({ righe, testoVuoto, onApri, onSposta }: TabellaLeadProps) {
+export function TabellaLead({ righe, testoVuoto, onApri, onSposta, mostraValore }: TabellaLeadProps) {
   const oggi = todayIso();
   return (
     <div className="overflow-hidden rounded-lg border bg-card">
@@ -70,14 +72,14 @@ export function TabellaLead({ righe, testoVuoto, onApri, onSposta }: TabellaLead
             <TableHead>Lead</TableHead>
             <TableHead>Fonte</TableHead>
             <TableHead className="w-44">Stage</TableHead>
-            <TableHead className="text-right">Valore</TableHead>
+            {mostraValore ? <TableHead className="text-right">Valore</TableHead> : null}
             <TableHead>Prossima azione</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {righe.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={5} className="py-10 text-center text-[13px] whitespace-normal text-muted-foreground">
+              <TableCell colSpan={mostraValore ? 5 : 4} className="py-10 text-center text-[13px] whitespace-normal text-muted-foreground">
                 {testoVuoto}
               </TableCell>
             </TableRow>
@@ -101,11 +103,11 @@ export function TabellaLead({ righe, testoVuoto, onApri, onSposta }: TabellaLead
                   {l.contatto ? <span className="mt-0.5 block max-w-72 truncate text-xs text-muted-foreground">{l.contatto}</span> : null}
                   {/* Telefono: fonte, valore, prossima azione e stage sotto il nome. */}
                   <div className="mt-2 grid gap-2 whitespace-normal md:hidden">
-                    {l.fonte || l.valore > 0 ? (
+                    {l.fonte || (mostraValore && l.valore > 0) ? (
                       <p className="flex flex-wrap items-center gap-x-1.5 text-[12.5px] text-muted-foreground">
                         {l.fonte ? <span>{l.fonte}</span> : null}
-                        {l.fonte && l.valore > 0 ? <span aria-hidden>·</span> : null}
-                        {l.valore > 0 ? <span className="figure">{formatCurrency(l.valore)}</span> : null}
+                        {l.fonte && mostraValore && l.valore > 0 ? <span aria-hidden>·</span> : null}
+                        {mostraValore && l.valore > 0 ? <span className="figure">{formatCurrency(l.valore)}</span> : null}
                       </p>
                     ) : null}
                     {l.prossima_azione || l.prossima_azione_il ? (
@@ -120,9 +122,11 @@ export function TabellaLead({ righe, testoVuoto, onApri, onSposta }: TabellaLead
                 <TableCell className="hidden py-2.5 md:table-cell">
                   <SelectStage lead={l} onSposta={onSposta} />
                 </TableCell>
-                <TableCell className="figure hidden text-right text-[13px] text-muted-foreground md:table-cell">
-                  {l.valore > 0 ? formatCurrency(l.valore) : "—"}
-                </TableCell>
+                {mostraValore ? (
+                  <TableCell className="figure hidden text-right text-[13px] text-muted-foreground md:table-cell">
+                    {l.valore > 0 ? formatCurrency(l.valore) : "—"}
+                  </TableCell>
+                ) : null}
                 <TableCell className={cn("hidden max-w-md text-[13px] whitespace-normal md:table-cell", coloreAzione)}>
                   <ProssimaAzione lead={l} scaduta={scaduta} />
                 </TableCell>

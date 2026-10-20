@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { logDev, MESSAGGIO_ERRORE_GENERICO } from "@/shared/utils/errors";
-import { stageLabel, type Lead, type LeadInsert, type LeadStage } from "../types";
+import { leadDaVista, stageLabel, type Lead, type LeadInsert, type LeadStage } from "../types";
 
 export const CHIAVE_LEAD = ["pipeline", "lead"] as const;
 
@@ -12,24 +12,24 @@ export function useLeadPerId(id: string | null) {
     queryKey: [...CHIAVE_LEAD, id],
     enabled: !!id,
     queryFn: async (): Promise<Lead | null> => {
-      const { data, error } = await supabase.from("lead").select("*").eq("id", id as string).maybeSingle();
+      const { data, error } = await supabase.from("lead_team").select("*").eq("id", id as string).maybeSingle();
       if (error) throw error;
-      return data ? { ...data, valore: Number(data.valore) || 0 } : null;
+      return data ? leadDaVista(data) : null;
     },
   });
 }
 
-/** Tutti i lead (RLS: solo team), i più aggiornati per primi. */
+/** Tutti i lead (RLS: solo team) dalla vista `lead_team` (il valore arriva solo a chi vede gli importi), i più aggiornati per primi. */
 export function useLeads() {
   return useQuery({
     queryKey: CHIAVE_LEAD,
     queryFn: async (): Promise<Lead[]> => {
       const { data, error } = await supabase
-        .from("lead")
+        .from("lead_team")
         .select("*")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data.map((l) => ({ ...l, valore: Number(l.valore) || 0 }));
+      return data.map(leadDaVista);
     },
   });
 }

@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, Clapperboard, FileSignature, KanbanSquare, LayoutGrid, Plus, ShieldAlert, Tag, Tags, TrendingUp, UserCog, Users } from "lucide-react";
-import { useAuth, esFinance, esTeam, etichettaRuolo } from "@/features/auth";
+import { useAuth, esFinance, esTeam, etichettaRuolo, PassaAccountPersonale } from "@/features/auth";
 import { NuovoLeadRapido } from "@/features/pipeline";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
@@ -21,8 +21,8 @@ const VOCI_PRINCIPALI: VoceNav[] = [
   { href: "/finance", label: "Finance", icon: TrendingUp, soloFinance: true },
   { href: "/contratti", label: "Contratti", icon: FileSignature, soloFinance: true },
   { href: "/offerte", label: "Offerte", icon: Tag, soloAdmin: true },
-  { href: "/lezioni", label: "Lezioni", icon: BookOpen, soloAdmin: true },
-  { href: "/skool-video", label: "Skool Video", icon: Clapperboard, soloAdmin: true },
+  { href: "/lezioni", label: "Lezioni", icon: BookOpen },
+  { href: "/skool-video", label: "Skool Video", icon: Clapperboard },
 ];
 
 const VOCI_SECONDARIE: VoceNav[] = [
@@ -85,7 +85,14 @@ export function AppShell() {
   const filtra = (v: VoceNav) => (!v.soloFinance || puoFinance) && (!v.soloAdmin || eAdmin);
   const principali = VOCI_PRINCIPALI.filter(filtra);
   const secondarie = VOCI_SECONDARIE.filter(filtra);
-  const cardUtente = <CardUtente nome={utente?.nombre || (rol ? etichettaRuolo(rol) : "Utente")} sotto={utente?.email} onEsci={() => void signOut()} />;
+  const cardUtente = (
+    <CardUtente
+      nome={utente?.nombre || (rol ? etichettaRuolo(rol) : "Utente")}
+      sotto={utente?.email}
+      onEsci={() => void signOut()}
+      azioni={<PassaAccountPersonale />}
+    />
+  );
 
   return (
     <FinestraSeto

@@ -14,9 +14,11 @@ interface FunnelPillsProps {
   perStage: Record<string, RiepilogoStage>;
   attivo: FiltroStage;
   onChange: (filtro: FiltroStage) => void;
+  /** false per chi non vede gli importi (staff): le pillole mostrano solo il conteggio. */
+  mostraValore: boolean;
 }
 
-function Pill({ label, dati, attivo, onClick }: { label: string; dati: RiepilogoStage; attivo: boolean; onClick: () => void }) {
+function Pill({ label, dati, attivo, onClick, mostraValore }: { label: string; dati: RiepilogoStage; attivo: boolean; onClick: () => void; mostraValore: boolean }) {
   return (
     <button
       type="button"
@@ -31,7 +33,9 @@ function Pill({ label, dati, attivo, onClick }: { label: string; dati: Riepilogo
         <span className="text-xs font-semibold text-foreground">{label}</span>
         <span className="figure text-[13px] text-muted-foreground">{dati.count}</span>
       </span>
-      <span className="figure text-[10.5px] text-muted-foreground/80">{dati.valore > 0 ? formatCurrency(dati.valore) : "—"}</span>
+      {mostraValore ? (
+        <span className="figure text-[12px] text-muted-foreground/80">{dati.valore > 0 ? formatCurrency(dati.valore) : "—"}</span>
+      ) : null}
     </button>
   );
 }
@@ -40,14 +44,14 @@ function Pill({ label, dati, attivo, onClick }: { label: string; dati: Riepilogo
  * Imbuto: una pillola per stage con conteggio e valore; cliccandola si filtra la tabella.
  * Sul telefono è una riga che scorre di lato (a filo schermo) invece di tre righe di pillole.
  */
-export function FunnelPills({ totale, perStage, attivo, onChange }: FunnelPillsProps) {
+export function FunnelPills({ totale, perStage, attivo, onChange, mostraValore }: FunnelPillsProps) {
   return (
     <div
       className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
       role="group"
       aria-label="Filtra per stage"
     >
-      <Pill label="Tutti" dati={totale} attivo={attivo === "tutti"} onClick={() => onChange("tutti")} />
+      <Pill label="Tutti" dati={totale} attivo={attivo === "tutti"} onClick={() => onChange("tutti")} mostraValore={mostraValore} />
       {LEAD_STAGES.map((s) => (
         <Pill
           key={s.key}
@@ -55,6 +59,7 @@ export function FunnelPills({ totale, perStage, attivo, onChange }: FunnelPillsP
           dati={perStage[s.key] ?? { count: 0, valore: 0 }}
           attivo={attivo === s.key}
           onClick={() => onChange(s.key)}
+          mostraValore={mostraValore}
         />
       ))}
     </div>

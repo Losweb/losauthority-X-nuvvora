@@ -3,6 +3,26 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase
 export type Lead = Tables<"lead">;
 export type LeadInsert = TablesInsert<"lead">;
 export type LeadUpdate = TablesUpdate<"lead">;
+/** Una riga della vista `lead_team`: il gestionale legge i lead da qui. Le colonne arrivano nullable (è una vista) e `valore` è null per chi non vede gli importi (staff). */
+export type RigaLeadTeam = Tables<"lead_team">;
+
+/** Dalla vista al `Lead` usato in tutto il gestionale: il valore vale 0 quando non lo si può vedere. */
+export function leadDaVista(r: RigaLeadTeam): Lead {
+  return {
+    id: r.id ?? "",
+    nome: r.nome ?? "",
+    contatto: r.contatto,
+    fonte: r.fonte,
+    stage: r.stage ?? "nuovo",
+    valore: Number(r.valore) || 0,
+    note: r.note,
+    prossima_azione: r.prossima_azione,
+    prossima_azione_il: r.prossima_azione_il,
+    cliente_id: r.cliente_id,
+    created_at: r.created_at ?? "",
+    updated_at: r.updated_at ?? "",
+  };
+}
 
 /** Stage della pipeline, nell'ordine dell'imbuto (stesso CHECK della tabella). */
 export const LEAD_STAGE_KEYS = ["nuovo", "contattato", "call_fissata", "proposta", "cliente", "perso"] as const;

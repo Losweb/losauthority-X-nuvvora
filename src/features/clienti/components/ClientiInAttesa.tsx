@@ -34,16 +34,18 @@ function AzioneAttesa({ riga, eAdmin, eFinance }: { riga: ClienteInAttesa; eAdmi
       </Button>
     );
   }
+  if (!riga.lead) return null;
   if (!eAdmin) return <span className="text-[13px] text-muted-foreground">L'invito lo crea l'admin</span>;
   return (
-    <Button size="sm" nativeButton={false} render={<Link to={`/contratti/nuovo?lead=${riga.lead.id}`} />}>
+    <Button size="sm" nativeButton={false} render={<Link to={`/contratti/nuovo?lead=${riga.lead.id}&da=clienti`} />}>
       <FileSignature aria-hidden /> Crea il contratto
     </Button>
   );
 }
 
 /**
- * I lead diventati clienti ma senza contratto pagato: niente scheda da aprire (nasce col pagamento),
+ * I futuri clienti senza account: lead diventati clienti e contratti creati direttamente, finché il contratto
+ * non è pagato. Niente scheda da aprire (nasce col pagamento, dai dati che il cliente compila nel modulo):
  * solo il nome, da dove arrivano, lo stato del contratto e il bottone per il passo successivo.
  */
 export function ClientiInAttesa({ righe, testo }: { righe: ClienteInAttesa[]; testo: string }) {
@@ -51,23 +53,22 @@ export function ClientiInAttesa({ righe, testo }: { righe: ClienteInAttesa[]; te
   const eAdmin = utente?.rol === "admin";
   const eFinance = eAdmin || utente?.rol === "staff_fatture";
   const q = testo.trim().toLowerCase();
-  const visibili = q ? righe.filter((r) => `${r.lead.nome} ${r.lead.contatto ?? ""}`.toLowerCase().includes(q)) : righe;
+  const visibili = q ? righe.filter((r) => `${r.nome} ${r.contatto ?? ""}`.toLowerCase().includes(q)) : righe;
   if (visibili.length === 0) return null;
 
   return (
     <section aria-label="Clienti in attesa di contratto" className="mb-5 grid gap-2">
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="text-[15px] font-semibold">In attesa di contratto</h3>
-        <p className="text-[13px] text-muted-foreground">Dai Leads. La scheda si apre quando il contratto è pagato.</p>
+        <p className="text-[13px] text-muted-foreground">Dai Leads o da «Nuovo contratto». La scheda si apre quando il contratto è pagato.</p>
       </div>
       <ul className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-card">
         {visibili.map((r) => (
-          <li key={r.lead.id} className="grid gap-3 px-4 py-3.5 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center md:gap-5">
+          <li key={r.id} className="grid gap-3 px-4 py-3.5 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center md:gap-5">
             <span className="grid min-w-0 gap-0.5">
-              <span className="truncate font-medium">{r.lead.nome}</span>
+              <span className="truncate font-medium">{r.nome}</span>
               <span className="truncate text-xs text-muted-foreground">
-                {r.lead.contatto ?? "senza contatto"}
-                {r.lead.fonte ? ` · ${r.lead.fonte}` : ""} · cliente dal {formatDate(r.lead.updated_at)}
+                {r.contatto ?? "senza contatto"} · {r.origine} · dal {formatDate(r.dal)}
               </span>
             </span>
             <StatoAttesa riga={r} />

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Tags } from "lucide-react";
+import { FileSignature, Plus, Tags } from "lucide-react";
+import { useAccountPersonale, useAuth } from "@/features/auth";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonRighe, StatoVuoto } from "@/shared/components/layout/StatoCaricamento";
 import { Button } from "@/shared/components/ui/button";
@@ -17,7 +18,12 @@ const TUTTE = "tutte";
 const VOCI_FASE = [{ value: TUTTE, label: "Tutte le fasi" }, ...FASI.map((f) => ({ value: f.value, label: f.label }))];
 
 export default function ClientiPage() {
+  const { utente } = useAuth();
+  const eAdmin = utente?.rol === "admin";
   const { data, isLoading, isError } = useClienti();
+  const idPersonale = useAccountPersonale().data?.id ?? null;
+  // Il conteggio è dei clienti veri: «Wesley ME» resta in lista con il suo badge.
+  const numeroClienti = (data ?? []).filter((c) => c.id !== idPersonale).length;
   const inAttesa = useClientiInAttesa();
   const [testo, setTesto] = useState("");
   const [fase, setFase] = useState<string>(TUTTE);
@@ -37,7 +43,7 @@ export default function ClientiPage() {
         titolo="Clienti"
         sottotitolo={
           data
-            ? `${data.length} ${data.length === 1 ? "cliente" : "clienti"} · ordinati per prossima call${inAttesa.data?.length ? ` · ${inAttesa.data.length} in attesa di contratto` : ""}`
+            ? `${numeroClienti} ${numeroClienti === 1 ? "cliente" : "clienti"} · ordinati per prossima call${inAttesa.data?.length ? ` · ${inAttesa.data.length} in attesa di contratto` : ""}`
             : undefined
         }
         azioni={
@@ -46,6 +52,12 @@ export default function ClientiPage() {
               <Tags aria-hidden />
               Gestisci tag
             </Button>
+            {eAdmin ? (
+              <Button variant="outline" size="sm" render={<Link to="/contratti/nuovo?da=clienti" />}>
+                <FileSignature aria-hidden />
+                Nuovo contratto
+              </Button>
+            ) : null}
             <Button size="sm" render={<Link to="/clienti/nuovo" />}>
               <Plus aria-hidden />
               Nuovo cliente
@@ -85,7 +97,7 @@ export default function ClientiPage() {
         <StatoVuoto titolo="Nessun cliente ancora" testo="Crea il primo: riceverà email e password per accedere e completare l'onboarding." />
       ) : null}
       {data && data.length > 0 && righe.length === 0 ? <StatoVuoto titolo="Nessun cliente corrisponde ai filtri" /> : null}
-      {righe.length > 0 ? <TabellaClienti righe={righe} /> : null}
+      {righe.length > 0 ? <TabellaClienti righe={righe} idPersonale={idPersonale} /> : null}
     </div>
   );
 }
