@@ -7,3 +7,8 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+# Il file della versione del build: mai in cache, così una scheda aperta da prima di un deploy
+# vede subito che ne è uscita una nuova e mostra il popup «C'è una nuova versione».
+/version.json
+  Cache-Control: no-store

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
@@ -13,6 +13,30 @@ const CHUNK_LIBRERIE: Array<[nome: string, pacchetti: RegExp]> = [
   ["supabase", /[\\/]node_modules[\\/]@supabase[\\/]/],
   ["ui", /[\\/]node_modules[\\/](@base-ui|@floating-ui)[\\/]/],
 ];
+
+/**
+ * Versione di questo build: ora UTC compatta, più il commit quando lo passa Cloudflare (Workers Builds).
+ * Finisce nel codice (`__VERSIONE_APP__`) e in /version.json: una scheda aperta da prima di un deploy
+ * le confronta e mostra il popup «C'è una nuova versione» (src/shared/components/AvvisoNuovaVersione.tsx).
+ * Calcolata una sola volta, così codice e file hanno per forza la stessa stringa.
+ */
+const VERSIONE_APP = (() => {
+  const ora = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+  const commit = (process.env.WORKERS_CI_COMMIT_SHA ?? "").slice(0, 7);
+  return commit ? `${ora}-${commit}` : ora;
+})();
+
+/** Scrive /version.json accanto a index.html, solo nel build del browser (public/_headers: mai in cache). */
+function fileVersione(): Plugin {
+  return {
+    name: "losauthority:version-json",
+    apply: "build",
+    applyToEnvironment: (ambiente) => ambiente.name === "client",
+    generateBundle() {
+      this.emitFile({ type: "asset", fileName: "version.json", source: `${JSON.stringify({ versione: VERSIONE_APP })}\n` });
+    },
+  };
+}
 
 // https://vite.dev/config/
 // Vite 6 + @cloudflare/vite-plugin: deploy su Cloudflare Workers con static assets (wrangler.jsonc,
@@ -33,7 +57,8 @@ export default defineConfig(({ command, mode }) => {
     }
   }
   return {
-    plugins: [react(), tailwindcss(), cloudflare()],
+    plugins: [react(), tailwindcss(), cloudflare(), fileVersione()],
+    define: { __VERSIONE_APP__: JSON.stringify(VERSIONE_APP) },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
