@@ -9,9 +9,15 @@ Guida per Wesley. Spiega come funziona il blocco di accettazione della sezione �
 - Il blocco vale **nel database**: senza un'accettazione valida, ogni lettura e scrittura dei contatti viene rifiutata, anche se qualcuno chiama il server direttamente. L'eccezione è «Esporta i miei contatti (CSV)», il pulsante in fondo alla pagina, che funziona sempre. Nel database anche la cancellazione dei propri contatti resta sempre permessa (art. 28(3) GDPR); dal 06/10/2026, su richiesta di Wesley, nella pagina c'è solo il pulsante di esportazione: i contatti si cancellano uno per uno dal popup del contatto (a sezione attiva).
 - Il resto dell'area clienti non cambia.
 
-## I documenti di oggi sono BOZZE
+## Versione 2: testi completi (17/10/2026)
 
-La versione 1 contiene testi provvisori, segnati «BOZZA — da sostituire». Mancano i testi definitivi dei Termini, dell'Accordo e dell'Informativa e, nella casella 2, i numeri e i titoli delle clausole da approvare per iscritto (artt. 1341-1342 c.c.). Quando sono pronti si pubblica la versione 2 (vedi sotto).
+La versione 1 (06/10/2026) conteneva testi provvisori segnati «BOZZA», con punti «[Da completare.]» (limitazioni di responsabilità, sospensione, foro, elenco dei fornitori, sicurezza, informativa). La migrazione `supabase/migrations/20261017000064_crm_documenti_v2.sql` pubblica la **versione 2** con i tre testi completi e `bozza = false`; la casella 2 cita le clausole 4, 5 e 7 dei Termini (artt. 1341-1342 c.c.). I testi riprendono i dati del Fornitore e lo stile dell'informativa dei contratti.
+
+Cose da sapere sulla versione 2:
+
+- **Va eseguita nel SQL Editor** (la finestra dei permessi del MCP rifiuta gli `update`). Azzera il preavviso solo per quella pubblicazione e lo rimette a 30: al 17/10/2026 le accettazioni della v1 erano tutte account di prova, quindi nessun cliente vero perde il preavviso. Gli account di prova devono riaccettare.
+- I testi sono una base completa scritta dal team di sviluppo, **non un parere legale**: prima dei primi clienti veri Wesley (o chi lo assiste) li rilegge. Se cambia qualcosa, si pubblica una versione 3 con la funzione qui sotto.
+- Impegni scritti nei testi che vanno rispettati davvero: avviso di violazione **entro 48 ore**; cancellazione dei contatti **entro 30 giorni** dalla chiusura (oggi è immediata, a cascata); registri delle accettazioni e degli accessi conservati **10 anni** dalla chiusura dell'account; copie di sicurezza di Supabase nella stessa regione UE (da confermare nel dashboard, vedi sotto); nessun servizio di IA e nessun altro fornitore oltre Supabase e Cloudflare riceve i dati dei contatti.
 
 ## Pubblicare una versione nuova
 

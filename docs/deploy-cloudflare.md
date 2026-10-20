@@ -6,7 +6,9 @@ El frontend (React + Vite 6) se publica como **Cloudflare Worker con static asse
 
 - Las dos variables públicas (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` = clave **publicable**) están en **`.env.production`**, versionado: no hace falta ponerlas en el panel. Nunca poner ahí claves secretas.
 - `wrangler.jsonc` tiene `build.command = "npm run build"`: `npx wrangler deploy` compila solo antes de publicar, aunque el **Build command** del panel esté vacío (si está puesto, compila dos veces: no pasa nada).
-- Cada push a `main` publica en https://losauthority-v2.ignaciojaliff29.workers.dev (o en el dominio propio, cuando se conecte).
+- Cada push a `main` publica en https://upscales.wesleycaicedo.com (desde el 20/10/2026; repo `Losweb/losauthority-X-nuvvora`).
+- **No desplegar desde el Mac**: el Worker `losauthority-x-nuvvora` está en la cuenta de Cloudflare conectada al repo, y `wrangler` en el Mac tiene sesión con otra cuenta (la de ignaciojaliff29), donde ese Worker no existe. `npm run deploy` crearía un Worker nuevo en la cuenta equivocada.
+- Para ver si un deploy ya está en línea: `https://upscales.wesleycaicedo.com/version.json` termina con los 7 primeros caracteres del último commit de `main`.
 
 ## Qué hay en el repo
 
@@ -14,10 +16,10 @@ El frontend (React + Vite 6) se publica como **Cloudflare Worker con static asse
 |---|---|
 | `package.json` | `vite` 6.4.4, `@vitejs/plugin-react` 5.2.0 (la 6 solo funciona con Vite 8), `@cloudflare/vite-plugin` y `wrangler` |
 | `vite.config.ts` | plugin `cloudflare()`; el build **falla** si faltan `VITE_SUPABASE_URL` o `VITE_SUPABASE_ANON_KEY` (sin ellas la app quedaría en blanco); chunks separados para react, supabase y la librería de UI |
-| `wrangler.jsonc` | nombre `losauthority-v2` (igual que el proyecto en Cloudflare), `assets.directory: "./dist"` y `not_found_handling: "single-page-application"`: cualquier ruta (`/area/...`, `/contratto/:token`, `/stampa/...`) responde con `index.html`. |
+| `wrangler.jsonc` | nombre `losauthority-x-nuvvora` (igual que el proyecto en Cloudflare), `assets.directory: "./dist"` y `not_found_handling: "single-page-application"`: cualquier ruta (`/area/...`, `/contratto/:token`, `/stampa/...`) responde con `index.html`. |
 | `.node-version` | Node 22.16.0 en el build de Cloudflare (`wrangler` necesita Node 22 o más) |
 | `public/_headers` | `noindex`, sin iframes de otros sitios, `nosniff`, el token de los contratos no sale en el Referer |
-| `src/main.tsx` | tras un deploy nuevo, una pestaña vieja que no encuentra un chunk se recarga sola una vez |
+| `src/main.tsx` | tras un deploy nuevo, una pestaña vieja que no encuentra un chunk muestra el aviso de nueva versión (ver abajo) |
 
 `npm run build` deja en `dist/` la web y un `wrangler.json` generado (que no se publica: lo excluye `dist/.assetsignore`). `npx wrangler deploy` usa ese archivo.
 
@@ -46,6 +48,19 @@ npm run build            # usa el .env local
 npx wrangler login
 npx wrangler deploy
 ```
+
+## Aviso de nueva versión (desde el 20/10/2026)
+
+Cloudflare sirve la versión nueva a quien abre o recarga el sitio después de un deploy, pero una pestaña que ya estaba abierta sigue con el código viejo. Para eso:
+
+- Cada build tiene una versión: la hora UTC del build, más el commit cuando lo pasa Workers Builds (`WORKERS_CI_COMMIT_SHA`). Va dentro del código (`__VERSIONE_APP__`, `define` en `vite.config.ts`) y en `/version.json`, que escribe el plugin `fileVersione` de `vite.config.ts` junto a `index.html`.
+- `public/_headers` sirve `/version.json` con `Cache-Control: no-store`.
+- La app abierta consulta `/version.json` a los 20 s de abrirse, cada 5 minutos con la pestaña visible, al volver a la pestaña (máximo una vez por minuto) y cuando vuelve la red (`src/shared/hooks/useNuovaVersione.ts`). En `npm run dev` no consulta nada.
+- Si la versión publicada no es la suya, aparece el popup a pantalla completa «C'è una nuova versione» (`src/shared/components/AvvisoNuovaVersione.tsx`): no se cierra con X, Esc ni clic fuera, y el resto de la página queda inerte. Lo mismo pasa cuando un trozo de código del deploy anterior ya no existe (`vite:preloadError`, `src/main.tsx`).
+- «Aggiorna ora» vacía Cache Storage y los service worker y recarga la misma página con `?_v=<versión>`, así el navegador pide el HTML nuevo; al arrancar, `?_v=` se quita de la dirección. La sesión no se pierde.
+- Si tras dos actualizaciones la versión sigue sin coincidir, el popup deja de bloquear para esa versión durante la sesión, para no encerrar a nadie en un bucle si un deploy queda a medias.
+
+Probado el 20/10/2026 sobre el build de producción con `vite preview` y Chrome headless, simulando el deploy nuevo al interceptar `/version.json`: popup solo con versión distinta, no se cierra, foco en el botón, recarga con `?_v=` que luego se quita, freno tras dos intentos, popup también con `vite:preloadError` y en el teléfono.
 
 ## En Supabase, antes de dar el link a nadie
 
