@@ -3,7 +3,7 @@ import { Palette, RotateCcw } from "lucide-react";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
 import { Button } from "@/shared/components/ui/button";
 import { scorriChatInFondo } from "../scorriChat";
-import type { Idea, Messaggio, Stile } from "../types";
+import { ERRORE_FERMATA, type Idea, type Messaggio, type Stile } from "../types";
 import { CardIdea } from "./CardIdea";
 import { PensieroAura } from "./PensieroAura";
 
@@ -31,7 +31,8 @@ function BollaCliente({ testo, stile }: { testo: string; stile?: string | null }
           <Palette className="size-3" aria-hidden /> Stile · {stile}
         </span>
       ) : null}
-      <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap text-primary-foreground">
+      {/* La selezione globale è dello stesso colore della bolla: qui si inverte, o il testo evidenziato sparisce. */}
+      <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap text-primary-foreground selection:bg-(--on-action) selection:text-(--action)">
         {testo}
       </p>
     </div>
@@ -79,7 +80,9 @@ export function FlussoMessaggi({
                   ) : null}
                   {m.stato === "errore" ? (
                     <div className="flex flex-wrap items-center gap-3">
-                      <p className="text-sm text-muted-foreground">Aura non è riuscita a rispondere{m.errore ? ` (${m.errore.toLowerCase()})` : ""}.</p>
+                      <p className="text-sm text-muted-foreground">
+                        {m.errore === ERRORE_FERMATA ? "Hai fermato Aura." : `Aura non è riuscita a rispondere${m.errore ? ` (${m.errore.toLowerCase()})` : ""}.`}
+                      </p>
                       <Button size="sm" variant="outline" disabled={occupato} onClick={() => onRiprova(m)}>
                         <RotateCcw aria-hidden /> Riprova
                       </Button>
