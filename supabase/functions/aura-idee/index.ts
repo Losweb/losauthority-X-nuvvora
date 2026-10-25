@@ -185,7 +185,8 @@ Deno.serve(async (req: Request) => {
     const testo = await streamAnthropicText({
       system: SYSTEM,
       user: costruisciPrompt({ ...dati, stile, messaggio }),
-      maxTokens: 3000,
+      // 5 script da ~160 parole + la risposta stanno larghi in 4000.
+      maxTokens: 4000,
       tag: "aura-idee",
       utente: c.id,
       signal: req.signal,
