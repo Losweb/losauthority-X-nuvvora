@@ -6,6 +6,9 @@ export type Idea = Tables<"idee">;
 /** Pagina "Stili": un format che Aura ha imparato dagli script del cliente e che riusa in Crea idee. */
 export type Stile = Tables<"stili">;
 
+/** `idee_messaggi.errore` quando il cliente ferma Aura con il tasto stop (lo scrive aura-idee). */
+export const ERRORE_FERMATA = "Fermata";
+
 export type StatoIdea = "proposta" | "salvata" | "usata" | "scartata";
 
 export const ETICHETTA_STATO_IDEA: Record<StatoIdea, string> = {

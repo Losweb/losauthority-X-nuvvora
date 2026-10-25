@@ -18,6 +18,21 @@ export class ErroreEdge extends Error {
   }
 }
 
+export interface OpzioniInvoca {
+  /** Per fermare la richiesta (tasto stop): la funzione vede la connessione chiusa e può smettere di lavorare. */
+  signal?: AbortSignal;
+}
+
+/** La richiesta è stata fermata dall'utente: non è un errore da mostrare. */
+export class InvioFermato extends Error {
+  constructor() {
+    super("Richiesta fermata");
+    this.name = "InvioFermato";
+  }
+}
+
+export const eInvioFermato = (e: unknown): e is InvioFermato => e instanceof InvioFermato;
+
 async function messaggioDalContesto(error: unknown): Promise<string | null> {
   if (!(error instanceof FunctionsHttpError)) return null;
   const ctx: unknown = error.context;
@@ -38,13 +53,18 @@ async function messaggioDalContesto(error: unknown): Promise<string | null> {
 export async function invocaFunzioneSicura<T>(
   nome: string,
   body: Record<string, unknown>,
+  opzioni: OpzioniInvoca = {},
 ): Promise<RispostaEdge<T>> {
-  let esito = await supabase.functions.invoke<RispostaEdge<T>>(nome, { body });
+  const { signal } = opzioni;
+  let esito = await supabase.functions.invoke<RispostaEdge<T>>(nome, { body, signal });
+  // Fermata dall'utente: niente secondo tentativo, chi chiama lo riconosce con `eInvioFermato`.
+  if (signal?.aborted) throw new InvioFermato();
   if (esito.error instanceof FunctionsFetchError) {
     // Safari: la prima richiesta dopo una pausa può morire con "Load failed" su una connessione
     // HTTP/3 ormai chiusa, PRIMA di partire (e Safari non ritenta i POST). Un secondo tentativo basta.
     await new Promise((r) => setTimeout(r, 700));
-    esito = await supabase.functions.invoke<RispostaEdge<T>>(nome, { body });
+    esito = await supabase.functions.invoke<RispostaEdge<T>>(nome, { body, signal });
+    if (signal?.aborted) throw new InvioFermato();
   }
   const { data, error } = esito;
   if (error) {
@@ -61,8 +81,8 @@ export async function invocaFunzioneSicura<T>(
  * Se la funzione risponde `{ ok:false, error }` (anche con status 4xx/5xx)
  * lancia un `ErroreEdge` con quel messaggio, da mostrare all'utente.
  */
-export async function invocaEdge<T>(nome: string, body: Record<string, unknown>): Promise<{ ok: true } & T> {
-  const r = await invocaFunzioneSicura<T>(nome, body);
+export async function invocaEdge<T>(nome: string, body: Record<string, unknown>, opzioni: OpzioniInvoca = {}): Promise<{ ok: true } & T> {
+  const r = await invocaFunzioneSicura<T>(nome, body, opzioni);
   if (!r.ok) throw new ErroreEdge(r.error || "Operazione non riuscita.");
   return r;
 }
@@ -77,6 +97,7 @@ export function messaggioErrore(e: unknown): string {
 /** onError standard per le mutation che chiamano una Edge Function. */
 export function erroreMutation(titolo: string) {
   return (error: unknown) => {
+    if (eInvioFermato(error)) return;
     toast.error(titolo, { description: messaggioErrore(error) });
     logDev(error);
   };

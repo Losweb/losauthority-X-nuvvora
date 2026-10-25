@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUp, Palette, X } from "lucide-react";
+import { ArrowUp, Mic, Palette, Square, X } from "lucide-react";
 import { Aura, useAuraStatus } from "@/shared/components/aura";
+import { useDettatura } from "@/shared/hooks/useDettatura";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Stile } from "../types";
@@ -9,6 +10,8 @@ import { MenuStili } from "./MenuStili";
 interface ComposerAuraProps {
   inAttesa: boolean;
   onInvia: (testo: string) => void;
+  /** Tasto stop al posto di «Invia» mentre Aura lavora: senza, durante l'attesa resta «Invia» disabilitato. */
+  onFerma?: () => void;
   /** Testo da inserire dall'esterno (spunti). */
   suggerito?: string;
   onSuggeritoUsato?: () => void;
@@ -50,11 +53,13 @@ function queryComando(testo: string): string | null {
 /**
  * Il composer di Seto con il volto di Aura (AURA_MANUALE): Aura ascolta mentre si scrive (un'onda a
  * ogni tasto), fa un cenno e «pensa» all'invio, pulsa quando la risposta arriva e torna a riposo.
- * Invio manda, Shift+Invio a capo, "/" richiama uno stile.
+ * Invio manda, Shift+Invio a capo, "/" richiama uno stile. Il microfono detta il messaggio
+ * (riconoscimento vocale del browser), lo stop interrompe Aura mentre risponde.
  */
 export function ComposerAura({
   inAttesa,
   onInvia,
+  onFerma,
   suggerito,
   onSuggeritoUsato,
   stili = [],
@@ -69,19 +74,25 @@ export function ComposerAura({
   const aura = useAuraStatus();
   const { sent, speaking, done } = aura;
   const attesaPrecedente = useRef(inAttesa);
+  const dettatura = useDettatura((t) => {
+    setTesto(t.slice(0, MAX));
+    aura.typing();
+  });
+  const fermaDettatura = dettatura.ferma;
 
   // Lo stato di Aura segue quello che succede davvero: inizio dell'attesa → cenno + pensa; fine → parla, poi riposo.
   useEffect(() => {
     if (inAttesa === attesaPrecedente.current) return;
     attesaPrecedente.current = inAttesa;
     if (inAttesa) {
+      fermaDettatura();
       sent();
       return;
     }
     speaking();
     const timer = window.setTimeout(done, PARLA_MS);
     return () => window.clearTimeout(timer);
-  }, [inAttesa, sent, speaking, done]);
+  }, [inAttesa, sent, speaking, done, fermaDettatura]);
 
   if (suggerito && testo !== suggerito) {
     setTesto(suggerito);
@@ -110,6 +121,7 @@ export function ComposerAura({
   function invia() {
     const t = testo.trim();
     if (t.length < 3 || inAttesa || menuAperto) return;
+    dettatura.ferma();
     onInvia(t);
     setTesto("");
   }
@@ -195,9 +207,29 @@ export function ComposerAura({
           Invio per mandare · Shift+Invio per andare a capo{onStileChange ? " · / per usare un tuo stile" : ""}
         </p>
         <div className="ml-auto flex items-center gap-2">
-          <Button size="icon" aria-label="Invia ad Aura" disabled={inAttesa || menuAperto || testo.trim().length < 3} onClick={invia}>
-            <ArrowUp aria-hidden />
-          </Button>
+          {dettatura.supportata ? (
+            <Button
+              size="icon"
+              variant={dettatura.attiva ? "default" : "ghost"}
+              aria-label={dettatura.attiva ? "Smetti di dettare" : "Detta il messaggio"}
+              title={dettatura.attiva ? "Smetti di dettare" : "Detta il messaggio"}
+              aria-pressed={dettatura.attiva}
+              disabled={inAttesa}
+              className={cn(dettatura.attiva ? "animate-pulse" : "text-muted-foreground")}
+              onClick={() => (dettatura.attiva ? dettatura.ferma() : dettatura.avvia(testo))}
+            >
+              <Mic aria-hidden />
+            </Button>
+          ) : null}
+          {inAttesa && onFerma ? (
+            <Button size="icon" aria-label="Ferma Aura" title="Ferma Aura" onClick={onFerma}>
+              <Square className="fill-current" aria-hidden />
+            </Button>
+          ) : (
+            <Button size="icon" aria-label="Invia ad Aura" disabled={inAttesa || menuAperto || testo.trim().length < 3} onClick={invia}>
+              <ArrowUp aria-hidden />
+            </Button>
+          )}
         </div>
       </div>
     </div>
