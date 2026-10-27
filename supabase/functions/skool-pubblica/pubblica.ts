@@ -77,12 +77,38 @@ function testoPiatto(md: string): string {
     .trim();
 }
 
-/** La descrizione per il catalogo `lezioni`: apertura + righe «tempo titolo» (le usa Wesley Coach per il minuto). */
+/** Titolo del capitolo per il catalogo: testo piatto, senza l'emoji iniziale. */
+function titoloPiatto(titolo: string): string {
+  return testoPiatto(titolo).replace(/^[\p{Extended_Pictographic}\u{FE0F}\u{200D}\s]+/u, "").trim();
+}
+
+/** Toglie dal testo libero i «10:30» che `aura-coach/capitoli.ts` scambierebbe per l'inizio di un capitolo. */
+const senzaTempi = (testo: string) => testo.replace(/(\d):(\d{2})/g, "$1.$2");
+
+/** Taglia a `max` caratteri senza spezzare l'ultima parola. */
+function tagliaAParola(testo: string, max: number): string {
+  if (testo.length <= max) return testo;
+  const taglio = testo.slice(0, max);
+  const spazio = taglio.lastIndexOf(" ");
+  return `${(spazio > max * 0.6 ? taglio.slice(0, spazio) : taglio).trim()}…`;
+}
+
+/**
+ * La descrizione per il catalogo `lezioni`. Con i capitoli: apertura e poi
+ * «tempo titolo» di ogni capitolo, il formato che `aura-coach/capitoli.ts`
+ * legge per dire «guarda dal minuto 27:40». I capitoli entrano sempre interi:
+ * è l'apertura ad accorciarsi per stare nei 2000 caratteri.
+ */
 export function descrizioneCatalogo(v: VideoDaPubblicare, capitoli: Capitolo[]): string {
-  const righe = [testoPiatto(v.apertura ?? "")];
-  if (capitoli.length > 0) righe.push(capitoli.map((c) => `${tempo(c.inizio_sec)} ${testoPiatto(c.titolo)}`).join(" "));
-  else if (v.riassunto) righe.push(testoPiatto(v.riassunto));
-  return righe.filter(Boolean).join(" ").slice(0, MAX_DESCRIZIONE_CATALOGO);
+  const apertura = senzaTempi(testoPiatto(v.apertura ?? ""));
+  if (capitoli.length === 0) {
+    const resto = v.riassunto ? senzaTempi(testoPiatto(v.riassunto)) : "";
+    return [apertura, resto].filter(Boolean).join(" ").slice(0, MAX_DESCRIZIONE_CATALOGO);
+  }
+  const indice = capitoli.map((c) => `${tempo(c.inizio_sec)} ${senzaTempi(titoloPiatto(c.titolo))}`).join(" ");
+  const spazio = MAX_DESCRIZIONE_CATALOGO - indice.length - 1;
+  const testa = spazio >= 60 ? tagliaAParola(apertura, spazio) : "";
+  return (testa ? `${testa} ${indice}` : indice).slice(0, MAX_DESCRIZIONE_CATALOGO);
 }
 
 export function urlLezione(corsoNome: string, pageId: string): string {

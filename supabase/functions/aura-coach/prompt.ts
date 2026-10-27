@@ -110,7 +110,7 @@ export function lezioniPertinenti(lezioni: Lezione[], messaggio: string): Lezion
 function rigaLezione(l: Lezione): string {
   const capitoli = estraiCapitoli(l.descrizione);
   if (capitoli.length > 0) {
-    return `[${l.id}] ${l.titolo} — capitoli: ${taglia(capitoli.map((c) => `${c.tempo} ${c.titolo}`).join(" · "), 900)}`;
+    return `[${l.id}] ${l.titolo} — capitoli: ${taglia(capitoli.map((c) => `${c.tempo} ${c.titolo}`).join(" · "), 1600)}`;
   }
   const descr = l.descrizione?.trim() ? ` — ${taglia(l.descrizione.replace(/\s+/g, " ").trim(), 260)}` : "";
   return `[${l.id}] ${l.titolo}${descr}`;

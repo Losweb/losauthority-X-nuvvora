@@ -2,7 +2,8 @@
  * Aura scrive il testo della lezione dalla trascrizione, con la regola decisa
  * dall'utente (12/10/2026, soglia abbassata a 20 minuti il 27/10/2026):
  *  - video da 20 minuti in su → CAPITOLI per tema, ognuno con il minuto di inizio
- *    (servono a capire di cosa si parla e dove);
+ *    (servono a capire di cosa si parla e dove; li usa Wesley Coach per dire a
+ *    un cliente da che minuto guardare: per questo sono fitti e con titoli concreti);
  *  - sotto i 20 minuti → RIASSUNTO di cosa si è detto.
  * In entrambi i casi un'apertura (2-3 frasi) e le parole chiave per il catalogo.
  * Dal 15/10/2026 (richiesta dell'utente: il testo era «troppo basico») il testo
@@ -55,11 +56,11 @@ const PAROLE_CHIAVE = `«parole_chiave» = da 5 a 12 parole o espressioni (minus
 function consegna(v: Video): string {
   const durata = tempo(v.durata_sec);
   if (v.durata_sec >= SOGLIA_CAPITOLI_SEC) {
-    return `Il video dura ${durata}: va diviso in CAPITOLI per i temi importanti, in ordine di tempo (da 3 a 15 capitoli secondo quanti temi veri ci sono; un capitolo ogni 4-12 minuti è un buon ritmo). I capitoli servono a capire di cosa si parla e da che minuto.
+    return `Il video dura ${durata}: va diviso in CAPITOLI, in ordine di tempo: un capitolo ogni volta che Wesley cambia argomento o risponde a una domanda diversa (di solito ogni 3-8 minuti; da 3 a 20 capitoli). I capitoli servono a ritrovare il minuto ESATTO in cui si parla di una cosa: chi ha un dubbio deve poter andare dritto al punto, quindi non unire in un capitolo due argomenti diversi.
 Per ogni capitolo:
 - «inizio» = il tempo «h:mm:ss» della riga della trascrizione in cui quel tema comincia;
-- «titolo» = UN'emoji + massimo 8 parole che dicono il tema (es. «🎯 Come qualificare il cliente prima della call»); se è un passaggio di una procedura: «🔑 Step 2 — Inserire la chiave API»;
-- «testo» = markdown, da 40 a 120 parole: cosa dice Wesley in quel pezzo. Se spiega come fare qualcosa, i passaggi in elenco «- »; se spiega un'idea, 2-3 frasi corte con il **grassetto** sulle parole chiave. Chiudi con UNA riga speciale se c'è materia: «💡 Nota: …», «⚠️ Attenzione: …», «💬 Concetto chiave: …» o «✅ Risultato: …». Niente titoli «##» dentro il testo del capitolo (il titolo c'è già).
+- «titolo» = UN'emoji + massimo 8 parole che dicono il tema in modo concreto, con le parole che userebbe chi cerca proprio quella risposta (es. «🎯 Come qualificare il cliente prima della call», non «🎯 Il cliente»); se è un passaggio di una procedura: «🔑 Step 2 — Inserire la chiave API»;
+- «testo» = markdown, da 30 a 100 parole: cosa dice Wesley in quel pezzo. Se spiega come fare qualcosa, i passaggi in elenco «- »; se spiega un'idea, 2-3 frasi corte con il **grassetto** sulle parole chiave. Chiudi con UNA riga speciale se c'è materia: «💡 Nota: …», «⚠️ Attenzione: …», «💬 Concetto chiave: …» o «✅ Risultato: …». Niente titoli «##» dentro il testo del capitolo (il titolo c'è già).
 «apertura» = 2-3 frasi: di cosa parla il video e per chi è utile, con il **grassetto** sul tema centrale. Senza titolo e senza emoji.
 ${PAROLE_CHIAVE}
 
