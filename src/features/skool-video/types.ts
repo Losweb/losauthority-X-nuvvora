@@ -9,8 +9,15 @@ export type StatoVideo = SkoolVideo["stato"];
 export const BUCKET_AUDIO = "skool-audio";
 /** Durata di ogni blocco audio (10 minuti ≈ 2,5 MB a 32 kbps: ben sotto i 25 MB di OpenAI). */
 export const BLOCCO_SEC = 600;
-/** Oltre quest'ora Aura scrive i capitoli, sotto il riassunto (regola del 12/10/2026). */
-export const SOGLIA_CAPITOLI_SEC = 3600;
+/** Da 20 minuti in su Aura scrive i capitoli, sotto il riassunto (regola del 12/10/2026, 20 minuti dal 27/10/2026). */
+export const SOGLIA_CAPITOLI_SEC = 20 * 60;
+/** Skool rifiuta i titoli delle lezioni oltre 50 caratteri (stesso limite in `skool-pubblica`). */
+export const MAX_TITOLO_SKOOL = 50;
+
+/** Caratteri visibili del titolo (le emoji contano una). */
+export function lunghezzaTitolo(titolo: string): number {
+  return [...titolo.trim()].length;
+}
 export const MAX_DURATA_SEC = 6 * 3600;
 
 export const ETICHETTA_STATO: Record<string, string> = {
