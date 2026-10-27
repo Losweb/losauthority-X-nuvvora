@@ -1,7 +1,8 @@
 /**
  * Un video in `pubblicazione` → una lezione su Skool: pagina nel corso (o nella
- * cartella) scelto, corpo in markdown (apertura + capitoli o riassunto) e la
- * trascrizione intera nel campo «transcript» di Skool. Poi la lezione entra nel
+ * cartella) scelto e corpo in markdown (apertura + capitoli o riassunto). La
+ * trascrizione NON va su Skool (decisione dell'utente, 27/10/2026): resta nel
+ * gestionale e serve solo ad Aura per scrivere il testo. Poi la lezione entra nel
  * catalogo `lezioni` (così Aura e Wesley Coach la conoscono subito) e Telegram
  * avvisa con il link: il video lo carica Wesley a mano nella lezione.
  */
@@ -20,7 +21,6 @@ export interface VideoDaPubblicare {
   cartella_id: string | null;
   durata_sec: number;
   tentativi: number;
-  trascrizione: string | null;
   tipo_testo: "capitoli" | "riassunto" | null;
   apertura: string | null;
   riassunto: string | null;
@@ -34,10 +34,10 @@ export interface Capitolo {
 }
 
 export const COLONNE_PUBBLICA =
-  "id, titolo, corso_id, corso_nome, corso_titolo, cartella_id, durata_sec, tentativi, trascrizione, tipo_testo, apertura, riassunto, parole_chiave";
+  "id, titolo, corso_id, corso_nome, corso_titolo, cartella_id, durata_sec, tentativi, tipo_testo, apertura, riassunto, parole_chiave";
 
-/** Skool accetta transcript lunghi, ma oltre tanto conviene tagliare (il testo intero resta nel gestionale). */
-const MAX_TRANSCRIPT = 200_000;
+/** Skool rifiuta i titoli oltre 50 caratteri (HTTP 422 «Title is too long»): le lezioni esistenti arrivano a 50. */
+export const MAX_TITOLO_SKOOL = 50;
 const MAX_DESCRIZIONE_CATALOGO = 2000;
 
 function tempo(sec: number): string {
@@ -100,6 +100,15 @@ async function chiudiInErrore(admin: SupabaseClient, v: VideoDaPubblicare, messa
   await admin.from("skool_video").update({ stato: "errore", errore: messaggio.slice(0, 500), avviato_il: null }).eq("id", v.id);
 }
 
+/**
+ * Su Skool non è nato nulla: il video torna in `bozza` con il motivo, così si
+ * corregge (es. il titolo) e si ripubblica senza far riscrivere il testo ad Aura.
+ */
+async function tornaInBozza(admin: SupabaseClient, v: VideoDaPubblicare, messaggio: string, registra = true): Promise<void> {
+  if (registra) await logError("skool-pubblica", messaggio, { video: v.id, titolo: v.titolo }, { silent: true });
+  await admin.from("skool_video").update({ stato: "bozza", errore: messaggio.slice(0, 500), avviato_il: null, tentativi: 0 }).eq("id", v.id);
+}
+
 export async function pubblicaVideo(admin: SupabaseClient, v: VideoDaPubblicare): Promise<boolean> {
   const { data: righe, error: eCap } = await admin
     .from("skool_video_capitoli")
@@ -113,21 +122,19 @@ export async function pubblicaVideo(admin: SupabaseClient, v: VideoDaPubblicare)
     await chiudiInErrore(admin, v, "Il testo della lezione è vuoto: fallo scrivere ad Aura prima di pubblicare.");
     return false;
   }
+  const lunghezzaTitolo = [...v.titolo.trim()].length;
+  if (lunghezzaTitolo > MAX_TITOLO_SKOOL) {
+    await tornaInBozza(admin, v, `Il titolo ha ${lunghezzaTitolo} caratteri: Skool ne accetta al massimo ${MAX_TITOLO_SKOOL}. Accorcialo e pubblica di nuovo.`, false);
+    return false;
+  }
 
   const creata = await azione(admin, "classroom:createPage", { courseId: v.corso_id, parentId: v.cartella_id ?? v.corso_id, title: v.titolo });
   const pageId = creata.ok ? idDi(creata.items[0]) : null;
   if (!creata.ok || !pageId) {
-    await chiudiInErrore(admin, v, `Skool non ha creato la lezione: ${creata.ok ? "risposta senza id" : creata.dettaglio}`);
+    await tornaInBozza(admin, v, `Skool non ha creato la lezione: ${creata.ok ? "risposta senza id" : creata.dettaglio}`);
     return false;
   }
-  // Prima con il transcript; se Skool lo rifiuta, almeno il corpo.
-  const transcript = (v.trascrizione ?? "").slice(0, MAX_TRANSCRIPT);
-  let corpoEsito = await azione(admin, "classroom:setBody", { pageId, title: v.titolo, bodyMarkdown: corpo, transcript });
-  let senzaTranscript = false;
-  if (!corpoEsito.ok && transcript) {
-    corpoEsito = await azione(admin, "classroom:setBody", { pageId, title: v.titolo, bodyMarkdown: corpo });
-    senzaTranscript = corpoEsito.ok;
-  }
+  const corpoEsito = await azione(admin, "classroom:setBody", { pageId, title: v.titolo, bodyMarkdown: corpo });
   const url = urlLezione(v.corso_nome, pageId);
   if (!corpoEsito.ok) {
     await admin.from("skool_video").update({ skool_page_id: pageId, skool_url: url }).eq("id", v.id);
@@ -138,7 +145,7 @@ export async function pubblicaVideo(admin: SupabaseClient, v: VideoDaPubblicare)
   const adesso = new Date().toISOString();
   const { error: eUp } = await admin
     .from("skool_video")
-    .update({ stato: "pubblicato", skool_page_id: pageId, skool_url: url, pubblicato_il: adesso, errore: senzaTranscript ? "Pubblicata senza transcript (Skool lo ha rifiutato)." : null, avviato_il: null, tentativi: 0 })
+    .update({ stato: "pubblicato", skool_page_id: pageId, skool_url: url, pubblicato_il: adesso, errore: null, avviato_il: null, tentativi: 0 })
     .eq("id", v.id);
   if (eUp) throw eUp;
 
@@ -159,7 +166,7 @@ export async function pubblicaVideo(admin: SupabaseClient, v: VideoDaPubblicare)
   if (eLez) await logError("skool-pubblica:catalogo", eLez, { video: v.id }, { silent: true });
 
   await notifyTelegram(
-    `✅ Lezione creata su Skool\n«${v.titolo}» in ${v.corso_titolo}${senzaTranscript ? " (senza transcript)" : ""}.\nOra carica il video nella lezione:\n👉 ${url}`,
+    `✅ Lezione creata su Skool\n«${v.titolo}» in ${v.corso_titolo}.\nOra carica il video nella lezione:\n👉 ${url}`,
   );
   return true;
 }

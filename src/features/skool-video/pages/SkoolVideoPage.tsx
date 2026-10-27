@@ -10,7 +10,7 @@ import { useElencoVideo } from "../hooks/useSkoolVideo";
 const PASSI: Array<[string, string]> = [
   ["1 · Carichi il video", "Da qui parte solo l'audio: il video resta sul tuo computer."],
   ["2 · Aura trascrive e scrive", "Oltre l'ora: capitoli per tema con il minuto. Sotto l'ora: riassunto di cosa si è detto."],
-  ["3 · Pubblichi su Skool", "La lezione nasce con testo e transcript nel corso scelto: tu ci aggiungi il video."],
+  ["3 · Pubblichi su Skool", "La lezione nasce con il testo nel corso scelto: tu ci aggiungi il video."],
 ];
 
 /** Pagina «Skool Video» (tutto il team, staff compreso): la lista dei video e il pulsante per caricarne uno. */

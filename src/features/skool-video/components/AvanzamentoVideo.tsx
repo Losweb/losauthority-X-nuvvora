@@ -39,7 +39,7 @@ export function AvanzamentoVideo({ video }: { video: VideoCompleto }) {
       <div className="grid gap-2 rounded-lg border bg-card p-4">
         <p className="text-sm font-medium">Creo la lezione su Skool</p>
         <Progress value={null} />
-        <p className="text-xs text-muted-foreground">Pochi secondi: corpo e transcript vanno nella classroom.</p>
+        <p className="text-xs text-muted-foreground">Pochi secondi: il testo va nella classroom.</p>
       </div>
     );
   }
