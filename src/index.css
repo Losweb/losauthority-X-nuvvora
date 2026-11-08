@@ -205,6 +205,7 @@
 
   --radius: 16px;
   --sidebar-w: 232px;
+  --sidebar-w-compatta: 72px;
   --header-h: 64px;
 
   /* La finestra Seto riempie tutto lo schermo (decisione dell'utente, 16/10/2026: niente tela sfumata
@@ -271,6 +272,14 @@
       animation-duration: 0.001ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.001ms !important;
+    }
+    /* Pannelli laterali (Sheet: il popup del Workflow, il menu ☰…): entrano ed escono con uno
+       scivolamento breve anche con «Riduci movimento» — richiesta dell'utente dell'08/11/2026. */
+    [data-slot="sheet-content"] {
+      transition-duration: 220ms !important;
+    }
+    [data-slot="sheet-overlay"] {
+      transition-duration: 180ms !important;
     }
     /* Eccezione (stesso layer, così vince per specificità): la linea del tempo del
        piano d'azione tiene un movimento minimo — richiesta esplicita del 29/09/2026. */
