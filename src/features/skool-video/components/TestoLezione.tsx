@@ -15,7 +15,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { useCambiaStatoVideo, useSalvaTesto, type VideoCompleto } from "../hooks/useSkoolVideo";
-import { tempo } from "../types";
+import { lunghezzaTitolo, MAX_TITOLO_SKOOL, tempo } from "../types";
 
 const NOTA_MARKDOWN = "Il testo è in markdown, come lo mostra Skool: «## 🔑 Titolo» per le sezioni, «- » per gli elenchi, **grassetto**, righe «💡 Nota:», «⚠️ Attenzione:», «✅ Risultato:».";
 
@@ -38,6 +38,7 @@ export function TestoLezione({ video }: { video: VideoCompleto }) {
   );
   const [confermaPubblica, setConfermaPubblica] = useState(false);
   const bozza = video.stato === "bozza";
+  const titoloTroppoLungo = lunghezzaTitolo(titolo) > MAX_TITOLO_SKOOL;
   const pubblicato = video.stato === "pubblicato";
   const modificato =
     titolo !== video.titolo ||
@@ -69,15 +70,23 @@ export function TestoLezione({ video }: { video: VideoCompleto }) {
       {pubblicato && video.skool_url ? (
         <div className="rounded-lg border border-status-active/40 bg-status-active-soft p-4">
           <p className="font-medium">La lezione è su Skool. Ora carica il video dentro la lezione.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Apri la lezione, aggiungi il video (caricalo o incolla il link) e salva: testo e transcript ci sono già.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Apri la lezione, aggiungi il video (caricalo o incolla il link) e salva: il testo c'è già.</p>
           <Button className="mt-3" render={<a href={video.skool_url} target="_blank" rel="noreferrer" />}>
             Apri la lezione su Skool <ExternalLink className="size-4" aria-hidden="true" />
           </Button>
         </div>
       ) : null}
+      {bozza && video.errore ? (
+        <p role="alert" className="rounded-lg border border-status-churn/40 bg-status-churn-soft p-3 text-sm">
+          La pubblicazione non è andata: {video.errore}
+        </p>
+      ) : null}
       <div className="grid gap-1.5">
         <Label htmlFor="sv-titolo">Titolo</Label>
-        <Input id="sv-titolo" value={titolo} maxLength={200} onChange={(e) => setTitolo(e.target.value)} />
+        <Input id="sv-titolo" value={titolo} aria-invalid={titoloTroppoLungo} aria-describedby="sv-titolo-nota" onChange={(e) => setTitolo(e.target.value)} />
+        <p id="sv-titolo-nota" className={titoloTroppoLungo ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
+          {lunghezzaTitolo(titolo)}/{MAX_TITOLO_SKOOL} caratteri{titoloTroppoLungo ? ": accorcialo, Skool non accetta titoli più lunghi." : ""}
+        </p>
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="sv-apertura">Apertura</Label>
@@ -118,7 +127,7 @@ export function TestoLezione({ video }: { video: VideoCompleto }) {
             <Button variant="outline" disabled={cambia.isPending} onClick={() => cambia.mutate({ id: video.id, stato: "scrittura" })}>
               <Sparkles className="size-4" aria-hidden="true" /> Riscrivi con Aura
             </Button>
-            <Button disabled={cambia.isPending || salva.isPending} onClick={() => setConfermaPubblica(true)}>
+            <Button disabled={cambia.isPending || salva.isPending || titoloTroppoLungo} onClick={() => setConfermaPubblica(true)}>
               <Upload className="size-4" aria-hidden="true" /> Pubblica su Skool
             </Button>
           </>
@@ -129,7 +138,7 @@ export function TestoLezione({ video }: { video: VideoCompleto }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Pubblicare la lezione su Skool?</AlertDialogTitle>
             <AlertDialogDescription>
-              Creo la lezione «{titolo.trim() || video.titolo}» in {video.cartella_titolo ? `${video.corso_titolo} › ${video.cartella_titolo}` : video.corso_titolo} con questo testo e la trascrizione. Il video lo aggiungi tu dopo, dentro Skool.
+              Creo la lezione «{titolo.trim() || video.titolo}» in {video.cartella_titolo ? `${video.corso_titolo} › ${video.cartella_titolo}` : video.corso_titolo} con questo testo. Il video lo aggiungi tu dopo, dentro Skool.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

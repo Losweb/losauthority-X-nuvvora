@@ -1,8 +1,10 @@
 /**
  * Aura scrive il testo della lezione dalla trascrizione, con la regola decisa
- * dall'utente il 12/10/2026:
- *  - video da 60 minuti in su → CAPITOLI per tema, ognuno con il minuto di inizio;
- *  - sotto i 60 minuti → RIASSUNTO di cosa si è detto.
+ * dall'utente (12/10/2026, soglia abbassata a 20 minuti il 27/10/2026):
+ *  - video da 20 minuti in su → CAPITOLI per tema, ognuno con il minuto di inizio
+ *    (servono a capire di cosa si parla e dove; li usa Wesley Coach per dire a
+ *    un cliente da che minuto guardare: per questo sono fitti e con titoli concreti);
+ *  - sotto i 20 minuti → RIASSUNTO di cosa si è detto.
  * In entrambi i casi un'apertura (2-3 frasi) e le parole chiave per il catalogo.
  * Dal 15/10/2026 (richiesta dell'utente: il testo era «troppo basico») il testo
  * è markdown VISIVO: titoli con emoji, passaggi in elenco, righe 💡/⚠️/💬/✅,
@@ -13,7 +15,7 @@
 import { ANTHROPIC_MODEL, blocchiPrompt, estraiJson, streamAnthropicText } from "../_shared/anthropic.ts";
 import { secondi, tempo, type Video } from "./tipi.ts";
 
-export const SOGLIA_CAPITOLI_SEC = 60 * 60;
+export const SOGLIA_CAPITOLI_SEC = 20 * 60;
 const MAX_TRASCRIZIONE = 400_000;
 const TIMEOUT_MS = 110_000;
 
@@ -54,18 +56,18 @@ const PAROLE_CHIAVE = `«parole_chiave» = da 5 a 12 parole o espressioni (minus
 function consegna(v: Video): string {
   const durata = tempo(v.durata_sec);
   if (v.durata_sec >= SOGLIA_CAPITOLI_SEC) {
-    return `Il video dura ${durata}: va diviso in CAPITOLI per i temi importanti, in ordine di tempo (da 5 a 15 capitoli secondo quanti temi veri ci sono; un capitolo ogni 5-12 minuti è un buon ritmo).
+    return `Il video dura ${durata}: va diviso in CAPITOLI, in ordine di tempo: un capitolo ogni volta che Wesley cambia argomento o risponde a una domanda diversa (di solito ogni 3-8 minuti; da 3 a 20 capitoli). I capitoli servono a ritrovare il minuto ESATTO in cui si parla di una cosa: chi ha un dubbio deve poter andare dritto al punto, quindi non unire in un capitolo due argomenti diversi.
 Per ogni capitolo:
 - «inizio» = il tempo «h:mm:ss» della riga della trascrizione in cui quel tema comincia;
-- «titolo» = UN'emoji + massimo 8 parole che dicono il tema (es. «🎯 Come qualificare il cliente prima della call»); se è un passaggio di una procedura: «🔑 Step 2 — Inserire la chiave API»;
-- «testo» = markdown, da 40 a 120 parole: cosa dice Wesley in quel pezzo. Se spiega come fare qualcosa, i passaggi in elenco «- »; se spiega un'idea, 2-3 frasi corte con il **grassetto** sulle parole chiave. Chiudi con UNA riga speciale se c'è materia: «💡 Nota: …», «⚠️ Attenzione: …», «💬 Concetto chiave: …» o «✅ Risultato: …». Niente titoli «##» dentro il testo del capitolo (il titolo c'è già).
+- «titolo» = UN'emoji + massimo 8 parole che dicono il tema in modo concreto, con le parole che userebbe chi cerca proprio quella risposta (es. «🎯 Come qualificare il cliente prima della call», non «🎯 Il cliente»); se è un passaggio di una procedura: «🔑 Step 2 — Inserire la chiave API»;
+- «testo» = markdown, da 30 a 100 parole: cosa dice Wesley in quel pezzo. Se spiega come fare qualcosa, i passaggi in elenco «- »; se spiega un'idea, 2-3 frasi corte con il **grassetto** sulle parole chiave. Chiudi con UNA riga speciale se c'è materia: «💡 Nota: …», «⚠️ Attenzione: …», «💬 Concetto chiave: …» o «✅ Risultato: …». Niente titoli «##» dentro il testo del capitolo (il titolo c'è già).
 «apertura» = 2-3 frasi: di cosa parla il video e per chi è utile, con il **grassetto** sul tema centrale. Senza titolo e senza emoji.
 ${PAROLE_CHIAVE}
 
 JSON:
 {"apertura":"…","capitoli":[{"inizio":"0:00:00","titolo":"🔑 …","testo":"- …\\n- …\\n\\n💡 Nota: …"}],"parole_chiave":["…"]}`;
   }
-  return `Il video dura ${durata} (meno di un'ora): serve un RIASSUNTO di cosa si è detto, non i capitoli con i minuti.
+  return `Il video dura ${durata} (meno di 20 minuti): serve un RIASSUNTO di cosa si è detto, non i capitoli con i minuti.
 «apertura» = 2-3 frasi: di cosa parla il video e per chi è utile, con il **grassetto** sul tema centrale. Senza titolo e senza emoji.
 «riassunto» = markdown, da 250 a 500 parole, diviso in 3-7 sezioni «## emoji Titolo» che seguono l'ordine in cui Wesley parla (se procede per passaggi: «## 🔗 Step 1 — …», «## 🔑 Step 2 — …»). In ogni sezione: i passaggi pratici in elenco «- », le idee in 1-3 frasi corte con il **grassetto** su parole e numeri che contano, e dove serve una riga speciale «💡 Nota: …», «⚠️ Attenzione: …», «💬 Concetto chiave: …», «✅ Risultato: …». Chiudi con una sezione «## 🎯 …» con cosa resta da fare a chi guarda, SOLO se Wesley lo dice (altrimenti chiudi con l'ultimo tema).
 ${PAROLE_CHIAVE}

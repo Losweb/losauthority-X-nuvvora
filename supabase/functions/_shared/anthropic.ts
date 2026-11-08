@@ -54,6 +54,8 @@ export interface StreamAnthropicOptions {
   utente?: string | null;
   /** Tempo massimo per tutta la risposta (stream compreso): oltre si interrompe e torna null. Facoltativo. */
   timeoutMs?: number;
+  /** Interruzione dall'esterno (di solito `req.signal`: il cliente ha premuto stop): si chiude lo stream e torna null. */
+  signal?: AbortSignal;
 }
 
 /**
@@ -78,7 +80,7 @@ export async function streamAnthropicText(opts: StreamAnthropicOptions): Promise
         "anthropic-version": ANTHROPIC_VERSION,
         "content-type": "application/json",
       },
-      signal: opts.timeoutMs ? AbortSignal.timeout(opts.timeoutMs) : undefined,
+      signal: segnale(opts),
       // toWellFormed: un'emoji spezzata da un taglio (surrogato spaiato) farebbe rifiutare il JSON all'API.
       body: JSON.stringify(
         {
@@ -139,6 +141,12 @@ export async function streamAnthropicText(opts: StreamAnthropicOptions): Promise
   }
   const out = text.trim();
   return out.length > 0 ? out : null;
+}
+
+function segnale(opts: StreamAnthropicOptions): AbortSignal | undefined {
+  const segnali = [opts.timeoutMs ? AbortSignal.timeout(opts.timeoutMs) : null, opts.signal ?? null].filter((s): s is AbortSignal => s !== null);
+  if (segnali.length === 0) return undefined;
+  return segnali.length === 1 ? segnali[0] : AbortSignal.any(segnali);
 }
 
 /** `message_start` porta input e cache; `message_delta` l'output cumulativo. */

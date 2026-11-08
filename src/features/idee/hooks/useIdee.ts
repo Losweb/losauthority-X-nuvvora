@@ -78,12 +78,16 @@ interface RispostaAura {
   idee: Idea[];
 }
 
-type InvioInput =
+type InvioInput = (
   /** stileId = stile della pagina "Stili" richiamato con "/". */
   | { sessioneId: string | null; messaggio: string; stileId?: string | null }
-  | { riprovaId: string; sessioneId: string };
+  | { riprovaId: string; sessioneId: string }
+) & {
+  /** Tasto stop: interrompe la richiesta e aura-idee smette di scrivere. */
+  signal?: AbortSignal;
+};
 
-/** Manda un messaggio ad Aura (o riprova una risposta in errore). Ritorna l'id della sessione. */
+/** Manda un messaggio ad Aura (o riprova una risposta in errore). Ritorna l'id della sessione. Fermato con stop: nessun toast. */
 export function useInviaAdAura(clienteId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -92,7 +96,7 @@ export function useInviaAdAura(clienteId: string) {
         "riprovaId" in input
           ? { riprova_messaggio_id: input.riprovaId }
           : { sessione_id: input.sessioneId, messaggio: input.messaggio, stile_id: input.stileId ?? null };
-      return invocaEdge<RispostaAura>("aura-idee", body);
+      return invocaEdge<RispostaAura>("aura-idee", body, { signal: input.signal });
     },
     onSettled: (data, _err, input) => {
       const sid = data?.sessione_id ?? input.sessioneId;

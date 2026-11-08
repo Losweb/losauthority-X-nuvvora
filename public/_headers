@@ -1,12 +1,13 @@
 # Header di Cloudflare per tutti i file serviti (Workers static assets e Pages leggono questo file).
 # Gestionale privato + pagine contratto con il token nell'URL: niente indicizzazione, niente iframe
-# di altri siti, il token non esce nel Referer verso domini esterni.
+# di altri siti, il token non esce nel Referer verso domini esterni. Il microfono è permesso solo al
+# sito stesso (self): serve alla dettatura nei composer di Aura.
 /*
   X-Robots-Tag: noindex, nofollow
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Permissions-Policy: camera=(), microphone=(self), geolocation=(), payment=(), usb=()
 
 # Il file della versione del build: mai in cache, così una scheda aperta da prima di un deploy
 # vede subito che ne è uscita una nuova e mostra il popup «C'è una nuova versione».

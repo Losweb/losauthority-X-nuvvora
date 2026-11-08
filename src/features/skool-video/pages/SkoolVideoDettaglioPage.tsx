@@ -96,7 +96,7 @@ export default function SkoolVideoDettaglioPage() {
   );
 }
 
-/** Un video pubblicato può avere una nota (es. transcript rifiutato da Skool). */
+/** Un video pubblicato può avere una nota (es. un avviso di Skool). */
 function pubblicatoConAvviso(stato: string, errore: string | null) {
   if (stato !== "pubblicato" || !errore) return null;
   return <p className="rounded-lg border border-status-expiring/40 bg-status-expiring-soft p-3 text-sm">{errore}</p>;

@@ -10,6 +10,8 @@
  * finisce 'completato' o 'errore' (con il motivo). Le proposte vanno in `idee`
  * con stato 'proposta': è il cliente che le conferma.
  * Rate limit: aura_help_allowed(user, 30, 3600).
+ * Tasto stop: il browser chiude la richiesta → req.signal interrompe lo stream di Anthropic
+ * (niente altri token) e la riga di Aura finisce 'errore' con errore = ERRORE_FERMATA.
  */
 import { gestisciErrore, HttpError, json, leggiBody, preflight } from "../_shared/http.ts";
 import { adminClient, richiediUtente } from "../_shared/supabase.ts";
@@ -30,6 +32,8 @@ type Body = {
 const MAX_MESSAGGIO = 4000;
 const MAX_STORICO = 12;
 const MSG_ERRORE_AURA = "Aura non riesce a rispondere in questo momento. Riprova tra poco.";
+/** Stesso testo di ERRORE_FERMATA nel frontend (features/idee/types.ts): lì diventa «Hai fermato Aura». */
+const ERRORE_FERMATA = "Fermata";
 
 interface Messaggio {
   id: string;
@@ -178,7 +182,19 @@ Deno.serve(async (req: Request) => {
 
     // In riprova lo stile potrebbe essere stato eliminato nel frattempo: si prosegue senza.
     const [dati, stile] = await Promise.all([contesto(admin, c.id, sessioneId, auraId), stilePer(admin, c.id, stileId).catch(() => null)]);
-    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, stile, messaggio }), maxTokens: 3000, tag: "aura-idee", utente: c.id });
+    const testo = await streamAnthropicText({
+      system: SYSTEM,
+      user: costruisciPrompt({ ...dati, stile, messaggio }),
+      // 5 script da ~160 parole + la risposta stanno larghi in 4000.
+      maxTokens: 4000,
+      tag: "aura-idee",
+      utente: c.id,
+      signal: req.signal,
+    });
+    if (req.signal.aborted) {
+      await admin.from("idee_messaggi").update({ stato: "errore", errore: ERRORE_FERMATA, contenuto: "" }).eq("id", auraId);
+      return json({ ok: false, error: "Fermata dal cliente." }, 499);
+    }
     if (!testo) {
       await admin.from("idee_messaggi").update({ stato: "errore", errore: "Nessuna risposta dal modello" }).eq("id", auraId);
       await logError("aura-idee:anthropic", "Nessuna risposta da Aura", { user: c.id, sessioneId }, { silent: true });

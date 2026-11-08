@@ -10,7 +10,7 @@ import { Progress } from "@/shared/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useCaricaVideo, type FaseCaricamento } from "../hooks/useCaricaVideo";
 import { useCartelleSkool, useCorsiSkool } from "../hooks/useSkoolVideo";
-import { dimensioneLeggibile } from "../types";
+import { dimensioneLeggibile, lunghezzaTitolo, MAX_TITOLO_SKOOL } from "../types";
 
 interface NuovoVideoDialogProps {
   aperto: boolean;
@@ -20,7 +20,7 @@ interface NuovoVideoDialogProps {
 const NESSUNA_CARTELLA = "";
 
 function titoloDaNomeFile(nome: string): string {
-  return nome.replace(/\.[a-z0-9]{1,5}$/i, "").replace(/[_-]+/g, " ").trim().slice(0, 200);
+  return nome.replace(/\.[a-z0-9]{1,5}$/i, "").replace(/[_-]+/g, " ").trim().slice(0, MAX_TITOLO_SKOOL).trim();
 }
 
 function descrizioneFase(f: FaseCaricamento): { testo: string; percento: number | null } {
@@ -61,7 +61,7 @@ export function NuovoVideoDialog({ aperto, onChiudi }: NuovoVideoDialogProps) {
 
   const corso = corsi.data?.find((c) => c.id === corsoId) ?? null;
   const cartella = cartelle.data?.find((c) => c.id === cartellaId) ?? null;
-  const pronto = !!file && titolo.trim().length >= 3 && !!corso && !!utente && !inCorso;
+  const pronto = !!file && titolo.trim().length >= 3 && lunghezzaTitolo(titolo) <= MAX_TITOLO_SKOOL && !!corso && !!utente && !inCorso;
   const avanzamento = descrizioneFase(fase);
 
   function chiudi() {
@@ -110,7 +110,10 @@ export function NuovoVideoDialog({ aperto, onChiudi }: NuovoVideoDialogProps) {
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="skool-titolo">Titolo della lezione</Label>
-            <Input id="skool-titolo" value={titolo} maxLength={200} disabled={inCorso} onChange={(e) => setTitolo(e.target.value)} />
+            <Input id="skool-titolo" value={titolo} maxLength={MAX_TITOLO_SKOOL} disabled={inCorso} aria-describedby="skool-titolo-nota" onChange={(e) => setTitolo(e.target.value)} />
+            <p id="skool-titolo-nota" className="text-xs text-muted-foreground">
+              {lunghezzaTitolo(titolo)}/{MAX_TITOLO_SKOOL} caratteri: Skool non accetta titoli più lunghi.
+            </p>
           </div>
           <div className="grid gap-1.5">
             <Label>Corso su Skool</Label>
