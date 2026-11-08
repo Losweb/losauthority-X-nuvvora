@@ -4,7 +4,8 @@
  * Body: { messaggio, sessione_id?, stile_id? } oppure { riprova_messaggio_id } per rifare
  * una risposta finita in errore. Risposta: { ok, sessione_id, messaggio_id, risposta, idee }.
  * stile_id = uno stile della pagina "Stili" (tabella stili, richiamato con "/"): entra nel
- * prompt e le proposte lo seguono; si salva sul messaggio del cliente.
+ * prompt con le istruzioni E gli script originali (`script_fonte`, il riferimento esatto) e le
+ * proposte lo seguono; si salva sul messaggio del cliente.
  *
  * Traccia dello stato: la riga di Aura in idee_messaggi nasce 'in_corso' e
  * finisce 'completato' o 'errore' (con il motivo). Le proposte vanno in `idee`
@@ -62,13 +63,15 @@ async function stilePer(admin: SupabaseClient, clienteId: string, stileId: strin
   if (!stileId) return null;
   const { data } = await admin
     .from("stili")
-    .select("titolo, istruzioni")
+    .select("titolo, istruzioni, script_fonte")
     .eq("id", stileId)
     .eq("cliente_id", clienteId)
     .eq("stato", "pronta")
     .maybeSingle();
   if (!data) throw new HttpError(404, "Stile non trovato o non ancora pronto.");
-  return data as StileScelto;
+  const s = data as { titolo: string; istruzioni: string; script_fonte: string[] | null };
+  // Gli script incollati dal cliente entrano nel prompt: sono il riferimento esatto dello stile.
+  return { titolo: s.titolo, istruzioni: s.istruzioni, script: s.script_fonte ?? [] };
 }
 
 /** Riprova: la riga di Aura in errore e il messaggio del cliente che la precede. */

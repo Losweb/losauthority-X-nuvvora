@@ -38,12 +38,12 @@ Come rispondi, SEMPRE in questo ordine:
 [{"titolo": "…", "hook": "…", "script": "…", "tipologia": "virale|consolidazione|vendita|content_series" oppure null}]
 </idee>
    - Da 1 a 3 idee (fino a 5 se il cliente ne chiede di più), diverse tra loro nell'angolo. JSON valido, nessun testo dentro il blocco oltre all'array.
-   - "titolo": nome interno breve (max 80 caratteri). "hook": la prima frase pronta da dire. "script": testo PARLATO completo in prima persona, 100-160 parole, senza titoli né elenchi. "tipologia": una delle quattro, oppure null se l'idea segue un angolo o un format del cliente che non è nessuna delle quattro.
+   - "titolo": nome interno breve (max 80 caratteri). "hook": la prima frase pronta da dire. "script": testo PARLATO completo in prima persona, senza titoli né elenchi (un a capo doppio tra un blocco e l'altro va bene); senza stile scelto 100-160 parole, con uno stile scelto lungo quanto gli script originali dello stile. "tipologia": una delle quattro, oppure null se l'idea segue un angolo o un format del cliente che non è nessuna delle quattro.
    - Le idee nascono dal cliente ideale e dai dolori del cliente, con le SUE parole e i SUOI esempi. Mai inventare numeri o fatti su di lui.
 3. Se fai una domanda invece di proporre, NON mettere il blocco <idee>.
 
 Se il cliente ti chiede di cambiare una proposta (più corta, altro hook, altra tipologia), rispondi con la versione nuova nel blocco <idee>, una sola idea.
-Se nel contesto c'è un blocco STILE SCELTO DAL CLIENTE, ogni idea che proponi segue QUELLO stile: stessa struttura, stesso tipo di hook, stesso ritmo e chiusura, applicati a quanto chiede il messaggio. Lo stile vince sulle abitudini generali.
+Se nel contesto c'è un blocco STILE SCELTO DAL CLIENTE, ogni idea che proponi segue QUELLO stile: stessa struttura, stesso tipo di hook, stesso ritmo e chiusura, applicati a quanto chiede il messaggio. Nel blocco hai le istruzioni dello stile E gli SCRIPT ORIGINALI da cui è nato: sono il tuo riferimento esatto. Rileggili prima di scrivere e imita lunghezza, divisione in paragrafi, formule che tornano, blocchi che non mancano mai e CTA finale; uno script tuo deve poter stare accanto a quelli senza stonare. Non dire MAI che non hai script o esempi di riferimento: li hai, sono nel blocco. Se il cliente dice che ti sei allontanato dallo stile o di «seguire gli script», riparti dagli script originali e riscrivi, non chiedergliene altri. Lo stile vince sulle abitudini generali e sulla lunghezza standard.
 Se nel contesto c'è il blocco KIT BRAND DEL CLIENTE, per colori, font, tono di voce e regole della marca usa SOLO quei dati: non inventare codici colore o font.
 Scrivi in testo semplice: NIENTE markdown, niente asterischi, niente titoli, niente elenchi nella risposta parlata.
 Non promettere risultati. Nessun consiglio legale, medico o finanziario. Niente testo dopo il blocco </idee>.`;
@@ -59,10 +59,39 @@ export interface TopPubblicazione {
   visualizzazioni: number | null;
 }
 
+const taglia = (t: string, n: number) => (t.length > n ? `${t.slice(0, n)}…` : t);
+
 /** Stile della pagina "Stili" richiamato dal cliente con "/" (tabella stili). */
 export interface StileScelto {
   titolo: string;
   istruzioni: string;
+  /** Gli script incollati dal cliente da cui Aura ha imparato lo stile (`stili.script_fonte`): il riferimento esatto. */
+  script: string[];
+}
+
+/** Quanto degli script originali entra nel prompt: ogni script e il totale (caratteri). */
+const MAX_SCRIPT_STILE = 6000;
+const MAX_SCRIPT_STILE_TOTALE = 30000;
+
+/** Il blocco dello stile: istruzioni + script originali numerati (fino al budget), che Aura deve imitare. */
+export function bloccoStile(stile: StileScelto): string {
+  const parti = [`=== STILE SCELTO DAL CLIENTE: "${stile.titolo}" ===`, `--- Istruzioni dello stile ---\n${taglia(stile.istruzioni, 12000)}`];
+  const script: string[] = [];
+  let totale = 0;
+  for (const s of stile.script) {
+    const t = taglia(s.trim(), MAX_SCRIPT_STILE);
+    if (!t) continue;
+    if (totale + t.length > MAX_SCRIPT_STILE_TOTALE) break;
+    totale += t.length;
+    script.push(`[Script originale ${script.length + 1}]\n${t}`);
+  }
+  if (script.length > 0) {
+    parti.push(
+      `--- Script originali da cui nasce lo stile (${script.length}) ---\nRiferimento ESATTO per tono, ritmo, lunghezza, paragrafi e chiusura: ogni script che proponi deve poter stare accanto a questi.\n\n${script.join("\n\n")}`,
+    );
+  }
+  parti.push("Le idee di questa risposta seguono questo stile.");
+  return parti.join("\n\n");
 }
 
 export interface DatiPrompt {
@@ -79,15 +108,11 @@ export interface DatiPrompt {
   messaggio: string;
 }
 
-const taglia = (t: string, n: number) => (t.length > n ? `${t.slice(0, n)}…` : t);
-
-/** Tre tratti per il prompt caching: metodo (fisso), stile+scheda+analisi (fissi nella sessione), idee recenti+pubblicazioni+storico+messaggio. */
+/** Tre tratti per il prompt caching: metodo (fisso), stile (istruzioni + script originali)+scheda+analisi (fissi nella sessione), idee recenti+pubblicazioni+storico+messaggio. */
 export function costruisciPrompt(d: DatiPrompt): Blocco[] {
   const fisso = [`=== METODO DI WESLEY (usa SOLO questo) ===\n${d.conoscenza || "(nessun blocco caricato: usa buon senso e chiedi conferma)"}`];
   const cliente: string[] = [];
-  if (d.stile) {
-    cliente.push(`=== STILE SCELTO DAL CLIENTE: "${d.stile.titolo}" ===\n${taglia(d.stile.istruzioni, 12000)}\n\nLe idee di questa risposta seguono questo stile.`);
-  }
+  if (d.stile) cliente.push(bloccoStile(d.stile));
   cliente.push(`=== CLIENTE: ${d.nome} ===\n--- Scheda onboarding ---${d.scheda}`);
   if (d.analisi) cliente.push(`--- Analisi strategica di Aura ---\n${taglia(d.analisi, 6000)}`);
   if (d.kitBrand) cliente.push(d.kitBrand);
