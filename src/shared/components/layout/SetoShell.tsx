@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { LogOut, type LucideIcon } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen, type LucideIcon } from "lucide-react";
 import { Monogramma } from "@/shared/components/brand/Monogramma";
 import { Button } from "@/shared/components/ui/button";
+import { SidebarCompattaContext, useSidebarCompatta, useSidebarCompattaAttiva } from "@/shared/hooks/useSidebarCompatta";
 import { cn } from "@/lib/utils";
 
 /*
@@ -10,6 +11,11 @@ import { cn } from "@/lib/utils";
  * Le classi `st-canvas` / `st-window` (index.css) fanno la tela sfumata, la finestra arrotondata
  * con l'ombra e il velo pesca; da md la finestra è alta quanto lo schermo e scorre SOLO il <main>
  * (`data-scroll-principale`), sul telefono scorre la pagina come sempre.
+ *
+ * La sidebar si può ridurre a una colonna di sole icone («Nascondi la barra»): le voci, i titoli
+ * di sezione e il piede utente leggono `SidebarCompattaContext` e si disegnano di conseguenza.
+ * Fuori dalla sidebar (menu ☰) il contesto vale false, quindi lì restano come sempre
+ * (contesto e hook in `shared/hooks/useSidebarCompatta.ts`).
  */
 
 export interface VoceNavBase {
@@ -20,33 +26,48 @@ export interface VoceNavBase {
   badge?: number;
 }
 
-/** Riga di navigazione di Seto (`st-nav`): 40px, raggio md. Sulla sidebar bianca: attiva = grigio hover con testo nero, hover = grigio della finestra. */
+/**
+ * Riga di navigazione di Seto (`st-nav`): 40px, raggio md. Sulla sidebar bianca: attiva = grigio hover
+ * con testo nero, hover = grigio della finestra. Compatta: solo l'icona (40×40), il nome nel `title`.
+ */
 export function VoceNavSeto({ voce, className }: { voce: VoceNavBase; className?: string }) {
+  const compatta = useSidebarCompattaAttiva();
   const Icon = voce.icon;
+  const badge = voce.badge != null ? (voce.badge > 99 ? "99+" : String(voce.badge)) : null;
   return (
     <NavLink
       to={voce.href}
+      title={compatta ? voce.label : undefined}
+      aria-label={compatta ? voce.label : undefined}
       className={({ isActive }) =>
         cn(
-          "flex h-10 w-full shrink-0 items-center gap-3 rounded-md px-3 text-sm leading-5 font-medium transition-colors",
+          "relative flex h-10 shrink-0 items-center rounded-md text-sm leading-5 font-medium transition-colors",
+          compatta ? "mx-auto w-10 justify-center" : "w-full gap-3 px-3",
           isActive ? "bg-surface-hover font-semibold text-foreground [&_svg]:text-foreground" : "text-muted-foreground hover:bg-surface hover:text-foreground",
           className,
         )
       }
     >
       <Icon className="size-[18px] shrink-0 text-muted-foreground" strokeWidth={2} aria-hidden />
-      <span className="min-w-0 flex-1 truncate">{voce.label}</span>
-      {voce.badge != null ? (
-        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[12px] leading-4 font-medium text-primary-foreground">
-          {voce.badge > 99 ? "99+" : voce.badge}
+      {compatta ? null : <span className="min-w-0 flex-1 truncate">{voce.label}</span>}
+      {badge !== null ? (
+        <span
+          className={cn(
+            "inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[12px] leading-4 font-medium text-primary-foreground",
+            compatta && "absolute -top-1 -right-1 h-4 min-w-4 px-1 leading-none",
+          )}
+        >
+          {badge}
         </span>
       ) : null}
     </NavLink>
   );
 }
 
-/** Titolo di una sezione della sidebar (`st-section-toggle`, senza chevron): 14/700. */
+/** Titolo di una sezione della sidebar (`st-section-toggle`, senza chevron): 14/700. Compatta: una linea sottile. */
 export function TitoloSezioneNav({ children, className }: { children: ReactNode; className?: string }) {
+  const compatta = useSidebarCompattaAttiva();
+  if (compatta) return <div role="separator" className={cn("my-2 border-t border-line", className)} />;
   return <p className={cn("flex h-9 items-center px-3 text-sm leading-5 font-bold text-foreground", className)}>{children}</p>;
 }
 
@@ -60,8 +81,20 @@ interface AzioneCardUtenteProps {
   variante?: "outline" | "ghost";
 }
 
-/** Bottone del piede utente: pillola a tutta larghezza, icona e testo a sinistra; un testo lungo si tronca invece di uscire. */
+/**
+ * Bottone del piede utente: pillola a tutta larghezza, icona e testo a sinistra; un testo lungo si
+ * tronca invece di uscire. Nella sidebar compatta diventa un bottone rotondo con la sola icona.
+ */
 export function AzioneCardUtente({ icona: Icona, children, onClick, disabled = false, titolo, variante = "outline" }: AzioneCardUtenteProps) {
+  const compatta = useSidebarCompattaAttiva();
+  if (compatta) {
+    const etichetta = titolo ?? (typeof children === "string" ? children : undefined);
+    return (
+      <Button type="button" size="icon" variant={variante} onClick={onClick} disabled={disabled} title={etichetta} aria-label={etichetta}>
+        <Icona aria-hidden />
+      </Button>
+    );
+  }
   return (
     <Button type="button" variant={variante} onClick={onClick} disabled={disabled} title={titolo} className="w-full min-w-0 justify-start px-4">
       <Icona aria-hidden />
@@ -81,9 +114,23 @@ interface CardUtenteProps {
 
 /**
  * Chi è collegato, le azioni dell'account e «Esci». Va dentro `PiedeUtente`, che gli dà il fondo
- * bianco e la linea sopra (sidebar e menu ☰).
+ * bianco e la linea sopra (sidebar e menu ☰). Compatta: avatar e bottoni rotondi in colonna.
  */
 export function CardUtente({ nome, sotto, onEsci, azioni }: CardUtenteProps) {
+  const compatta = useSidebarCompattaAttiva();
+  if (compatta) {
+    return (
+      <div className="flex flex-col items-center gap-2 text-foreground">
+        <span title={sotto ? `${nome} · ${sotto}` : nome} className="mb-1">
+          <Monogramma nome={nome} tono="peach" online />
+        </span>
+        {azioni}
+        <AzioneCardUtente icona={LogOut} variante="ghost" onClick={onEsci} titolo="Esci">
+          Esci
+        </AzioneCardUtente>
+      </div>
+    );
+  }
   return (
     <div className="flex min-w-0 flex-col gap-3 text-foreground">
       <div className="flex min-w-0 items-center gap-3 px-1">
@@ -106,28 +153,56 @@ export function CardUtente({ nome, sotto, onEsci, azioni }: CardUtenteProps) {
 
 /** Il piede dell'utente: fondo bianco a tutta larghezza e una linea sopra che lo separa dalle voci. */
 export function PiedeUtente({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("shrink-0 border-t border-line bg-card px-4 pt-4 pb-4", className)}>{children}</div>;
+  const compatta = useSidebarCompattaAttiva();
+  return <div className={cn("shrink-0 border-t border-line bg-card pt-4 pb-4", compatta ? "px-2" : "px-4", className)}>{children}</div>;
 }
 
 interface SidebarSetoProps {
   marchio: ReactNode;
+  /** Il marchio quando la sidebar è compatta (di solito il solo quadratino «W»); senza, si usa `marchio`. */
+  marchioCompatto?: ReactNode;
   children: ReactNode;
   piede?: ReactNode;
 }
 
 /**
  * La colonna sinistra (`st-sidebar`): marchio e voci scorrono, il piede utente resta fermo in fondo.
- * Solo da md (sotto c'è il pannello ☰).
+ * Solo da md (sotto c'è il pannello ☰). Il bottone accanto al marchio la riduce a sole icone
+ * (`--sidebar-w-compatta`) e la riapre; la scelta si ricorda nel browser.
  */
-export function SidebarSeto({ marchio, children, piede }: SidebarSetoProps) {
+export function SidebarSeto({ marchio, marchioCompatto, children, piede }: SidebarSetoProps) {
+  const [compatta, cambia] = useSidebarCompatta();
+  const IconaBarra = compatta ? PanelLeftOpen : PanelLeftClose;
+  const etichetta = compatta ? "Mostra la barra" : "Nascondi la barra";
   return (
-    <aside className="hidden min-h-0 flex-col border-r border-line bg-sidebar md:flex">
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 pt-6 pb-4">
-        <div className="mb-4 flex h-8 shrink-0 items-center px-3 text-foreground">{marchio}</div>
-        {children}
-      </div>
-      {piede ? <PiedeUtente>{piede}</PiedeUtente> : null}
-    </aside>
+    <SidebarCompattaContext.Provider value={compatta}>
+      <aside
+        data-compatta={compatta ? "" : undefined}
+        className={cn(
+          "hidden min-h-0 flex-col border-r border-line bg-sidebar transition-[width] duration-200 ease-in-out md:flex",
+          compatta ? "w-(--sidebar-w-compatta)" : "w-(--sidebar-w)",
+        )}
+      >
+        <div className={cn("flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto pt-6 pb-4", compatta ? "px-3" : "px-4")}>
+          <div className={cn("mb-4 flex shrink-0 text-foreground", compatta ? "flex-col items-center gap-2" : "h-8 items-center justify-between pl-3 pr-1")}>
+            <span className="flex h-8 items-center">{compatta ? (marchioCompatto ?? marchio) : marchio}</span>
+            <Button
+              type="button"
+              size="icon-sm"
+              variant="ghost"
+              onClick={cambia}
+              aria-label={etichetta}
+              title={etichetta}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <IconaBarra aria-hidden />
+            </Button>
+          </div>
+          {children}
+        </div>
+        {piede ? <PiedeUtente>{piede}</PiedeUtente> : null}
+      </aside>
+    </SidebarCompattaContext.Provider>
   );
 }
 
@@ -140,11 +215,11 @@ interface FinestraSetoProps {
   children: ReactNode;
 }
 
-/** La tela e la finestra: griglia sidebar + colonna (barra in alto + main che scorre). */
+/** La tela e la finestra: griglia sidebar + colonna (barra in alto + main che scorre). La colonna della sidebar è larga quanto la sidebar (piena o compatta). */
 export function FinestraSeto({ sidebar, header, classeMain, children }: FinestraSetoProps) {
   return (
     <div className="st-canvas">
-      <div className={cn("st-window flex flex-col", sidebar && "md:grid md:grid-cols-[var(--sidebar-w)_minmax(0,1fr)]")}>
+      <div className={cn("st-window flex flex-col", sidebar && "md:grid md:grid-cols-[auto_minmax(0,1fr)]")}>
         {sidebar}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 flex h-(--header-h) shrink-0 items-center justify-between gap-2 bg-background/85 px-4 backdrop-blur-md md:static md:gap-3 md:bg-transparent md:px-8 md:backdrop-blur-none">

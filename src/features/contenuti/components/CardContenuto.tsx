@@ -1,22 +1,17 @@
 import type { DragEvent } from "react";
 import { ArrowRightLeft, CalendarDays, CheckCircle2, FileText, FolderOpen, GripVertical, Link2 } from "lucide-react";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/shared/components/ui/dropdown-menu";
 import { formatDateShort } from "@/shared/utils/formatDate";
 import { cn } from "@/lib/utils";
-import {
-  eTipologiaContenuto,
-  ETICHETTA_STATO_CONTENUTO,
-  STATO_CONTENUTO_KEYS,
-  TIPOLOGIE_CONTENUTO,
-  type Contenuto,
-  type StatoContenuto,
-} from "../types";
+import { ETICHETTA_STATO_CONTENUTO, STATO_CONTENUTO_KEYS, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
+import { EtichettaTipologia } from "./EtichettaTipologia";
 import { PuntoStato } from "./PuntoStato";
 
 interface CardContenutoProps {
   contenuto: Contenuto;
+  /** La tipologia del contenuto (risolta da `tipologia_id`), se ne ha una. */
+  tipologia: Tipologia | null;
   inTrascinamento: boolean;
   onApri: (c: Contenuto) => void;
   /** Cambio di fase senza trascinare (menu «Sposta in…», solo sotto md). */
@@ -26,8 +21,7 @@ interface CardContenutoProps {
 }
 
 /** Una idea di video: card trascinabile tra le colonne, clic per aprirla. */
-export function CardContenuto({ contenuto: c, inTrascinamento, onApri, onSposta, onDragStart, onDragEnd }: CardContenutoProps) {
-  const tipologia = eTipologiaContenuto(c.tipologia) ? TIPOLOGIE_CONTENUTO[c.tipologia] : null;
+export function CardContenuto({ contenuto: c, tipologia, inTrascinamento, onApri, onSposta, onDragStart, onDragEnd }: CardContenutoProps) {
 
   function handleDragStart(e: DragEvent<HTMLElement>) {
     e.dataTransfer.setData("text/plain", c.id);
@@ -60,11 +54,7 @@ export function CardContenuto({ contenuto: c, inTrascinamento, onApri, onSposta,
         <p className="min-w-0 flex-1 text-sm leading-snug font-medium">{c.titolo}</p>
       </div>
 
-      {tipologia ? (
-        <Badge variant={tipologia.tono} className="w-fit">
-          {tipologia.label}
-        </Badge>
-      ) : null}
+      {tipologia ? <EtichettaTipologia tipologia={tipologia} className="w-fit" /> : null}
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
         {c.pubblicato_il ? (

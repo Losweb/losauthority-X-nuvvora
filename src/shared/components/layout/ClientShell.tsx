@@ -6,6 +6,7 @@ import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
 import { ContenutoPagina } from "@/shared/components/layout/ContenutoPagina";
 import { MenuMobile } from "@/shared/components/layout/MenuMobile";
 import { CardUtente, FinestraSeto, SidebarSeto, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
+import { useSidebarCompattaAttiva } from "@/shared/hooks/useSidebarCompatta";
 import { cn } from "@/lib/utils";
 
 /** Sezioni del percorso; il "Cervello del tuo branding" è a parte, con una voce in evidenza. */
@@ -21,8 +22,32 @@ const VOCI_PERCORSO: VoceNavBase[] = [
 
 const HREF_CERVELLO = "/area/cervello";
 
-/** La voce "Cervello del tuo branding": più importante delle altre, quindi una card (Seto action card) con il cervello su disco `action`; attiva anche nelle sottopagine. */
+const TITOLO_CERVELLO = "Cervello del tuo branding";
+
+/**
+ * La voce "Cervello del tuo branding": più importante delle altre, quindi una card (Seto action card)
+ * con il cervello su disco `action`; attiva anche nelle sottopagine. Nella sidebar compatta resta
+ * solo il disco, con un anello quando è attiva.
+ */
 function VoceCervello() {
+  const compatta = useSidebarCompattaAttiva();
+  if (compatta) {
+    return (
+      <NavLink
+        to={HREF_CERVELLO}
+        title={TITOLO_CERVELLO}
+        aria-label={TITOLO_CERVELLO}
+        className={({ isActive }) =>
+          cn(
+            "mx-auto grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-xs transition-[transform,box-shadow] duration-300 hover:scale-105",
+            isActive && "ring-2 ring-primary/30 ring-offset-2 ring-offset-sidebar",
+          )
+        }
+      >
+        <Brain className="size-[18px]" strokeWidth={2} aria-hidden />
+      </NavLink>
+    );
+  }
   return (
     <NavLink
       to={HREF_CERVELLO}
@@ -38,7 +63,7 @@ function VoceCervello() {
       </span>
       <span className="min-w-0">
         <span className="eyebrow block">Il tuo branding</span>
-        <span className="block text-[15px] leading-tight font-bold tracking-[-0.01em] text-foreground">Cervello del tuo branding</span>
+        <span className="block text-[15px] leading-tight font-bold tracking-[-0.01em] text-foreground">{TITOLO_CERVELLO}</span>
       </span>
     </NavLink>
   );
@@ -60,6 +85,11 @@ function NavPercorso() {
 const logoArea = (
   <Link to="/area/dashboard" aria-label="La tua area" className="text-foreground">
     <MarmoLogo altezza={20} />
+  </Link>
+);
+const logoAreaCompatto = (
+  <Link to="/area/dashboard" aria-label="La tua area" className="text-foreground">
+    <MarmoLogo altezza={24} soloMonogramma />
   </Link>
 );
 
@@ -107,7 +137,7 @@ export function ClientShell({ conNav = false }: ClientShellProps) {
     <FinestraSeto
       classeMain="md:pt-2"
       sidebar={
-        <SidebarSeto marchio={logoArea} piede={cardUtente}>
+        <SidebarSeto marchio={logoArea} marchioCompatto={logoAreaCompatto} piede={cardUtente}>
           <NavPercorso />
         </SidebarSeto>
       }

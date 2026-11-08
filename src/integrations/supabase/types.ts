@@ -846,6 +846,7 @@ export type Database = {
           cliente_id: string
           created_at: string
           creato_da: string | null
+          descrizione: string | null
           drive_url: string | null
           id: string
           note: string | null
@@ -855,7 +856,7 @@ export type Database = {
           riferimenti: string[]
           script: string | null
           stato: string
-          tipologia: string | null
+          tipologia_id: string | null
           titolo: string
           updated_at: string
         }
@@ -863,6 +864,7 @@ export type Database = {
           cliente_id: string
           created_at?: string
           creato_da?: string | null
+          descrizione?: string | null
           drive_url?: string | null
           id?: string
           note?: string | null
@@ -872,7 +874,7 @@ export type Database = {
           riferimenti?: string[]
           script?: string | null
           stato?: string
-          tipologia?: string | null
+          tipologia_id?: string | null
           titolo: string
           updated_at?: string
         }
@@ -880,6 +882,7 @@ export type Database = {
           cliente_id?: string
           created_at?: string
           creato_da?: string | null
+          descrizione?: string | null
           drive_url?: string | null
           id?: string
           note?: string | null
@@ -889,7 +892,7 @@ export type Database = {
           riferimenti?: string[]
           script?: string | null
           stato?: string
-          tipologia?: string | null
+          tipologia_id?: string | null
           titolo?: string
           updated_at?: string
         }
@@ -913,6 +916,13 @@ export type Database = {
             columns: ["creato_da"]
             isOneToOne: false
             referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contenuti_tipologia_id_fkey"
+            columns: ["tipologia_id"]
+            isOneToOne: false
+            referencedRelation: "tipologie_contenuto"
             referencedColumns: ["id"]
           },
         ]
@@ -3558,6 +3568,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tipologie_contenuto: {
+        Row: {
+          chiave: string | null
+          colore: string
+          created_at: string
+          creato_da: string | null
+          id: string
+          nome: string
+          ordine: number
+          predefinita: boolean
+          updated_at: string
+        }
+        Insert: {
+          chiave?: string | null
+          colore: string
+          created_at?: string
+          creato_da?: string | null
+          id?: string
+          nome: string
+          ordine?: number
+          predefinita?: boolean
+          updated_at?: string
+        }
+        Update: {
+          chiave?: string | null
+          colore?: string
+          created_at?: string
+          creato_da?: string | null
+          id?: string
+          nome?: string
+          ordine?: number
+          predefinita?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tipologie_contenuto_creato_da_fkey"
+            columns: ["creato_da"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

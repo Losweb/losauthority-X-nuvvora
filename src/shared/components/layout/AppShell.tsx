@@ -97,7 +97,7 @@ export function AppShell() {
   return (
     <FinestraSeto
       sidebar={
-        <SidebarSeto marchio={<MarmoLogo altezza={20} />} piede={cardUtente}>
+        <SidebarSeto marchio={<MarmoLogo altezza={20} />} marchioCompatto={<MarmoLogo altezza={24} soloMonogramma />} piede={cardUtente}>
           <NavGestionale principali={principali} secondarie={secondarie} />
         </SidebarSeto>
       }

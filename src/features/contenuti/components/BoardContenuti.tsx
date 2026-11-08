@@ -6,12 +6,15 @@ import {
   STATO_CONTENUTO_KEYS,
   type Contenuto,
   type StatoContenuto,
+  type Tipologia,
 } from "../types";
 import { CardContenuto } from "./CardContenuto";
 import { PuntoStato } from "./PuntoStato";
 
 interface BoardContenutiProps {
   contenuti: Contenuto[];
+  /** id → tipologia, per l'etichetta colorata sulle card. */
+  tipologie: Map<string, Tipologia>;
   onApri: (c: Contenuto) => void;
   onSposta: (id: string, stato: StatoContenuto) => void;
 }
@@ -26,7 +29,7 @@ interface Trascinamento {
  * drag & drop, nessuna libreria). Sotto md le colonne si impilano e ogni card
  * ha «Sposta in…» (col dito il trascinamento non funziona).
  */
-export function BoardContenuti({ contenuti, onApri, onSposta }: BoardContenutiProps) {
+export function BoardContenuti({ contenuti, tipologie, onApri, onSposta }: BoardContenutiProps) {
   const [trascinato, setTrascinato] = useState<Trascinamento | null>(null);
   const [sopra, setSopra] = useState<StatoContenuto | null>(null);
 
@@ -91,6 +94,7 @@ export function BoardContenuti({ contenuti, onApri, onSposta }: BoardContenutiPr
                     <CardContenuto
                       key={c.id}
                       contenuto={c}
+                      tipologia={c.tipologia_id ? (tipologie.get(c.tipologia_id) ?? null) : null}
                       inTrascinamento={trascinato?.id === c.id}
                       onApri={onApri}
                       onSposta={(nuovo) => {
