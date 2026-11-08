@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
-import { Palette, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Copy, Palette, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
 import { Button } from "@/shared/components/ui/button";
 import { scorriChatInFondo } from "../scorriChat";
@@ -23,6 +24,33 @@ interface FlussoMessaggiProps {
   onWorkflow: (idea: Idea) => void;
 }
 
+/** Bottone minimo, in basso a destra di ogni messaggio: copia il testo negli appunti con conferma. */
+function BottoneCopia({ testo }: { testo: string }) {
+  const [copiato, setCopiato] = useState(false);
+  async function copia() {
+    try {
+      await navigator.clipboard.writeText(testo);
+      setCopiato(true);
+      setTimeout(() => setCopiato(false), 1500);
+    } catch {
+      toast.error("Copia non riuscita", { description: "Seleziona il testo e copialo a mano." });
+    }
+  }
+  return (
+    <Button
+      type="button"
+      size="icon-xs"
+      variant="ghost"
+      className="text-muted-foreground hover:text-foreground"
+      title={copiato ? "Copiato" : "Copia il testo"}
+      aria-label={copiato ? "Copiato" : "Copia il testo"}
+      onClick={() => void copia()}
+    >
+      {copiato ? <Check aria-hidden /> : <Copy aria-hidden />}
+    </Button>
+  );
+}
+
 function BollaCliente({ testo, stile }: { testo: string; stile?: string | null }) {
   return (
     <div className="flex flex-col items-end gap-1">
@@ -35,6 +63,7 @@ function BollaCliente({ testo, stile }: { testo: string; stile?: string | null }
       <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap text-primary-foreground selection:bg-(--on-action) selection:text-(--action)">
         {testo}
       </p>
+      <BottoneCopia testo={testo} />
     </div>
   );
 }
@@ -76,7 +105,12 @@ export function FlussoMessaggi({
                 <AuraSfera dimensione={32} conNome={false} className="mt-0.5" />
                 <div className="min-w-0 flex-1 pt-1">
                   {m.stato === "completato" && m.contenuto ? (
-                    <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">{m.contenuto}</p>
+                    <>
+                      <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">{m.contenuto}</p>
+                      <div className="mt-1 flex justify-end">
+                        <BottoneCopia testo={m.contenuto} />
+                      </div>
+                    </>
                   ) : null}
                   {m.stato === "errore" ? (
                     <div className="flex flex-wrap items-center gap-3">
