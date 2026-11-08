@@ -1,18 +1,25 @@
 import { useMemo, useState, type DragEvent } from "react";
-import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, isToday, startOfMonth, startOfWeek } from "date-fns";
+import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
 import { it } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Contenuto } from "../types";
+import { ETICHETTA_STATO_CONTENUTO, mappaTipologie, STATO_CONTENUTO_KEYS, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
 import { AgendaContenuti, RigaAgenda } from "./AgendaContenuti";
+import { ChipCalendario } from "./ChipCalendario";
+import { EtichettaTipologia } from "./EtichettaTipologia";
+import { GiornoCalendario } from "./GiornoCalendario";
 import { PuntoStato } from "./PuntoStato";
 
 interface CalendarioContenutiProps {
   contenuti: Contenuto[];
+  /** Le tipologie che l'utente vede: colore e nome nelle card, legenda. */
+  tipologie: Tipologia[];
   onApri: (c: Contenuto) => void;
   /** Nuova data prevista ("YYYY-MM-DD") o null se trascinato in "Senza data". */
   onRipianifica: (id: string, data: string | null) => void;
+  /** Nuovo contenuto nel giorno toccato, come script o come video. */
+  onNuovo: (data: string, stato: StatoContenuto) => void;
 }
 
 const LUNEDI = { weekStartsOn: 1 } as const;
@@ -23,28 +30,14 @@ function dataDi(c: Contenuto): string | null {
   return c.pubblicazione_prevista ?? c.pubblicato_il;
 }
 
-function ChipContenuto({ c, onApri }: { c: Contenuto; onApri: (c: Contenuto) => void }) {
-  return (
-    <button
-      type="button"
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.setData("text/plain", c.id);
-        e.dataTransfer.effectAllowed = "move";
-      }}
-      onClick={() => onApri(c)}
-      title={c.titolo}
-      className="flex w-full cursor-grab items-center gap-1.5 rounded-sm border bg-card px-1.5 py-1 text-left text-xs leading-tight hover:border-input active:cursor-grabbing"
-    >
-      <PuntoStato stato={c.stato} />
-      <span className="truncate">{c.titolo}</span>
-    </button>
-  );
-}
-
-/** Vista mensile: i contenuti nel giorno previsto; trascinali per ripianificare. Sotto md: elenco dei giorni con la data da cambiare. */
-export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: CalendarioContenutiProps) {
+/**
+ * Vista mensile: i contenuti nel giorno previsto, un giorno si tocca per
+ * aggiungere uno script o un video, le card si trascinano per ripianificare.
+ * Sotto md: elenco dei giorni con la data da cambiare.
+ */
+export function CalendarioContenuti({ contenuti, tipologie, onApri, onRipianifica, onNuovo }: CalendarioContenutiProps) {
   const [mese, setMese] = useState(() => startOfMonth(new Date()));
+  const mappa = useMemo(() => mappaTipologie(tipologie), [tipologie]);
   const [sopra, setSopra] = useState<string | null>(null);
 
   const giorni = useMemo(
@@ -85,7 +78,7 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
       <section aria-label="Calendario dei contenuti" className="grid gap-3">
-        <header className="flex items-center justify-between gap-2">
+        <header className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-display text-2xl font-semibold capitalize">{titoloMese}</h3>
           <div className="flex items-center gap-1">
             <Button size="sm" variant="outline" onClick={() => setMese(startOfMonth(new Date()))}>
@@ -100,7 +93,31 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
           </div>
         </header>
 
-        <AgendaContenuti mese={mese} perGiorno={perGiorno} onApri={onApri} onRipianifica={onRipianifica} />
+        {/* Legende (solo con la griglia): il pallino è la fase, la barra della card è il colore della tipologia. */}
+        <div className="hidden gap-1 text-xs text-muted-foreground md:grid">
+          <ul aria-label="Fasi del workflow" className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <li className="eyebrow text-[12px]">Fase</li>
+            {STATO_CONTENUTO_KEYS.map((s) => (
+              <li key={s} className="flex items-center gap-1.5">
+                <PuntoStato stato={s} />
+                {ETICHETTA_STATO_CONTENUTO[s]}
+              </li>
+            ))}
+          </ul>
+          {tipologie.length > 0 ? (
+            <ul aria-label="Tipologie dei contenuti" className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <li className="eyebrow text-[12px]">Tipologia</li>
+              {tipologie.map((t) => (
+                <li key={t.id} className="flex items-center">
+                  <EtichettaTipologia tipologia={t} />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+
+        {/* La chiave rimette il giorno proposto per il nuovo contenuto quando cambia il mese. */}
+        <AgendaContenuti key={format(mese, "yyyy-MM")} mese={mese} perGiorno={perGiorno} onApri={onApri} onRipianifica={onRipianifica} onNuovo={onNuovo} />
 
         <div className="hidden md:block md:overflow-x-auto">
           <div className="grid min-w-[720px] grid-cols-7 overflow-hidden rounded-lg border bg-border gap-px">
@@ -111,32 +128,21 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
             ))}
             {giorni.map((g) => {
               const chiave = format(g, ISO);
-              const lista = perGiorno.get(chiave) ?? [];
-              const nelMese = isSameMonth(g, mese);
               return (
-                <div
+                <GiornoCalendario
                   key={chiave}
+                  giorno={g}
+                  chiave={chiave}
+                  nelMese={isSameMonth(g, mese)}
+                  lista={perGiorno.get(chiave) ?? []}
+                  tipologie={mappa}
+                  bersaglio={sopra === chiave}
+                  onApri={onApri}
+                  onNuovo={onNuovo}
                   onDragOver={(e) => accetta(e, chiave)}
                   onDragLeave={() => setSopra((s) => (s === chiave ? null : s))}
                   onDrop={(e) => rilascia(e, chiave)}
-                  className={cn(
-                    "flex min-h-24 flex-col gap-1 p-1.5 transition-colors",
-                    nelMese ? "bg-card" : "bg-muted/40 text-muted-foreground",
-                    sopra === chiave && "bg-sidebar-accent",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "figure self-end text-[12px] leading-none",
-                      isToday(g) && "rounded-full bg-primary px-1.5 py-1 text-primary-foreground",
-                    )}
-                  >
-                    {format(g, "d")}
-                  </span>
-                  {lista.map((c) => (
-                    <ChipContenuto key={c.id} c={c} onApri={onApri} />
-                  ))}
-                </div>
+                />
               );
             })}
           </div>
@@ -166,7 +172,7 @@ export function CalendarioContenuti({ contenuti, onApri, onRipianifica }: Calend
             </div>
             <div className="hidden md:contents">
               {senzaData.map((c) => (
-                <ChipContenuto key={c.id} c={c} onApri={onApri} />
+                <ChipCalendario key={c.id} c={c} tipologia={c.tipologia_id ? (mappa.get(c.tipologia_id) ?? null) : null} onApri={onApri} />
               ))}
             </div>
           </>

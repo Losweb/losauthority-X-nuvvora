@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/features/auth";
-import { chiaviContenuti } from "@/features/contenuti";
+import { CHIAVE_PER_TIPOLOGIA_IDEA, chiaviContenuti, eTipologiaContenuto, tipologiaIdPerChiave } from "@/features/contenuti";
 import { erroreMutation, invocaEdge } from "@/shared/utils/invocaEdge";
 import { logDev, MESSAGGIO_ERRORE_GENERICO } from "@/shared/utils/errors";
 import type { Idea, Messaggio, Sessione } from "../types";
@@ -144,6 +144,8 @@ export function usePortaNelWorkflow(clienteId: string) {
     mutationFn: async (idea: Idea) => {
       if (!utente) throw new Error("Utente non disponibile");
       const script = [idea.hook ? `HOOK: ${idea.hook}` : null, idea.script].filter(Boolean).join("\n\n") || null;
+      // La tipologia dell'idea (le quattro di Aura) diventa la predefinita corrispondente del Workflow.
+      const tipologia_id = eTipologiaContenuto(idea.tipologia) ? await tipologiaIdPerChiave(CHIAVE_PER_TIPOLOGIA_IDEA[idea.tipologia]) : null;
       const { data, error } = await supabase
         .from("contenuti")
         .insert({
@@ -151,7 +153,7 @@ export function usePortaNelWorkflow(clienteId: string) {
           creato_da: utente.id,
           titolo: idea.titolo,
           stato: "fase_script",
-          tipologia: idea.tipologia,
+          tipologia_id,
           script,
           riferimenti: idea.riferimenti,
         })
