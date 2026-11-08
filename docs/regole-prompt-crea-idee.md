@@ -18,7 +18,7 @@ Ogni risposta di Aura in Crea idee nasce da quattro pezzi, in quest'ordine:
 3. **Dati del cliente** (automatici): scheda onboarding, analisi di Aura, kit brand, stile scelto con «/», idee già proposte, video che hanno funzionato meglio.
 4. **Conversazione** (automatica): gli ultimi 12 messaggi della sessione e il nuovo messaggio.
 
-Aura risponde con 2-4 frasi parlate e poi un blocco `<idee>` in JSON con al massimo tre proposte. Ogni proposta ha: `titolo`, `hook`, `script` (parlato, 100-160 parole), `tipologia` (uno dei quattro valori: `virale`, `consolidazione`, `vendita`, `content_series`). Il codice legge quel blocco e crea le card. Se il formato cambia, le card non compaiono.
+Aura risponde con 2-4 frasi parlate e poi un blocco `<idee>` in JSON con al massimo tre proposte. Ogni proposta ha: `titolo`, `hook`, `script` (parlato, 100-160 parole; con uno stile scelto con «/» la lunghezza è quella degli script originali dello stile, che dall'08/11/2026 entrano interi nel prompt), `tipologia` (uno dei quattro valori: `virale`, `consolidazione`, `vendita`, `content_series`). Il codice legge quel blocco e crea le card. Se il formato cambia, le card non compaiono.
 
 ## Problemi noti da risolvere (21/10/2026)
 
