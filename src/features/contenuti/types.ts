@@ -68,8 +68,21 @@ export const COLORE_TIPOLOGIA_NUOVA = "#0f1921";
 /** Campi che il form scrive (il resto lo mettono la base e gli hook). */
 export type ContenutoDati = Pick<
   Contenuto,
-  "titolo" | "stato" | "tipologia_id" | "pubblicazione_prevista" | "pubblicato_il" | "drive_url" | "note" | "script" | "descrizione" | "riferimenti"
+  "titolo" | "stato" | "tipologia_id" | "pubblicazione_prevista" | "ora_prevista" | "pubblicato_il" | "drive_url" | "note" | "script" | "descrizione" | "riferimenti"
 >;
+
+/** L'ora prevista come «18:30» (il DB la restituisce «18:30:00»), o null se non c'è. */
+export function oraBreve(ora: string | null | undefined): string | null {
+  return ora ? ora.slice(0, 5) : null;
+}
+
+/** Ordine dentro un giorno: prima i contenuti con l'ora, dal più presto; poi quelli senza. */
+export function perOra(a: Contenuto, b: Contenuto): number {
+  if (a.ora_prevista && b.ora_prevista) return a.ora_prevista.localeCompare(b.ora_prevista);
+  if (a.ora_prevista) return -1;
+  if (b.ora_prevista) return 1;
+  return 0;
+}
 
 /** Con cosa nasce un contenuto creato dal calendario: il giorno toccato e la fase di partenza (script o video). */
 export interface ContenutoPredefiniti {

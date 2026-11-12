@@ -118,23 +118,45 @@ export function CampiFase({ control, tipologie, onGestisciTipologie }: CampiFase
   );
 }
 
-/** Data prevista e, solo se pubblicato, la data reale. */
+/** Giorno e ora previsti e, solo se pubblicato, la data reale. L'ora si sceglie solo con il giorno. */
 export function CampiDate({ control, statoScelto }: CampoProps & { statoScelto: string }) {
+  const giorno = useWatch({ control, name: "pubblicazione_prevista" });
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <FormField
-        control={control}
-        name="pubblicazione_prevista"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Da pubblicare il</FormLabel>
-            <FormControl>
-              <Input type="date" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid grid-cols-[minmax(0,1fr)_7.5rem] gap-3">
+        <FormField
+          control={control}
+          name="pubblicazione_prevista"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Da pubblicare il</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="ora_prevista"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Alle ore</FormLabel>
+              <FormControl>
+                <Input
+                  type="time"
+                  step={60}
+                  disabled={!giorno}
+                  title={giorno ? undefined : "Scegli prima il giorno"}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
       {statoScelto === "pubblicato" ? (
         <FormField
           control={control}

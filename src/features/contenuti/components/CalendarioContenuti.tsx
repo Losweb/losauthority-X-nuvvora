@@ -4,7 +4,7 @@ import { it } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ETICHETTA_STATO_CONTENUTO, mappaTipologie, STATO_CONTENUTO_KEYS, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
+import { ETICHETTA_STATO_CONTENUTO, mappaTipologie, perOra, STATO_CONTENUTO_KEYS, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
 import { AgendaContenuti, RigaAgenda } from "./AgendaContenuti";
 import { ChipCalendario } from "./ChipCalendario";
 import { EtichettaTipologia } from "./EtichettaTipologia";
@@ -56,6 +56,8 @@ export function CalendarioContenuti({ contenuti, tipologie, onApri, onRipianific
       }
       mappa.set(d, [...(mappa.get(d) ?? []), c]);
     }
+    // Dentro il giorno, in ordine di ora (quelli senza ora in fondo, nell'ordine di prima).
+    for (const lista of mappa.values()) lista.sort(perOra);
     return { perGiorno: mappa, senzaData: liberi };
   }, [contenuti]);
 

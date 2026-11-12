@@ -126,6 +126,14 @@ interface RipianificaInput {
   pubblicazione_prevista: string | null;
 }
 
+/**
+ * Cosa cambia spostando un contenuto: su un altro giorno l'ora resta la stessa;
+ * in «Senza data» si toglie anche l'ora (senza giorno non c'è ora, check in DB).
+ */
+function campiRipianifica(pubblicazione_prevista: string | null): Pick<Contenuto, "pubblicazione_prevista"> & Partial<Pick<Contenuto, "ora_prevista">> {
+  return pubblicazione_prevista === null ? { pubblicazione_prevista, ora_prevista: null } : { pubblicazione_prevista };
+}
+
 /** Cambia la data prevista di pubblicazione (trascinamento nel calendario), ottimistico. */
 export function useRipianificaContenuto(clienteId: string) {
   const queryClient = useQueryClient();
@@ -133,14 +141,14 @@ export function useRipianificaContenuto(clienteId: string) {
 
   return useMutation({
     mutationFn: async ({ id, pubblicazione_prevista }: RipianificaInput) => {
-      const { error } = await supabase.from("contenuti").update({ pubblicazione_prevista }).eq("id", id);
+      const { error } = await supabase.from("contenuti").update(campiRipianifica(pubblicazione_prevista)).eq("id", id);
       if (error) throw error;
     },
     onMutate: async ({ id, pubblicazione_prevista }) => {
       await queryClient.cancelQueries({ queryKey: chiave });
       const precedenti = queryClient.getQueryData<Contenuto[]>(chiave);
       queryClient.setQueryData<Contenuto[]>(chiave, (attuali) =>
-        attuali?.map((c) => (c.id === id ? { ...c, pubblicazione_prevista } : c)),
+        attuali?.map((c) => (c.id === id ? { ...c, ...campiRipianifica(pubblicazione_prevista) } : c)),
       );
       return { precedenti };
     },

@@ -4,7 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/shared/components/ui/dropdown-menu";
 import { formatDateShort } from "@/shared/utils/formatDate";
 import { cn } from "@/lib/utils";
-import { ETICHETTA_STATO_CONTENUTO, STATO_CONTENUTO_KEYS, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
+import { ETICHETTA_STATO_CONTENUTO, oraBreve, STATO_CONTENUTO_KEYS, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
 import { EtichettaTipologia } from "./EtichettaTipologia";
 import { PuntoStato } from "./PuntoStato";
 
@@ -66,6 +66,7 @@ export function CardContenuto({ contenuto: c, tipologia, inTrascinamento, onApri
           <span className="inline-flex items-center gap-1">
             <CalendarDays className="size-3.5" aria-hidden />
             Prevista {formatDateShort(c.pubblicazione_prevista)}
+            {c.ora_prevista ? ` · ${oraBreve(c.ora_prevista)}` : null}
           </span>
         ) : null}
         {c.script ? (

@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { STATO_CONTENUTO_KEYS, type Contenuto, type ContenutoDati, type ContenutoPredefiniti } from "./types";
+import { oraBreve, STATO_CONTENUTO_KEYS, type Contenuto, type ContenutoDati, type ContenutoPredefiniti } from "./types";
 
 const DATA_ISO = /^\d{4}-\d{2}-\d{2}$/;
+const ORA = /^([01]\d|2[0-3]):[0-5]\d$/;
 const URL_HTTP = /^https?:\/\//i;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const COLORE_HEX = /^#[0-9a-f]{6}$/i;
@@ -15,6 +16,8 @@ export const contenutoSchema = z.object({
   /** Id di una riga di `tipologie_contenuto`; "" = nessuna. */
   tipologia_id: z.string().refine((v) => v === "" || UUID.test(v), "Tipologia non valida"),
   pubblicazione_prevista: dataOpzionale,
+  /** "HH:MM" oppure "" (nessuna ora). Conta solo se c'è la data. */
+  ora_prevista: z.string().refine((v) => v === "" || ORA.test(v), "Ora non valida"),
   pubblicato_il: dataOpzionale,
   drive_url: z
     .string()
@@ -51,6 +54,7 @@ export function contenutoToForm(c: Contenuto | null, predefiniti?: ContenutoPred
     stato: (c?.stato as ContenutoFormValues["stato"] | undefined) ?? predefiniti?.stato ?? "fase_script",
     tipologia_id: c?.tipologia_id ?? "",
     pubblicazione_prevista: c?.pubblicazione_prevista ?? predefiniti?.pubblicazione_prevista ?? "",
+    ora_prevista: oraBreve(c?.ora_prevista) ?? "",
     pubblicato_il: c?.pubblicato_il ?? "",
     drive_url: c?.drive_url ?? "",
     script: c?.script ?? "",
@@ -71,6 +75,8 @@ export function formToContenuto(v: ContenutoFormValues): ContenutoDati {
     stato: v.stato,
     tipologia_id: v.tipologia_id || null,
     pubblicazione_prevista: v.pubblicazione_prevista || null,
+    // Senza giorno non c'è ora (lo impone anche il check in DB).
+    ora_prevista: v.pubblicazione_prevista && v.ora_prevista ? v.ora_prevista : null,
     pubblicato_il: v.stato === "pubblicato" ? v.pubblicato_il || null : null,
     drive_url: v.drive_url || null,
     script: v.script.trim() || null,

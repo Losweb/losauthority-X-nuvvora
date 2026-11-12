@@ -4,7 +4,7 @@ import { it } from "date-fns/locale";
 import { FileText, Plus } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import type { Contenuto, StatoContenuto } from "../types";
+import { oraBreve, type Contenuto, type StatoContenuto } from "../types";
 import { MenuNuovoContenuto } from "./MenuNuovoContenuto";
 import { PuntoStato } from "./PuntoStato";
 
@@ -19,6 +19,7 @@ interface RigaAgendaProps {
 
 /** Sul telefono: il contenuto (clic per aprirlo) e la data prevista, cambiabile senza trascinare. */
 export function RigaAgenda({ c, onApri, onRipianifica }: RigaAgendaProps) {
+  const ora = c.pubblicazione_prevista ? oraBreve(c.ora_prevista) : null;
   return (
     <div className="flex items-center gap-2">
       <button
@@ -27,7 +28,10 @@ export function RigaAgenda({ c, onApri, onRipianifica }: RigaAgendaProps) {
         className="flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-md border bg-card px-3 py-2 text-left text-sm leading-snug hover:border-input"
       >
         <PuntoStato stato={c.stato} />
-        <span className="line-clamp-2 min-w-0 flex-1">{c.titolo}</span>
+        <span className="line-clamp-2 min-w-0 flex-1">
+          {ora ? <span className="figure mr-1 font-semibold">{ora}</span> : null}
+          {c.titolo}
+        </span>
         {c.script ? (
           <span title="Script scritto" className="inline-flex shrink-0 text-muted-foreground">
             <FileText className="size-3.5" aria-hidden />

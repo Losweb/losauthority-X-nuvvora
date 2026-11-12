@@ -1,7 +1,7 @@
 import type { DragEvent, ReactNode } from "react";
 import { CheckCircle2, FileText, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ETICHETTA_STATO_CONTENUTO, eStatoContenuto, type Contenuto, type Tipologia } from "../types";
+import { ETICHETTA_STATO_CONTENUTO, eStatoContenuto, oraBreve, type Contenuto, type Tipologia } from "../types";
 import { stileTinta } from "../colore";
 import { EtichettaTipologia } from "./EtichettaTipologia";
 import { PuntoStato } from "./PuntoStato";
@@ -30,7 +30,9 @@ function Segno({ titolo, children }: { titolo: string; children: ReactNode }) {
  */
 export function ChipCalendario({ c, tipologia, onApri }: ChipCalendarioProps) {
   const stato = eStatoContenuto(c.stato) ? c.stato : null;
-  const titolo = [c.titolo, stato ? ETICHETTA_STATO_CONTENUTO[stato] : null, tipologia?.nome].filter(Boolean).join(" · ");
+  // Nella colonna «Senza data» l'ora non ha senso (il DB la toglie insieme al giorno).
+  const ora = c.pubblicazione_prevista ? oraBreve(c.ora_prevista) : null;
+  const titolo = [ora, c.titolo, stato ? ETICHETTA_STATO_CONTENUTO[stato] : null, tipologia?.nome].filter(Boolean).join(" · ");
 
   function handleDragStart(e: DragEvent<HTMLButtonElement>) {
     e.dataTransfer.setData("text/plain", c.id);
@@ -57,7 +59,10 @@ export function ChipCalendario({ c, tipologia, onApri }: ChipCalendarioProps) {
         style={tipologia ? { backgroundColor: tipologia.colore } : undefined}
       />
       <span className="grid min-w-0 flex-1 gap-1">
-        <span className="line-clamp-2 font-medium text-foreground">{c.titolo}</span>
+        <span className="line-clamp-2 font-medium text-foreground">
+          {ora ? <span className="figure mr-1 font-semibold">{ora}</span> : null}
+          {c.titolo}
+        </span>
         <span className="flex flex-wrap items-center gap-1.5 text-muted-foreground">
           {tipologia ? <EtichettaTipologia tipologia={tipologia} piccola /> : null}
           <PuntoStato stato={c.stato} />
