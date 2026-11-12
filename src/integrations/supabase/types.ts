@@ -850,6 +850,7 @@ export type Database = {
           drive_url: string | null
           id: string
           note: string | null
+          ora_prevista: string | null
           ordine: number
           pubblicato_il: string | null
           pubblicazione_prevista: string | null
@@ -868,6 +869,7 @@ export type Database = {
           drive_url?: string | null
           id?: string
           note?: string | null
+          ora_prevista?: string | null
           ordine?: number
           pubblicato_il?: string | null
           pubblicazione_prevista?: string | null
@@ -886,6 +888,7 @@ export type Database = {
           drive_url?: string | null
           id?: string
           note?: string | null
+          ora_prevista?: string | null
           ordine?: number
           pubblicato_il?: string | null
           pubblicazione_prevista?: string | null
