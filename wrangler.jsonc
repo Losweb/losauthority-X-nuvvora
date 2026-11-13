@@ -1,10 +1,12 @@
-// Deploy del gestionale su Cloudflare Workers (solo static assets, nessun Worker script).
+// Deploy del gestionale su Cloudflare Workers: static assets (la SPA) + un Worker piccolo (worker/index.ts)
+// che risponde solo su /mcp e /.well-known/oauth-protected-resource (server MCP del Workflow, 13/11/2026).
 // Il build lo fa @cloudflare/vite-plugin (vite.config.ts) in ./dist. Guida: docs/deploy-cloudflare.md
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   // Deve coincidere con il nome del progetto su Cloudflare. NON usare "los-authority": è il Worker della landing.
   "name": "losauthority-x-nuvvora",
   "compatibility_date": "2026-10-01",
+  "main": "./worker/index.ts",
   // `wrangler deploy` compila da solo prima di pubblicare: il deploy funziona anche con il
   // «Build command» di Cloudflare vuoto.
   "build": {
@@ -15,6 +17,10 @@
     "directory": "./dist",
     // SPA: ogni percorso dell'app (/area/..., /contratto/:token, /stampa/...) risponde con index.html;
     // i file che non esistono (richieste non di navigazione) restano 404.
-    "not_found_handling": "single-page-application"
-  }
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+    // Solo queste rotte passano dal Worker; tutto il resto lo servono gli assets come prima.
+    "run_worker_first": ["/mcp", "/.well-known/oauth-protected-resource", "/.well-known/oauth-protected-resource/*"]
+  },
+  "observability": { "enabled": true }
 }
