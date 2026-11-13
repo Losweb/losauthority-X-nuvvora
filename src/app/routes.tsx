@@ -45,6 +45,8 @@ const ConcorrentiPage = lazy(() => import("@/features/area/pages/ConcorrentiPage
 const ClientiAreaPage = lazy(() => import("@/features/area/pages/ClientiAreaPage"));
 const KitBrandPage = lazy(() => import("@/features/area/pages/KitBrandPage"));
 const SkoolVideoPage = lazy(() => import("@/features/skool-video/pages/SkoolVideoPage"));
+const ConsensoPage = lazy(() => import("@/features/claude/pages/ConsensoPage"));
+const CollegaClaudePage = lazy(() => import("@/features/claude/pages/CollegaClaudePage"));
 const SkoolVideoDettaglioPage = lazy(() => import("@/features/skool-video/pages/SkoolVideoDettaglioPage"));
 
 function Attesa({ children }: { children: React.ReactNode }) {
@@ -75,6 +77,15 @@ export function AppRoutes() {
         {/* Pubbliche, senza login: il contratto del cliente (la chiave è il token del link) e l'informativa privacy */}
         <Route path="/contratto/:token" element={<ContrattoPubblicoPage />} />
         <Route path="/informativa-privacy" element={<InformativaPrivacyPage />} />
+        {/* Consenso OAuth (Claude chiede di collegarsi al Workflow): serve il login, poi si torna qui con la stessa query. */}
+        <Route
+          path="/oauth/consent"
+          element={
+            <ProtectedRoute>
+              <ConsensoPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Gestionale: team */}
         <Route
@@ -94,6 +105,7 @@ export function AppRoutes() {
           <Route path="/onboarding" element={<Navigate to="/clienti" replace />} />
           <Route path="/onboarding/:id" element={<RedirectOnboarding />} />
           <Route path="/tag" element={<TagPage />} />
+          <Route path="/claude" element={<CollegaClaudePage />} />
           <Route path="/errori" element={<ErroriPage />} />
           <Route
             path="/finance"
@@ -197,6 +209,7 @@ export function AppRoutes() {
           <Route path="/area/stili" element={<StiliPage />} />
           <Route path="/area/crea-idee" element={<CreaIdeePage />} />
           <Route path="/area/coach" element={<WesleyCoachPage />} />
+          <Route path="/area/claude" element={<CollegaClaudePage />} />
           {/* Cervello del tuo branding: mappa + quattro sottopagine (i link vecchi /area/avatar e /area/offerta rimandano qui) */}
           <Route path="/area/cervello" element={<CervelloPage />} />
           <Route path="/area/cervello/avatar" element={<AvatarPage />} />

@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { BarChart3, Brain, GraduationCap, LayoutGrid, Palette, Route, Users, WandSparkles } from "lucide-react";
+import { BarChart3, Brain, GraduationCap, LayoutGrid, Palette, Plug, Route, Users, WandSparkles } from "lucide-react";
 import { TornaAlGestionale, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
@@ -18,6 +18,7 @@ const VOCI_PERCORSO: VoceNavBase[] = [
   { href: "/area/pubblicazioni", label: "Pubblicazioni", icon: BarChart3 },
   { href: "/area/clienti", label: "Clienti", icon: Users },
   { href: "/area/coach", label: "Wesley Coach", icon: GraduationCap },
+  { href: "/area/claude", label: "Collega Claude", icon: Plug },
 ];
 
 const HREF_CERVELLO = "/area/cervello";

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Clapperboard, FileSignature, KanbanSquare, LayoutGrid, Plus, ShieldAlert, Tag, Tags, TrendingUp, UserCog, Users } from "lucide-react";
+import { BookOpen, Clapperboard, FileSignature, KanbanSquare, LayoutGrid, Plug, Plus, ShieldAlert, Tag, Tags, TrendingUp, UserCog, Users } from "lucide-react";
 import { useAuth, esFinance, esTeam, etichettaRuolo, PassaAccountPersonale } from "@/features/auth";
 import { NuovoLeadRapido } from "@/features/pipeline";
 import { Button } from "@/shared/components/ui/button";
@@ -29,10 +29,12 @@ const VOCI_SECONDARIE: VoceNav[] = [
   { href: "/staff", label: "Staff", icon: UserCog, soloAdmin: true },
   { href: "/tag", label: "Tag", icon: Tags },
   { href: "/errori", label: "Errori", icon: ShieldAlert },
+  { href: "/claude", label: "Collega Claude", icon: Plug },
 ];
 
 const TITOLI: Array<[string, string]> = [
   ["/dashboard", "Dashboard"],
+  ["/claude", "Collega Claude"],
   ["/leads", "Leads"],
   ["/clienti/nuovo", "Nuovo cliente"],
   ["/clienti", "Clienti"],

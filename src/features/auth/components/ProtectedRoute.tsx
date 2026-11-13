@@ -32,7 +32,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (!session) {
-    return <Navigate to="/auth/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/auth/login" replace state={{ from: location.pathname + location.search }} />;
   }
 
   // Sessione valida ma profilo non ancora caricato o mancante: non lasciare la pagina in bianco.
