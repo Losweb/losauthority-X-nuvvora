@@ -851,6 +851,9 @@ export type Database = {
           id: string
           note: string | null
           ora_prevista: string | null
+          instagram_stato: string
+          tiktok_stato: string
+          youtube_stato: string
           ordine: number
           pubblicato_il: string | null
           pubblicazione_prevista: string | null
@@ -870,6 +873,9 @@ export type Database = {
           id?: string
           note?: string | null
           ora_prevista?: string | null
+          instagram_stato?: string
+          tiktok_stato?: string
+          youtube_stato?: string
           ordine?: number
           pubblicato_il?: string | null
           pubblicazione_prevista?: string | null
@@ -889,6 +895,9 @@ export type Database = {
           id?: string
           note?: string | null
           ora_prevista?: string | null
+          instagram_stato?: string
+          tiktok_stato?: string
+          youtube_stato?: string
           ordine?: number
           pubblicato_il?: string | null
           pubblicazione_prevista?: string | null
