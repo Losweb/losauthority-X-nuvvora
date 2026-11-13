@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { oraBreve, STATO_CONTENUTO_KEYS, type Contenuto, type ContenutoDati, type ContenutoPredefiniti } from "./types";
+import { oraBreve, STATI_PROGRAMMAZIONE, STATO_CONTENUTO_KEYS, type Contenuto, type ContenutoDati, type ContenutoPredefiniti } from "./types";
 
 const DATA_ISO = /^\d{4}-\d{2}-\d{2}$/;
 const ORA = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -19,6 +19,10 @@ export const contenutoSchema = z.object({
   /** "HH:MM" oppure "" (nessuna ora). Conta solo se c'è la data. */
   ora_prevista: z.string().refine((v) => v === "" || ORA.test(v), "Ora non valida"),
   pubblicato_il: dataOpzionale,
+  /** Programmazione per piattaforma (riquadri nella scheda). */
+  tiktok_stato: z.enum(STATI_PROGRAMMAZIONE),
+  instagram_stato: z.enum(STATI_PROGRAMMAZIONE),
+  youtube_stato: z.enum(STATI_PROGRAMMAZIONE),
   drive_url: z
     .string()
     .trim()
@@ -44,6 +48,11 @@ export const contenutoSchema = z.object({
 
 export type ContenutoFormValues = z.infer<typeof contenutoSchema>;
 
+/** Valore della colonna → valore del form (qualsiasi cosa diversa da «programmato» vale «da programmare»). */
+function programmazione(v: string | undefined): (typeof STATI_PROGRAMMAZIONE)[number] {
+  return v === "programmato" ? "programmato" : "da_programmare";
+}
+
 /**
  * Valori iniziali del form: da un contenuto esistente, oppure vuoti per una
  * nuova idea (con giorno e fase già scelti se nasce dal calendario).
@@ -56,6 +65,9 @@ export function contenutoToForm(c: Contenuto | null, predefiniti?: ContenutoPred
     pubblicazione_prevista: c?.pubblicazione_prevista ?? predefiniti?.pubblicazione_prevista ?? "",
     ora_prevista: oraBreve(c?.ora_prevista) ?? "",
     pubblicato_il: c?.pubblicato_il ?? "",
+    tiktok_stato: programmazione(c?.tiktok_stato),
+    instagram_stato: programmazione(c?.instagram_stato),
+    youtube_stato: programmazione(c?.youtube_stato),
     drive_url: c?.drive_url ?? "",
     script: c?.script ?? "",
     descrizione: c?.descrizione ?? "",
@@ -78,6 +90,9 @@ export function formToContenuto(v: ContenutoFormValues): ContenutoDati {
     // Senza giorno non c'è ora (lo impone anche il check in DB).
     ora_prevista: v.pubblicazione_prevista && v.ora_prevista ? v.ora_prevista : null,
     pubblicato_il: v.stato === "pubblicato" ? v.pubblicato_il || null : null,
+    tiktok_stato: v.tiktok_stato,
+    instagram_stato: v.instagram_stato,
+    youtube_stato: v.youtube_stato,
     drive_url: v.drive_url || null,
     script: v.script.trim() || null,
     descrizione: v.descrizione.trim() || null,

@@ -18,6 +18,7 @@ import { Form } from "@/shared/components/ui/form";
 import { useEliminaContenuto, useSalvaContenuto } from "../hooks/useContenuti";
 import { contenutoSchema, contenutoToForm, formToContenuto, type ContenutoFormValues } from "../schema";
 import type { Contenuto, ContenutoPredefiniti, Tipologia } from "../types";
+import { CampoPiattaforme } from "./CampoPiattaforme";
 import { CampoRiferimenti } from "./CampoRiferimenti";
 import { CampiDate, CampiFase, CampiTesti, CampoDrive, CampoNote, CampoTitolo } from "./CampiContenuto";
 import { TipologieDialog } from "./TipologieDialog";
@@ -68,6 +69,7 @@ export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, on
         <CampoTitolo control={form.control} />
         <CampiFase control={form.control} tipologie={tipologie} onGestisciTipologie={() => setGestisciTipologie(true)} />
         <CampiDate control={form.control} statoScelto={statoScelto} />
+        <CampoPiattaforme control={form.control} />
         <CampiTesti control={form.control} />
         <CampoRiferimenti control={form.control} />
         <CampoDrive control={form.control} />

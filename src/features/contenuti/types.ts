@@ -65,10 +65,40 @@ export const MAX_TIPOLOGIE = 30;
 /** Colore di partenza di una tipologia nuova (l'inchiostro `--action`): l'utente lo cambia dal selettore. */
 export const COLORE_TIPOLOGIA_NUOVA = "#0f1921";
 
+/**
+ * Le tre piattaforme su cui si programma ogni video, con lo stato di
+ * programmazione (`contenuti.<piattaforma>_stato`). Le scrive l'utente dalla
+ * scheda e l'agente IA che carica i video; la regola «in Pubblicato solo se
+ * tutte programmate» è dell'agente: l'app non blocca nulla.
+ */
+export const PIATTAFORME_CONTENUTO = ["tiktok", "instagram", "youtube"] as const;
+export type PiattaformaContenuto = (typeof PIATTAFORME_CONTENUTO)[number];
+
+export const ETICHETTA_PIATTAFORMA_CONTENUTO: Record<PiattaformaContenuto, string> = {
+  tiktok: "TikTok",
+  instagram: "Instagram",
+  youtube: "YouTube",
+};
+
+export const STATI_PROGRAMMAZIONE = ["da_programmare", "programmato"] as const;
+export type StatoProgrammazione = (typeof STATI_PROGRAMMAZIONE)[number];
+
+export const ETICHETTA_PROGRAMMAZIONE: Record<StatoProgrammazione, string> = {
+  da_programmare: "Da programmare",
+  programmato: "Programmato",
+};
+
+/** Colonna di `contenuti` con lo stato di quella piattaforma. */
+export const CAMPO_PIATTAFORMA = {
+  tiktok: "tiktok_stato",
+  instagram: "instagram_stato",
+  youtube: "youtube_stato",
+} as const satisfies Record<PiattaformaContenuto, keyof Contenuto>;
+
 /** Campi che il form scrive (il resto lo mettono la base e gli hook). */
 export type ContenutoDati = Pick<
   Contenuto,
-  "titolo" | "stato" | "tipologia_id" | "pubblicazione_prevista" | "ora_prevista" | "pubblicato_il" | "drive_url" | "note" | "script" | "descrizione" | "riferimenti"
+  "titolo" | "stato" | "tipologia_id" | "pubblicazione_prevista" | "ora_prevista" | "tiktok_stato" | "instagram_stato" | "youtube_stato" | "pubblicato_il" | "drive_url" | "note" | "script" | "descrizione" | "riferimenti"
 >;
 
 /** L'ora prevista come «18:30» (il DB la restituisce «18:30:00»), o null se non c'è. */
