@@ -71,6 +71,8 @@
   --color-online: var(--online);
   --color-frame-start: var(--frame-start);
   --color-frame-end: var(--frame-end);
+  --color-tela-carta: var(--tela-carta);
+  --color-tela-inchiostro: var(--tela-inchiostro);
 
   /* Stati (badge, delta finanziari, avvisi): non esistono in Seto, restano i tre toni sobri. */
   --color-status-active: var(--status-active-fg);
@@ -138,6 +140,11 @@
   --on-glass: #ffffff; /* Nel mockup bianco (2.1:1): qui si usa --ink, come consiglia il manuale */
   --silhouette: #121a1f; /* La figura scura delle miniature e il pannello scuro del login */
   --online: #1f9d4a; /* Il pallino di presenza sull'avatar */
+  /* Tela del logo nel Kit Brand: è l'anteprima del marchio, quindi carta e inchiostro restano
+     gli stessi anche col tema scuro (in .dark non si ridefiniscono). */
+  --tela-carta: #ffffff;
+  --tela-inchiostro: #111318;
+  --tela-neutra: #8f939b;
 
   --shadow-window: 0 40px 80px -32px #5a2a2066, 0 0 0 1px #ffffff80;
   --shadow-active: 0 1px 2px #11131810, 0 6px 16px -4px #11131814;
@@ -212,6 +219,58 @@
      né "finestra" sollevata dietro alla pagina). --vh-finestra resta per le pagine che si misurano sullo schermo. */
   --canvas-pad: 0px;
   --vh-finestra: 100dvh;
+}
+
+/* ============================================================
+   Tema scuro (20/11/2026, richiesta dell'utente): il chiaro resta
+   quello di serie, l'interruttore della card utente mette .dark su
+   <html> (next-themes). Si ridefiniscono solo i token di base: la
+   semantica shadcn qui sopra li segue da sola.
+   ============================================================ */
+.dark {
+  color-scheme: dark;
+
+  --frame-start: #1b1e22;
+  --frame-end: #3a2620;
+  --bleed: #fc8a6f0f;
+  --surface: #121417;
+  --surface-raised: #1a1d21;
+  --surface-active: #23272c;
+  --surface-input: #1d2024;
+  --surface-hover: #262a30;
+  --line: #2a2e34;
+  --line-strong: #3a3f46;
+  --line-faint: #1f2226;
+  --control-border: #737882;
+  --ink: #eceef0;
+  --ink-secondary: #b9bcc2;
+  --ink-muted: #9a9ea6;
+  --action: #eceef0;
+  --on-action: #0f1921;
+  --focus-ring: #eceef0;
+  --tint-rose: #3b2a25;
+  --tint-lilac: #2f2933;
+  --card-glass: #2d3238;
+  --card-glass-button: #3a4047;
+  --silhouette: #0b0f12;
+
+  --shadow-window: 0 40px 80px -32px #00000099, 0 0 0 1px #ffffff14;
+  --shadow-active: 0 1px 2px #00000066, 0 6px 16px -4px #00000059;
+  --shadow-card: 0 1px 2px #00000059;
+  --shadow-panel: 0 8px 24px -12px #00000080;
+
+  /* Stati: testo chiaro su fondo scuro dello stesso tono. */
+  --status-active-fg: #9fc6ab;
+  --status-active-bg: #1f2d24;
+  --status-expiring-fg: #d9bd82;
+  --status-expiring-bg: #2f2817;
+  --status-churn-fg: #e3a59d;
+  --status-churn-bg: #35221f;
+  --destructive: #e3a59d;
+
+  /* La sfera di Aura legge questi due: scura su chiaro, chiara su scuro. */
+  --aura-core: #eceef0;
+  --aura-rim: #eceef0;
 }
 
 @layer base {

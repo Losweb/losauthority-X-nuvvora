@@ -3,6 +3,7 @@ import { BarChart3, Brain, GraduationCap, LayoutGrid, Palette, Plug, Route, User
 import { TornaAlGestionale, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
+import { BottoneTemaCompatto } from "@/shared/components/layout/InterruttoreTema";
 import { ContenutoPagina } from "@/shared/components/layout/ContenutoPagina";
 import { MenuMobile } from "@/shared/components/layout/MenuMobile";
 import { CardUtente, FinestraSeto, SidebarSeto, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
@@ -122,6 +123,7 @@ export function ClientShell({ conNav = false }: ClientShellProps) {
             </Link>
             <span className="flex items-center gap-1">
               <TornaAlGestionale variante="testata" />
+              <BottoneTemaCompatto />
               <Button size="sm" variant="ghost" onClick={() => void signOut()}>
                 Esci
               </Button>

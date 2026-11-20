@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { LogOut, PanelLeftClose, PanelLeftOpen, type LucideIcon } from "lucide-react";
 import { Monogramma } from "@/shared/components/brand/Monogramma";
 import { Button } from "@/shared/components/ui/button";
+import { InterruttoreTema } from "@/shared/components/layout/InterruttoreTema";
 import { SidebarCompattaContext, useSidebarCompatta, useSidebarCompattaAttiva } from "@/shared/hooks/useSidebarCompatta";
 import { cn } from "@/lib/utils";
 
@@ -125,6 +126,7 @@ export function CardUtente({ nome, sotto, onEsci, azioni }: CardUtenteProps) {
           <Monogramma nome={nome} tono="peach" online />
         </span>
         {azioni}
+        <InterruttoreTema compatta />
         <AzioneCardUtente icona={LogOut} variante="ghost" onClick={onEsci} titolo="Esci">
           Esci
         </AzioneCardUtente>
@@ -143,6 +145,7 @@ export function CardUtente({ nome, sotto, onEsci, azioni }: CardUtenteProps) {
       {/* Colonna flex e non grid: in una griglia il testo lungo allargherebbe la colonna oltre il bordo. */}
       <div className="flex min-w-0 flex-col gap-1.5">
         {azioni}
+        <InterruttoreTema />
         <AzioneCardUtente icona={LogOut} variante="ghost" onClick={onEsci}>
           Esci
         </AzioneCardUtente>
