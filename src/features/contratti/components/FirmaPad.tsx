@@ -125,7 +125,8 @@ export function FirmaPad({ onChange, etichetta = "Firma qui", disabled = false }
 
   return (
     <div className="grid gap-1.5">
-      <div className={cn("relative overflow-hidden rounded-md border border-input", disabled ? "bg-muted/40" : "bg-card")}>
+      {/* Il riquadro è un foglio bianco anche col tema scuro: l'inchiostro è blu notte. */}
+      <div className={cn("relative overflow-hidden rounded-md border border-input bg-tela-carta", disabled && "opacity-60")}>
         <canvas
           ref={canvasRef}
           onPointerDown={giu}
@@ -138,11 +139,11 @@ export function FirmaPad({ onChange, etichetta = "Firma qui", disabled = false }
           style={{ aspectRatio: `${LARGO} / ${ALTO}`, touchAction: "none" }}
         />
         {vuoto ? (
-          <span aria-hidden className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-muted-foreground">
+          <span aria-hidden className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-tela-inchiostro/55">
             {etichetta}
           </span>
         ) : null}
-        <span aria-hidden className="pointer-events-none absolute right-[6%] bottom-[22%] left-[6%] border-b border-dashed border-input" />
+        <span aria-hidden className="pointer-events-none absolute right-[6%] bottom-[22%] left-[6%] border-b border-dashed border-tela-inchiostro/20" />
       </div>
       <div className="flex justify-end">
         <Button type="button" variant="ghost" size="sm" onClick={cancella} disabled={disabled || vuoto}>

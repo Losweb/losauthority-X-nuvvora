@@ -25,7 +25,8 @@ function FirmaFornitore({ firma }: { firma: Firma | null }) {
       </p>
       {firma && !mostraPad ? (
         <>
-          <div className="rounded-md border bg-muted/40 px-4 py-3">
+          {/* Foglio sempre bianco: l'inchiostro blu della firma deve leggersi anche col tema scuro. */}
+          <div className="rounded-md border bg-tela-carta px-4 py-3">
             <FirmaSvg firma={firma} altezza={78} />
           </div>
           <div>

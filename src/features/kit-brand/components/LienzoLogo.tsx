@@ -56,13 +56,13 @@ export function LienzoLogo({ clienteId, kit, colorePrimario }: LienzoLogoProps) 
   const url = usaScuro ? linkScuro.data : linkChiaro.data;
   const haLogo = !!kit?.logo_path;
   const stileSfondo: React.CSSProperties =
-    sfondo === "chiaro" ? { background: "var(--ink-0)" } : sfondo === "scuro" ? { background: "var(--ink-950)" } : { background: colorePrimario ?? "var(--ink-300)" };
+    sfondo === "chiaro" ? { background: "var(--tela-carta)" } : sfondo === "scuro" ? { background: "var(--tela-inchiostro)" } : { background: colorePrimario ?? "var(--tela-neutra)" };
   const chiaroSuSfondo = sfondo !== "chiaro";
 
   const sfondi: Array<{ valore: Sfondo; stile: React.CSSProperties; nome: string }> = [
-    { valore: "chiaro", stile: { background: "var(--ink-0)" }, nome: "Su carta" },
-    { valore: "scuro", stile: { background: "var(--ink-950)" }, nome: "Su inchiostro" },
-    { valore: "colore", stile: { background: colorePrimario ?? "var(--ink-300)" }, nome: "Sul colore primario" },
+    { valore: "chiaro", stile: { background: "var(--tela-carta)" }, nome: "Su carta" },
+    { valore: "scuro", stile: { background: "var(--tela-inchiostro)" }, nome: "Su inchiostro" },
+    { valore: "colore", stile: { background: colorePrimario ?? "var(--tela-neutra)" }, nome: "Sul colore primario" },
   ];
 
   return (
@@ -71,7 +71,7 @@ export function LienzoLogo({ clienteId, kit, colorePrimario }: LienzoLogoProps) 
         {/* Griglia leggera: dà la sensazione del foglio di lavoro, non di una card. */}
         <div
           aria-hidden
-          className={cn("pointer-events-none absolute inset-0 opacity-[0.07]", chiaroSuSfondo ? "text-white" : "text-black")}
+          className={cn("pointer-events-none absolute inset-0 opacity-[0.07]", chiaroSuSfondo ? "text-white" : "text-tela-inchiostro")}
           style={{ backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)", backgroundSize: "22px 22px" }}
         />
         {/* Sul touch ogni disco (sempre da 20px) sta in un pulsante da 36px: stessa posizione, più facile da prendere. */}
@@ -91,7 +91,9 @@ export function LienzoLogo({ clienteId, kit, colorePrimario }: LienzoLogoProps) 
                 aria-hidden
                 className={cn(
                   "size-5 rounded-full border-2 transition-transform group-hover/disco:scale-110",
-                  sfondo === s.valore ? "scale-110 border-foreground ring-2 ring-background" : "border-foreground/30",
+                  // I dischi stanno sopra la tela, non sulla pagina: il bordo segue la tela (scura o chiara).
+                  chiaroSuSfondo ? "border-white/40" : "border-tela-inchiostro/30",
+                  sfondo === s.valore && (chiaroSuSfondo ? "scale-110 border-white" : "scale-110 border-tela-inchiostro"),
                 )}
                 style={s.stile}
               />
@@ -107,7 +109,7 @@ export function LienzoLogo({ clienteId, kit, colorePrimario }: LienzoLogoProps) 
             className="group relative grid size-full place-items-center p-10 md:p-16"
           >
             {url ? <img src={url} alt="Logo del brand" className="max-h-[220px] max-w-full object-contain drop-shadow-sm" /> : null}
-            <span className={cn("absolute bottom-4 text-[12px] tracking-[0.18em] uppercase opacity-0 transition-opacity group-hover:opacity-70 pointer-coarse:opacity-70", chiaroSuSfondo ? "text-white" : "text-foreground")}>
+            <span className={cn("absolute bottom-4 text-[12px] tracking-[0.18em] uppercase opacity-0 transition-opacity group-hover:opacity-70 pointer-coarse:opacity-70", chiaroSuSfondo ? "text-white" : "text-tela-inchiostro")}>
               Tocca per sostituire
             </span>
           </SceltaFile>
@@ -116,7 +118,7 @@ export function LienzoLogo({ clienteId, kit, colorePrimario }: LienzoLogoProps) 
             accetta={ACCETTA_LOGO}
             etichetta="Carica il logo"
             onFile={(file) => logo.mutate({ file, vecchio: null })}
-            className={cn("grid place-items-center gap-3 rounded-xl border border-dashed px-10 py-12 text-center transition-colors", chiaroSuSfondo ? "border-white/40 text-white hover:bg-white/10" : "border-foreground/30 text-foreground hover:bg-foreground/5")}
+            className={cn("grid place-items-center gap-3 rounded-xl border border-dashed px-10 py-12 text-center transition-colors", chiaroSuSfondo ? "border-white/40 text-white hover:bg-white/10" : "border-tela-inchiostro/30 text-tela-inchiostro hover:bg-tela-inchiostro/5")}
           >
             <ImagePlus className="size-7" aria-hidden />
             <span className="font-display text-2xl">Il tuo logo</span>

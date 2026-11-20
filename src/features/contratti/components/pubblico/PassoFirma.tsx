@@ -46,8 +46,9 @@ export function PassoFirma(p: PassoFirmaProps) {
 
       <div className="grid gap-2">
         <p className="text-[15px] font-semibold text-foreground">{p.documento.firmatario_fornitore}</p>
+        {/* Foglio sempre bianco: l'inchiostro blu della firma deve leggersi anche col tema scuro. */}
         {p.firmaFornitore ? (
-          <div className="rounded-md border bg-card px-3.5 py-2.5">
+          <div className="rounded-md border bg-tela-carta px-3.5 py-2.5">
             <FirmaSvg firma={p.firmaFornitore} altezza={64} />
           </div>
         ) : (

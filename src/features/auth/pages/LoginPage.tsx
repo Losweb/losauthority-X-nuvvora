@@ -16,10 +16,10 @@ import type { Rol } from "../types";
 
 const SITO_PUBBLICO = "https://wesleycaicedo.com";
 
-/** Pannello sinistro: il film in bianco e nero della statua, come nel sito. */
+/** Pannello sinistro: il film in bianco e nero della statua, come nel sito. Resta scuro anche col tema scuro (colori fissi). */
 function PannelloFilm() {
   return (
-    <div className="relative hidden overflow-hidden bg-ink-deep text-paper lg:block">
+    <div className="relative hidden overflow-hidden bg-ink-deep text-tela-carta lg:block">
       <video
         autoPlay
         muted
@@ -30,12 +30,12 @@ function PannelloFilm() {
       >
         <source src="/marmo/hero-statue.mp4" type="video/mp4" />
       </video>
-      <div className="absolute inset-0 bg-gradient-to-b from-ink/45 to-ink/80" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-ink-deep/45 to-ink-deep/80" aria-hidden />
       <div className="relative z-[2] flex h-full flex-col justify-between p-12">
         <MarmoLogo altezza={28} />
         <div>
-          <p className="eyebrow text-paper/60">Area riservata</p>
-          <h2 className="mt-4 max-w-[420px] text-[44px] leading-[1.05] text-paper">
+          <p className="eyebrow text-tela-carta/60">Area riservata</p>
+          <h2 className="mt-4 max-w-[420px] text-[44px] leading-[1.05] text-tela-carta">
             Bentornato. La tua area ti aspetta.
           </h2>
         </div>
