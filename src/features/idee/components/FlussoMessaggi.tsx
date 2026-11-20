@@ -98,9 +98,9 @@ export function FlussoMessaggi({
                 </div>
               </div>
             )}
-            {/* Una proposta per riga, a tutta larghezza: su desktop la card si legge in orizzontale (vedi CardIdea). */}
+            {/* Una proposta per riga, sotto la risposta di Aura; la card non arriva al bordo destro (si legge meglio). */}
             {proposte.length > 0 ? (
-              <div className="grid gap-3 md:pl-11">
+              <div className="grid max-w-[860px] gap-3 md:pl-11">
                 {proposte.map((idea, i) => (
                   <CardIdea key={idea.id} idea={idea} indice={i} occupato={occupato} onSalva={onSalva} onScarta={onScarta} onWorkflow={onWorkflow} />
                 ))}

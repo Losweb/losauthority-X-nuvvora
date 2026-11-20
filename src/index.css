@@ -245,8 +245,9 @@
   --ink: #eceef0;
   --ink-secondary: #b9bcc2;
   --ink-muted: #9a9ea6;
-  --action: #eceef0;
-  --on-action: #0f1921;
+  /* Nello scuro il «pieno» non è bianco: grigio un passo sopra le card (bottoni principali, bolla del cliente). */
+  --action: #30353c;
+  --on-action: #eceef0;
   --focus-ring: #eceef0;
   --tint-rose: #3b2a25;
   --tint-lilac: #2f2933;
