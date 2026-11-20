@@ -17,7 +17,7 @@ export {
   useSessione,
   useSessioni,
 } from "./hooks/useIdee";
-export { chiaviStili, useAggiornaStile, useCreaStile, useEliminaStile, useStili } from "./hooks/useStili";
+export { chiaviStili, useAggiornaStile, useCreaStile, useEliminaStile, useRiscriviStile, useStili } from "./hooks/useStili";
 export { scorriChatInFondo } from "./scorriChat";
 export { linkCreaIdee } from "./types";
 export type { Idea, Messaggio, Sessione, Stile } from "./types";

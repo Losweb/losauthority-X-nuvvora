@@ -55,6 +55,28 @@ export function useCreaStile(clienteId: string) {
   });
 }
 
+/**
+ * Nuovi script per uno stile esistente (aggiunti, tolti, corretti): la riga torna «in corso»
+ * e Aura riscrive le istruzioni da capo (aura-stile, `aggiorna_stile_id`).
+ */
+export function useRiscriviStile(clienteId: string) {
+  const queryClient = useQueryClient();
+  const invalida = () => void queryClient.invalidateQueries({ queryKey: chiaviStili.lista(clienteId) });
+  return useMutation({
+    mutationFn: async ({ id, script, note }: { id: string; script: string[]; note: string | null }): Promise<RispostaStile> =>
+      invocaEdge<RispostaStile>("aura-stile", { aggiorna_stile_id: id, script, note }),
+    // La funzione mette subito la riga «in corso»: rileggendo poco dopo la carta lo mostra (e parte il polling).
+    onMutate: () => {
+      setTimeout(invalida, 1200);
+    },
+    onSuccess: (r) => {
+      toast.success("Stile aggiornato", { description: `Aura ha riscritto «${r.stile.titolo}» con i nuovi script.` });
+    },
+    onSettled: invalida,
+    onError: erroreMutation("Aura non è riuscita ad aggiornare lo stile"),
+  });
+}
+
 /** Il cliente ritocca titolo o istruzioni di uno stile pronto. */
 export function useAggiornaStile(clienteId: string) {
   const invalida = useInvalidaStili(clienteId);

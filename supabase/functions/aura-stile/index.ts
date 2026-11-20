@@ -2,8 +2,10 @@
  * aura-stile — pagina "Stili" dell'area cliente. Il cliente incolla più script
  * dello stesso stile; Aura li studia e scrive le istruzioni dello STILE (come
  * si costruisce quel tipo di video nel suo nicho) in una riga di `stili`.
- * Body: { titolo, script: string[], note? } oppure { riprova_stile_id } per
- * rifare uno stile finito in errore. Risposta: { ok, stile }.
+ * Body: { titolo, script: string[], note? } per uno stile nuovo, { riprova_stile_id }
+ * per rifare uno stile finito in errore, oppure { aggiorna_stile_id, script, note? }
+ * per cambiare gli script di uno stile esistente (aggiunti, tolti, corretti): Aura
+ * riscrive le istruzioni da capo. Risposta: { ok, stile }.
  *
  * Traccia dello stato: la riga nasce 'in_corso' e finisce 'pronta' o 'errore'
  * (con il motivo): la pagina la mostra subito e la aggiorna quando è pronta.
@@ -23,6 +25,7 @@ type Body = {
   script?: unknown;
   note?: unknown;
   riprova_stile_id?: unknown;
+  aggiorna_stile_id?: unknown;
 };
 
 const MAX_SCRIPT = 10;
@@ -36,10 +39,8 @@ interface Stile {
   script_fonte: string[];
 }
 
-/** Valida il body di uno stile nuovo: titolo + almeno uno script non vuoto. */
-function leggiNuovo(body: Body): { titolo: string; note: string | null; script: string[] } {
-  const titolo = typeof body.titolo === "string" ? body.titolo.trim().slice(0, 120) : "";
-  if (titolo.length < 2) throw new HttpError(400, "Dai un nome allo stile.");
+/** Script e nota dal body: almeno uno script completo (40+ caratteri), al massimo MAX_SCRIPT. */
+function leggiScript(body: Body): { note: string | null; script: string[] } {
   const grezzi = Array.isArray(body.script) ? body.script : [];
   const script = grezzi
     .filter((s): s is string => typeof s === "string")
@@ -48,7 +49,33 @@ function leggiNuovo(body: Body): { titolo: string; note: string | null; script: 
     .slice(0, MAX_SCRIPT);
   if (script.length === 0) throw new HttpError(400, "Incolla almeno uno script completo (minimo 40 caratteri).");
   const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 2000) : null;
-  return { titolo, note, script };
+  return { note, script };
+}
+
+/** Valida il body di uno stile nuovo: titolo + almeno uno script non vuoto. */
+function leggiNuovo(body: Body): { titolo: string; note: string | null; script: string[] } {
+  const titolo = typeof body.titolo === "string" ? body.titolo.trim().slice(0, 120) : "";
+  if (titolo.length < 2) throw new HttpError(400, "Dai un nome allo stile.");
+  return { titolo, ...leggiScript(body) };
+}
+
+/**
+ * Aggiorna: nuovi script (e nota) per uno stile del cliente già esistente, poi Aura riscrive le
+ * istruzioni da capo. Le istruzioni vecchie restano finché quelle nuove non sono pronte.
+ */
+async function perAggiorna(admin: SupabaseClient, clienteId: string, stileId: string, body: Body): Promise<Stile> {
+  const { note, script } = leggiScript(body);
+  const { data } = await admin.from("stili").select("id, stato").eq("id", stileId).eq("cliente_id", clienteId).maybeSingle();
+  if (!data) throw new HttpError(404, "Stile non trovato.");
+  if ((data as { stato: string }).stato === "in_corso") throw new HttpError(409, "Aura sta già lavorando su questo stile.");
+  const { data: aggiornato, error } = await admin
+    .from("stili")
+    .update({ script_fonte: script, note, stato: "in_corso", errore: null, modello: ANTHROPIC_MODEL })
+    .eq("id", stileId)
+    .select("id, titolo, note, script_fonte")
+    .single();
+  if (error || !aggiornato) throw error ?? new Error("stile non aggiornato");
+  return aggiornato as Stile;
 }
 
 /** Riprova: rimette 'in_corso' uno stile del cliente finito in errore. */
@@ -104,6 +131,8 @@ Deno.serve(async (req: Request) => {
     let stile: Stile;
     if (typeof body.riprova_stile_id === "string" && body.riprova_stile_id) {
       stile = await perRiprova(admin, c.id, body.riprova_stile_id);
+    } else if (typeof body.aggiorna_stile_id === "string" && body.aggiorna_stile_id) {
+      stile = await perAggiorna(admin, c.id, body.aggiorna_stile_id, body);
     } else {
       const nuovo = leggiNuovo(body);
       const { data, error } = await admin

@@ -34,3 +34,14 @@ export const modificaStileSchema = z.object({
   istruzioni: z.string().trim().min(50, "Le istruzioni sono troppo corte").max(20000, "Massimo 20000 caratteri"),
 });
 export type ModificaStileFormValues = z.infer<typeof modificaStileSchema>;
+
+/** Script di uno stile esistente: si aggiungono, tolgono o correggono e Aura riscrive le istruzioni. */
+export const scriptStileSchema = z.object({
+  script: nuovoStileSchema.shape.script,
+  note: nuovoStileSchema.shape.note,
+});
+export type ScriptStileFormValues = z.infer<typeof scriptStileSchema>;
+
+export function scriptStileToPayload(v: ScriptStileFormValues): { script: string[]; note: string | null } {
+  return { script: v.script.map((s) => s.testo).filter((t) => t.length >= MIN_SCRIPT), note: v.note || null };
+}
