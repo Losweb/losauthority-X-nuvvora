@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { SheetFooter } from "@/shared/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,7 +75,7 @@ export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, on
         <CampoNote control={form.control} />
 
         {/* Il pannello è alto: i bottoni restano fissi in fondo mentre il form scorre. */}
-        <SheetFooter className="sticky bottom-0 -mx-6 mt-1 flex-row items-center justify-between border-t border-line bg-popover px-6 py-4">
+        <div className="sticky bottom-0 -mx-6 mt-1 flex flex-row items-center justify-between gap-2 border-t border-line bg-popover px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {contenuto ? (
             <Button
               type="button"
@@ -99,7 +98,7 @@ export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, on
               {salva.isPending ? "Salvo…" : "Salva"}
             </Button>
           </div>
-        </SheetFooter>
+        </div>
       </form>
 
       <TipologieDialog open={gestisciTipologie} onOpenChange={setGestisciTipologie} tipologie={tipologie} />

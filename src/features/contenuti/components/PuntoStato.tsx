@@ -12,3 +12,14 @@ export function PuntoStato({ stato, className }: { stato: string; className?: st
     />
   );
 }
+
+/** Pillola della fase: pallino colorato + nome, su fondo neutro (card del calendario, tabella). */
+export function PillolaStato({ stato, className }: { stato: string; className?: string }) {
+  if (!eStatoContenuto(stato)) return null;
+  return (
+    <span className={cn("inline-flex h-5 max-w-full items-center gap-1.5 rounded-full bg-background/70 px-2 text-[12px] leading-none font-medium text-foreground", className)}>
+      <PuntoStato stato={stato} />
+      <span className="truncate">{ETICHETTA_STATO_CONTENUTO[stato]}</span>
+    </span>
+  );
+}

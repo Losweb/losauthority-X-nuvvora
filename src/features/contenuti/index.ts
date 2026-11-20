@@ -1,5 +1,5 @@
-export { BoardContenuti } from "./components/BoardContenuti";
 export { CalendarioContenuti } from "./components/CalendarioContenuti";
+export { TabellaContenuti } from "./components/TabellaContenuti";
 export { ContenutoDialog } from "./components/ContenutoDialog";
 export { useContenuti, useSpostaContenuto, useRipianificaContenuto, chiaviContenuti } from "./hooks/useContenuti";
 export { useTipologie, tipologiaIdPerChiave, chiaviTipologie } from "./hooks/useTipologie";

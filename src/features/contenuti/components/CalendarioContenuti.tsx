@@ -4,12 +4,10 @@ import { it } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ETICHETTA_STATO_CONTENUTO, mappaTipologie, perOra, STATO_CONTENUTO_KEYS, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
+import { mappaTipologie, perOra, type Contenuto, type StatoContenuto, type Tipologia } from "../types";
 import { AgendaContenuti, RigaAgenda } from "./AgendaContenuti";
 import { ChipCalendario } from "./ChipCalendario";
-import { EtichettaTipologia } from "./EtichettaTipologia";
 import { GiornoCalendario } from "./GiornoCalendario";
-import { PuntoStato } from "./PuntoStato";
 
 interface CalendarioContenutiProps {
   contenuti: Contenuto[];
@@ -78,7 +76,7 @@ export function CalendarioContenuti({ contenuti, tipologie, onApri, onRipianific
   const titoloMese = format(mese, "LLLL yyyy", { locale: it });
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
+    <div className="grid gap-4">
       <section aria-label="Calendario dei contenuti" className="grid gap-3">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-display text-2xl font-semibold capitalize">{titoloMese}</h3>
@@ -94,29 +92,6 @@ export function CalendarioContenuti({ contenuti, tipologie, onApri, onRipianific
             </Button>
           </div>
         </header>
-
-        {/* Legende (solo con la griglia): il pallino è la fase, la barra della card è il colore della tipologia. */}
-        <div className="hidden gap-1 text-xs text-muted-foreground md:grid">
-          <ul aria-label="Fasi del workflow" className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <li className="eyebrow text-[12px]">Fase</li>
-            {STATO_CONTENUTO_KEYS.map((s) => (
-              <li key={s} className="flex items-center gap-1.5">
-                <PuntoStato stato={s} />
-                {ETICHETTA_STATO_CONTENUTO[s]}
-              </li>
-            ))}
-          </ul>
-          {tipologie.length > 0 ? (
-            <ul aria-label="Tipologie dei contenuti" className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <li className="eyebrow text-[12px]">Tipologia</li>
-              {tipologie.map((t) => (
-                <li key={t.id} className="flex items-center">
-                  <EtichettaTipologia tipologia={t} />
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
 
         {/* La chiave rimette il giorno proposto per il nuovo contenuto quando cambia il mese. */}
         <AgendaContenuti key={format(mese, "yyyy-MM")} mese={mese} perGiorno={perGiorno} onApri={onApri} onRipianifica={onRipianifica} onNuovo={onNuovo} />
@@ -157,22 +132,23 @@ export function CalendarioContenuti({ contenuti, tipologie, onApri, onRipianific
         onDragLeave={() => setSopra((s) => (s === "senza-data" ? null : s))}
         onDrop={(e) => rilascia(e, null)}
         className={cn(
-          "flex flex-col gap-2 rounded-lg border border-dashed bg-muted/40 p-3 transition-colors",
+          "grid gap-2 rounded-lg border border-dashed bg-muted/40 p-3 transition-colors",
           sopra === "senza-data" && "border-primary bg-sidebar-accent",
         )}
       >
+        {/* Sotto il calendario e non a lato: il mese prende tutta la larghezza. */}
         <h3 className="eyebrow text-[12px]">Senza data · {senzaData.length}</h3>
         {senzaData.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Tutti i contenuti hanno una data. Trascina qui per toglierla.</p>
+          <p className="text-xs text-muted-foreground">Tutti i contenuti hanno una data. Trascina qui una card per toglierla.</p>
         ) : (
           <>
             {/* Sul telefono, al posto del trascinamento, la data si sceglie dalla riga. */}
-            <div className="contents md:hidden">
+            <div className="grid gap-2 md:hidden">
               {senzaData.map((c) => (
                 <RigaAgenda key={c.id} c={c} onApri={onApri} onRipianifica={onRipianifica} />
               ))}
             </div>
-            <div className="hidden md:contents">
+            <div className="hidden gap-2 md:grid md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
               {senzaData.map((c) => (
                 <ChipCalendario key={c.id} c={c} tipologia={c.tipologia_id ? (mappa.get(c.tipologia_id) ?? null) : null} onApri={onApri} />
               ))}

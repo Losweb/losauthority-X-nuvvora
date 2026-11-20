@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import { CalendarDays, Columns3, Plus } from "lucide-react";
+import { CalendarDays, Plus, Rows3 } from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { primoNome } from "@/features/scheda";
 import {
-  BoardContenuti,
   CalendarioContenuti,
   ContenutoDialog,
   mappaTipologie,
+  TabellaContenuti,
   useContenuti,
   useRipianificaContenuto,
   useSpostaContenuto,
@@ -19,10 +19,10 @@ import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/St
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 
-type Vista = "board" | "calendario";
+type Vista = "tabella" | "calendario";
 
 const SUGGERIMENTO: Record<Vista, string> = {
-  board: "Trascina una card per cambiarle stato.",
+  tabella: "Tocca un video per aprirlo, cambia la fase dalla riga.",
   calendario: "Tocca un giorno per aggiungere uno script o un video, trascina una card per spostarla.",
 };
 
@@ -34,7 +34,7 @@ interface StatoDialog {
   predefiniti?: ContenutoPredefiniti;
 }
 
-/** /area/workflow → pipeline dei video del cliente: tabella per stato o calendario per data prevista. */
+/** /area/workflow → pipeline dei video del cliente: calendario per data prevista (prima vista) o tabella per fase. */
 export default function WorkflowPage() {
   const { utente } = useAuth();
   const clienteId = utente?.id ?? "";
@@ -44,7 +44,8 @@ export default function WorkflowPage() {
   const mappa = useMemo(() => mappaTipologie(tipologie.data), [tipologie.data]);
   const sposta = useSpostaContenuto(clienteId);
   const ripianifica = useRipianificaContenuto(clienteId);
-  const [vista, setVista] = useState<Vista>("board");
+  // Il calendario è la prima vista: si pianifica per giorno (richiesta dell'utente, 20/11/2026).
+  const [vista, setVista] = useState<Vista>("calendario");
   const [dialog, setDialog] = useState<StatoDialog>({ open: false, contenuto: null });
 
   if (!utente) return null;
@@ -66,14 +67,14 @@ export default function WorkflowPage() {
         sottotitolo={`${conteggio} ${SUGGERIMENTO[vista]}`}
         azioni={
           <>
-            <Tabs value={vista} onValueChange={(v) => setVista(v === "calendario" ? "calendario" : "board")}>
+            <Tabs value={vista} onValueChange={(v) => setVista(v === "tabella" ? "tabella" : "calendario")}>
               {/* Su touch il segmented control cresce: le due voci arrivano a 36 px. */}
               <TabsList aria-label="Vista" className="pointer-coarse:min-h-[42px]">
-                <TabsTrigger value="board" className="pointer-coarse:min-h-9">
-                  <Columns3 aria-hidden /> Tabella
-                </TabsTrigger>
                 <TabsTrigger value="calendario" className="pointer-coarse:min-h-9">
                   <CalendarDays aria-hidden /> Calendario
+                </TabsTrigger>
+                <TabsTrigger value="tabella" className="pointer-coarse:min-h-9">
+                  <Rows3 aria-hidden /> Tabella
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -87,8 +88,8 @@ export default function WorkflowPage() {
 
       {contenuti.isLoading ? <SkeletonBlocco altezza="h-64" /> : null}
       {contenuti.isError ? <ErroreCaricamento /> : null}
-      {contenuti.data && vista === "board" ? (
-        <BoardContenuti contenuti={contenuti.data} tipologie={mappa} onApri={apri} onSposta={(id, stato) => sposta.mutate({ id, stato })} />
+      {contenuti.data && vista === "tabella" ? (
+        <TabellaContenuti contenuti={contenuti.data} tipologie={mappa} onApri={apri} onSposta={(id, stato) => sposta.mutate({ id, stato })} onNuovo={nuovo} />
       ) : null}
       {contenuti.data && vista === "calendario" ? (
         <CalendarioContenuti

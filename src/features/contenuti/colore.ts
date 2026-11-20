@@ -21,7 +21,13 @@ export function stilePieno(colore: string): CSSProperties {
   return { backgroundColor: colore, color: testoSu(colore) };
 }
 
-/** Tinta leggera dello stesso colore (sfondo e bordo di una card): l'alfa si aggiunge in coda all'hex. */
-export function stileTinta(colore: string): CSSProperties {
-  return { backgroundColor: `${colore}1f`, borderColor: `${colore}80` };
+/**
+ * Il colore della tipologia come variabile `--tinta`: la card del calendario lo mescola con
+ * `color-mix` (classe CLASSE_CARTA), più leggero nel chiaro e più pieno nello scuro.
+ */
+export function stileCarta(colore: string): CSSProperties {
+  return { "--tinta": colore } as CSSProperties;
 }
+
+/** Fondo tinto della card del calendario (insieme a `stileCarta`). */
+export const CLASSE_CARTA = "bg-[color-mix(in_srgb,var(--tinta)_22%,var(--card))] dark:bg-[color-mix(in_srgb,var(--tinta)_45%,var(--card))]";
