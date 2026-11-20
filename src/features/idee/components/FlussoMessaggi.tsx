@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Palette, RotateCcw } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect, useRef } from "react";
+import { Palette, RotateCcw } from "lucide-react";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
 import { Button } from "@/shared/components/ui/button";
 import { scorriChatInFondo } from "../scorriChat";
 import { ERRORE_FERMATA, type Idea, type Messaggio, type Stile } from "../types";
+import { BottoneCopia } from "./BottoneCopia";
 import { CardIdea } from "./CardIdea";
 import { PensieroAura } from "./PensieroAura";
 
@@ -22,33 +22,6 @@ interface FlussoMessaggiProps {
   onSalva: (idea: Idea) => void;
   onScarta: (idea: Idea) => void;
   onWorkflow: (idea: Idea) => void;
-}
-
-/** Bottone minimo, in basso a destra di ogni messaggio: copia il testo negli appunti con conferma. */
-function BottoneCopia({ testo }: { testo: string }) {
-  const [copiato, setCopiato] = useState(false);
-  async function copia() {
-    try {
-      await navigator.clipboard.writeText(testo);
-      setCopiato(true);
-      setTimeout(() => setCopiato(false), 1500);
-    } catch {
-      toast.error("Copia non riuscita", { description: "Seleziona il testo e copialo a mano." });
-    }
-  }
-  return (
-    <Button
-      type="button"
-      size="icon-xs"
-      variant="ghost"
-      className="text-muted-foreground hover:text-foreground"
-      title={copiato ? "Copiato" : "Copia il testo"}
-      aria-label={copiato ? "Copiato" : "Copia il testo"}
-      onClick={() => void copia()}
-    >
-      {copiato ? <Check aria-hidden /> : <Copy aria-hidden />}
-    </Button>
-  );
 }
 
 function BollaCliente({ testo, stile }: { testo: string; stile?: string | null }) {
@@ -125,8 +98,9 @@ export function FlussoMessaggi({
                 </div>
               </div>
             )}
+            {/* Una proposta per riga, a tutta larghezza: su desktop la card si legge in orizzontale (vedi CardIdea). */}
             {proposte.length > 0 ? (
-              <div className="grid gap-3 md:grid-cols-2 md:pl-11 xl:grid-cols-3">
+              <div className="grid gap-3 md:pl-11">
                 {proposte.map((idea, i) => (
                   <CardIdea key={idea.id} idea={idea} indice={i} occupato={occupato} onSalva={onSalva} onScarta={onScarta} onWorkflow={onWorkflow} />
                 ))}

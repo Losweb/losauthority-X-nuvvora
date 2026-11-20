@@ -6,6 +6,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ETICHETTA_STATO_IDEA, eStatoIdea, type Idea } from "../types";
+import { BottoneCopia } from "./BottoneCopia";
 
 const BORDO_TIPOLOGIA: Record<TipologiaContenuto, string> = {
   virale: "border-l-status-expiring",
@@ -18,6 +19,24 @@ function eTipologia(v: string | null): v is TipologiaContenuto {
   return v !== null && v in TIPOLOGIE_CONTENUTO;
 }
 
+/** Per confrontare hook e inizio dello script senza badare a virgolette, spazi e maiuscole. */
+const normalizza = (t: string) =>
+  t
+    .toLowerCase()
+    .replace(/[“”"«»'’.,!?…:;–—-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/**
+ * L'hook è «la prima frase pronta da dire»: quasi sempre lo script comincia proprio con quella.
+ * Si mostra a parte solo quando nello script non c'è, così la card non ripete la stessa frase due volte.
+ */
+function hookDaMostrare(idea: Idea): string | null {
+  if (!idea.hook) return null;
+  if (!idea.script) return idea.hook;
+  return normalizza(idea.script).startsWith(normalizza(idea.hook)) ? null : idea.hook;
+}
+
 interface CardIdeaProps {
   idea: Idea;
   indice?: number;
@@ -27,76 +46,108 @@ interface CardIdeaProps {
   occupato?: boolean;
 }
 
-/** Una proposta di Aura: striscia colorata per tipologia, hook in corsivo, script espandibile, azioni. */
+/**
+ * Una proposta di Aura: striscia colorata per tipologia, script in primo piano, copia, azioni.
+ * La card è un container: quando è larga (la chat su desktop) si legge in orizzontale, con titolo e
+ * azioni a sinistra e lo script a destra; stretta (telefono, pannello «Salvate») va in colonna.
+ */
 export function CardIdea({ idea, indice = 0, onSalva, onScarta, onWorkflow, occupato = false }: CardIdeaProps) {
   const [aperta, setAperta] = useState(false);
   const tipologia = eTipologia(idea.tipologia) ? TIPOLOGIE_CONTENUTO[idea.tipologia] : null;
   const stato = eStatoIdea(idea.stato) ? idea.stato : "proposta";
   const scartata = stato === "scartata";
+  const hook = hookDaMostrare(idea);
+  const daCopiare = [hook, idea.script ?? (hook ? null : idea.hook)].filter(Boolean).join("\n\n");
 
   return (
     <article
       style={{ animationDelay: `${indice * 120}ms` }}
       className={cn(
-        "flex flex-col gap-3 rounded-2xl border border-l-4 bg-card p-5 shadow-xs transition-[opacity,box-shadow] animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-500 motion-reduce:animate-none hover:shadow-sm",
+        "@container rounded-2xl border border-l-4 bg-card p-5 shadow-xs transition-[opacity,box-shadow] animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-500 motion-reduce:animate-none hover:shadow-sm",
         eTipologia(idea.tipologia) ? BORDO_TIPOLOGIA[idea.tipologia] : "border-l-border",
         scartata && "opacity-50",
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {tipologia ? <Badge variant={tipologia.tono}>{tipologia.label}</Badge> : null}
-          {stato !== "proposta" ? (
-            <Badge variant={stato === "usata" ? "active" : "outline"} dot={stato === "usata"}>
-              {ETICHETTA_STATO_IDEA[stato]}
-            </Badge>
-          ) : null}
+      {/* Stretta: titolo, script, azioni in colonna. Larga: titolo e azioni a sinistra, lo script a destra. */}
+      <div className="grid gap-4 [grid-template-areas:'meta'_'script'_'azioni'] @2xl:grid-cols-[minmax(200px,260px)_minmax(0,1fr)] @2xl:grid-rows-[auto_1fr] @2xl:gap-x-8 @2xl:[grid-template-areas:'meta_script'_'azioni_script']">
+        <div className="flex min-w-0 flex-col gap-3 [grid-area:meta]">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {tipologia ? <Badge variant={tipologia.tono}>{tipologia.label}</Badge> : null}
+              {stato !== "proposta" ? (
+                <Badge variant={stato === "usata" ? "active" : "outline"} dot={stato === "usata"}>
+                  {ETICHETTA_STATO_IDEA[stato]}
+                </Badge>
+              ) : null}
+            </div>
+            {/* Su card stretta copia e scarta stanno qui; su card larga in alto a destra, sopra lo script. */}
+            <div className="flex shrink-0 items-center gap-0.5 @2xl:hidden">
+              {daCopiare ? <BottoneCopia testo={daCopiare} etichetta="Copia lo script" dimensione="icon-sm" /> : null}
+              {!scartata && stato !== "usata" ? <BottoneScarta occupato={occupato} onClick={() => onScarta(idea)} /> : null}
+            </div>
+          </div>
+          <h3 className="font-sans text-[15px] leading-snug font-semibold text-foreground">{idea.titolo}</h3>
         </div>
-        {!scartata && stato !== "usata" ? (
-          <Button size="icon" variant="ghost" className="size-7 text-muted-foreground pointer-coarse:-m-1 pointer-coarse:size-9" aria-label="Scarta idea" disabled={occupato} onClick={() => onScarta(idea)}>
-            <X className="size-4" aria-hidden />
-          </Button>
+
+        {/* Lo script, in nero pieno: è la cosa da leggere. */}
+        <div className="relative min-w-0 [grid-area:script] @2xl:border-l @2xl:border-line @2xl:pl-8">
+          <div className="absolute -top-1 right-0 hidden items-center gap-0.5 @2xl:flex">
+            {daCopiare ? <BottoneCopia testo={daCopiare} etichetta="Copia lo script" dimensione="icon-sm" /> : null}
+            {!scartata && stato !== "usata" ? <BottoneScarta occupato={occupato} onClick={() => onScarta(idea)} /> : null}
+          </div>
+          <div className="grid gap-2 @2xl:pr-16">
+            {hook ? <p className="text-[15px] leading-relaxed font-medium text-foreground">{hook}</p> : null}
+            {idea.script ? (
+              <>
+                <p className={cn("text-[15px] leading-relaxed whitespace-pre-wrap text-foreground", !aperta && "line-clamp-6")}>{idea.script}</p>
+                <button
+                  type="button"
+                  onClick={() => setAperta((v) => !v)}
+                  className="inline-flex w-fit items-center gap-1 text-[13px] font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline pointer-coarse:-my-2.5 pointer-coarse:py-2.5"
+                >
+                  {aperta ? "Riduci" : "Leggi tutto lo script"}
+                  <ChevronDown className={cn("size-3.5 transition-transform", aperta && "rotate-180")} aria-hidden />
+                </button>
+              </>
+            ) : null}
+          </div>
+        </div>
+
+        {!scartata ? (
+          <div className="flex flex-wrap gap-2 [grid-area:azioni] @2xl:self-end">
+            {stato === "proposta" ? (
+              <Button size="sm" variant="outline" disabled={occupato} onClick={() => onSalva(idea)}>
+                <Bookmark aria-hidden /> Salva
+              </Button>
+            ) : null}
+            {stato === "usata" ? (
+              <Button size="sm" variant="outline" render={<Link to="/area/workflow" />}>
+                <Check aria-hidden /> Apri il Workflow
+              </Button>
+            ) : (
+              <Button size="sm" disabled={occupato} onClick={() => onWorkflow(idea)}>
+                Porta nel Workflow <ArrowRight aria-hidden />
+              </Button>
+            )}
+          </div>
         ) : null}
       </div>
-
-      <h3 className="font-sans text-base leading-snug font-semibold">{idea.titolo}</h3>
-
-      {idea.hook ? (
-        <p className="text-[17px] leading-snug font-semibold tracking-[-0.01em] text-foreground">“{idea.hook}”</p>
-      ) : null}
-
-      {idea.script ? (
-        <div className="grid gap-1.5">
-          <p className={cn("text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground", !aperta && "line-clamp-4")}>{idea.script}</p>
-          <button
-            type="button"
-            onClick={() => setAperta((v) => !v)}
-            className="inline-flex w-fit items-center gap-1 text-xs font-medium text-foreground underline-offset-4 hover:underline pointer-coarse:-my-2.5 pointer-coarse:py-2.5"
-          >
-            {aperta ? "Riduci" : "Leggi lo script"}
-            <ChevronDown className={cn("size-3.5 transition-transform", aperta && "rotate-180")} aria-hidden />
-          </button>
-        </div>
-      ) : null}
-
-      {!scartata ? (
-        <div className="mt-auto flex flex-wrap gap-2 pt-1">
-          {stato === "proposta" ? (
-            <Button size="sm" variant="outline" disabled={occupato} onClick={() => onSalva(idea)}>
-              <Bookmark aria-hidden /> Salva
-            </Button>
-          ) : null}
-          {stato === "usata" ? (
-            <Button size="sm" variant="outline" render={<Link to="/area/workflow" />}>
-              <Check aria-hidden /> Apri il Workflow
-            </Button>
-          ) : (
-            <Button size="sm" disabled={occupato} onClick={() => onWorkflow(idea)}>
-              Porta nel Workflow <ArrowRight aria-hidden />
-            </Button>
-          )}
-        </div>
-      ) : null}
     </article>
+  );
+}
+
+function BottoneScarta({ occupato, onClick }: { occupato: boolean; onClick: () => void }) {
+  return (
+    <Button
+      size="icon-sm"
+      variant="ghost"
+      className="text-muted-foreground hover:text-foreground"
+      aria-label="Scarta idea"
+      title="Scarta idea"
+      disabled={occupato}
+      onClick={onClick}
+    >
+      <X aria-hidden />
+    </Button>
   );
 }

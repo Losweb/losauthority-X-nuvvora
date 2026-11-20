@@ -25,6 +25,27 @@ import { Button } from "@/shared/components/ui/button";
 import { eInvioFermato } from "@/shared/utils/invocaEdge";
 import { cn } from "@/lib/utils";
 
+/** Dove si ricorda la conversazione aperta (per utente) e il pannello conversazioni. */
+const chiaveSessione = (clienteId: string) => `losauthority:crea-idee:sessione:${clienteId}`;
+const CHIAVE_RAIL = "losauthority:crea-idee:rail";
+
+/** localStorage può mancare o lanciare (navigazione privata, dati bloccati): allora non si ricorda nulla. */
+function leggiRicordo(chiave: string): string | null {
+  try {
+    return window.localStorage.getItem(chiave);
+  } catch {
+    return null;
+  }
+}
+function scriviRicordo(chiave: string, valore: string | null) {
+  try {
+    if (valore === null) window.localStorage.removeItem(chiave);
+    else window.localStorage.setItem(chiave, valore);
+  } catch {
+    // Senza storage la pagina funziona lo stesso: si riparte solo da una sessione nuova.
+  }
+}
+
 /**
  * /area/crea-idee → lo "studio" di Aura: a sinistra le sessioni, al centro la
  * conversazione con le proposte sotto ogni risposta, in basso il composer.
@@ -37,10 +58,13 @@ export default function CreaIdeePage() {
   const { utente } = useAuth();
   const clienteId = utente?.id ?? "";
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sessioneId, setSessioneId] = useState<string | null>(null);
+  /** Riparte dalla conversazione lasciata aperta: cambiando sezione e tornando qui non si riparte da zero. */
+  const [sessioneId, setSessioneId] = useState<string | null>(() => leggiRicordo(chiaveSessione(clienteId)));
   const [spunto, setSpunto] = useState<string | undefined>(undefined);
-  /** Pannello conversazioni: chiuso all'ingresso, la chat prende tutta la larghezza. */
-  const [railAperto, setRailAperto] = useState(false);
+  /** Pannello conversazioni: chiuso al primo ingresso, poi resta come l'ha lasciato il cliente. */
+  const [railAperto, setRailAperto] = useState(() => leggiRicordo(CHIAVE_RAIL) === "1");
+  /** La sessione ritrovata va controllata una volta: se nel frattempo non esiste più si riparte da una nuova. */
+  const daVerificare = useRef(sessioneId);
   /**
    * Stile scelto a mano in questa sessione (da "/", dalla X della chip o dal link "Usa in Crea idee").
    * undefined = nessuna scelta: vale lo stile dell'ultimo messaggio della sessione.
@@ -59,7 +83,19 @@ export default function CreaIdeePage() {
     sessioneAperta.current = sessioneId;
   }, [sessioneId]);
 
+  useEffect(() => {
+    scriviRicordo(chiaveSessione(clienteId), sessioneId);
+  }, [clienteId, sessioneId]);
+  useEffect(() => {
+    scriviRicordo(CHIAVE_RAIL, railAperto ? "1" : null);
+  }, [railAperto]);
+
   const sessioni = useSessioni(utente?.id);
+  useEffect(() => {
+    if (daVerificare.current === null || !sessioni.data) return;
+    if (!sessioni.data.some((s) => s.id === daVerificare.current)) setSessioneId(null);
+    daVerificare.current = null;
+  }, [sessioni.data]);
   const sessione = useSessione(sessioneId);
   const salvate = useIdeeSalvate(utente?.id);
   const stili = useStili(utente?.id);
