@@ -69,6 +69,8 @@ export default defineConfig(({ command, mode }) => {
         "@onboarding": path.resolve(__dirname, "./supabase/functions/_shared/onboarding"),
         // Pagine dell'area cliente a cui un sotto-compito rimanda («Fallo qui»): la lista la usa anche aura-compiti.
         "@area": path.resolve(__dirname, "./supabase/functions/_shared/area"),
+        // Forma della mappa e delle schede Avatar (righe {t, o}): la usa anche aura-avatar.
+        "@avatar-forma": path.resolve(__dirname, "./supabase/functions/_shared/avatar"),
       },
     },
     // ffmpeg.wasm (pagina Skool Video): il pre-bundle di Vite romperebbe il worker del pacchetto.

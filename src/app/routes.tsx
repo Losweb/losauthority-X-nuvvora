@@ -31,7 +31,6 @@ const CreaIdeePage = lazy(() => import("@/features/area/pages/CreaIdeePage"));
 const WesleyCoachPage = lazy(() => import("@/features/area/pages/WesleyCoachPage"));
 const CervelloPage = lazy(() => import("@/features/area/pages/CervelloPage"));
 const AvatarPage = lazy(() => import("@/features/area/pages/AvatarPage"));
-const AvatarDettaglioPage = lazy(() => import("@/features/area/pages/AvatarDettaglioPage"));
 const ContrattiPage = lazy(() => import("@/features/contratti/pages/ContrattiPage"));
 const NuovoInvitoPage = lazy(() => import("@/features/contratti/pages/NuovoInvitoPage"));
 const ContrattoDettaglioPage = lazy(() => import("@/features/contratti/pages/ContrattoDettaglioPage"));
@@ -213,7 +212,8 @@ export function AppRoutes() {
           {/* Cervello del tuo branding: mappa + quattro sottopagine (i link vecchi /area/avatar e /area/offerta rimandano qui) */}
           <Route path="/area/cervello" element={<CervelloPage />} />
           <Route path="/area/cervello/avatar" element={<AvatarPage />} />
-          <Route path="/area/cervello/avatar/:id" element={<AvatarDettaglioPage />} />
+          {/* Dal 25/11/2026 la fase Avatar è una pagina sola (mappa + schede): i link ai singoli avatar di prima tornano lì. */}
+          <Route path="/area/cervello/avatar/:id" element={<Navigate to="/area/cervello/avatar" replace />} />
           <Route path="/area/cervello/offerta" element={<OffertaPage />} />
           <Route path="/area/cervello/offerta/:id" element={<OffertaDettaglioPage />} />
           <Route path="/area/cervello/concorrenti" element={<ConcorrentiPage />} />

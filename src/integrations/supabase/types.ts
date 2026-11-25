@@ -418,6 +418,192 @@ export type Database = {
           },
         ]
       }
+      avatar_mappa: {
+        Row: {
+          arrivo: Json | null
+          cliente_id: string
+          convertita: boolean
+          created_at: string
+          da_verificare: Json
+          esempi: Json
+          fuori: Json
+          id: string
+          modello: string | null
+          offerta_da_costruire: boolean
+          passo: string
+          ponte: Json
+          principale_perche: Json | null
+          proporzione: Json | null
+          rivista_da: string | null
+          rivista_il: string | null
+          stato: string
+          tipo: string | null
+          updated_at: string
+        }
+        Insert: {
+          arrivo?: Json | null
+          cliente_id: string
+          convertita?: boolean
+          created_at?: string
+          da_verificare?: Json
+          esempi?: Json
+          fuori?: Json
+          id?: string
+          modello?: string | null
+          offerta_da_costruire?: boolean
+          passo?: string
+          ponte?: Json
+          principale_perche?: Json | null
+          proporzione?: Json | null
+          rivista_da?: string | null
+          rivista_il?: string | null
+          stato?: string
+          tipo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arrivo?: Json | null
+          cliente_id?: string
+          convertita?: boolean
+          created_at?: string
+          da_verificare?: Json
+          esempi?: Json
+          fuori?: Json
+          id?: string
+          modello?: string | null
+          offerta_da_costruire?: boolean
+          passo?: string
+          ponte?: Json
+          principale_perche?: Json | null
+          proporzione?: Json | null
+          rivista_da?: string | null
+          rivista_il?: string | null
+          stato?: string
+          tipo?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatar_mappa_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: true
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avatar_mappa_rivista_da_fkey"
+            columns: ["rivista_da"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avatar_mappa_messaggi: {
+        Row: {
+          cliente_id: string
+          contenuto: string
+          created_at: string
+          errore: string | null
+          id: string
+          mappa_id: string
+          modello: string | null
+          ruolo: string
+          stato: string
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: string
+          contenuto?: string
+          created_at?: string
+          errore?: string | null
+          id?: string
+          mappa_id: string
+          modello?: string | null
+          ruolo: string
+          stato?: string
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string
+          contenuto?: string
+          created_at?: string
+          errore?: string | null
+          id?: string
+          mappa_id?: string
+          modello?: string | null
+          ruolo?: string
+          stato?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatar_mappa_messaggi_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avatar_mappa_messaggi_mappa_id_fkey"
+            columns: ["mappa_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_mappa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avatar_scheda: {
+        Row: {
+          cliente_id: string
+          contenuto: Json
+          created_at: string
+          id: string
+          mappa_id: string
+          ordine: number
+          partenza: Json
+          principale: boolean
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: string
+          contenuto?: Json
+          created_at?: string
+          id?: string
+          mappa_id: string
+          ordine: number
+          partenza?: Json
+          principale?: boolean
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string
+          contenuto?: Json
+          created_at?: string
+          id?: string
+          mappa_id?: string
+          ordine?: number
+          partenza?: Json
+          principale?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatar_scheda_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avatar_scheda_mappa_id_fkey"
+            columns: ["mappa_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_mappa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chiamate: {
         Row: {
           cliente_id: string | null

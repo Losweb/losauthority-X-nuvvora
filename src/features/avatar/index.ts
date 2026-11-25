@@ -1,13 +1,21 @@
-export { AvatarVuoto } from "./components/AvatarVuoto";
-export { CardAvatarMini } from "./components/CardAvatarMini";
 export { CartaAvatar } from "./components/CartaAvatar";
-export { CartaGirevole } from "./components/CartaGirevole";
 export { DiagnosiAvatar } from "./components/DiagnosiAvatar";
 export { DossierAvatar, ElencoDossier, SezioneDossier, TestoDossier } from "./components/DossierAvatar";
-export { DossierPagina } from "./components/DossierPagina";
-export { MappaAvatar, haMappa } from "./components/MappaAvatar";
 export { FlussoAvatar, type MessaggioChat } from "./components/FlussoAvatar";
 export { SceltaVista, type VistaMobile } from "./components/SceltaVista";
-export { chiaviAvatar, useAvatar, useAvatars, useCreaAvatar, useDiagnosiAvatar, useEliminaAvatar, useInviaAvatar, useMessaggiAvatar } from "./hooks/useAvatar";
-export { campiCompilati, codiceAvatar, haDossier } from "./types";
-export type { Avatar, DiagnosiAvatar as Diagnosi, MessaggioAvatar } from "./types";
+export { TestoAura } from "./components/TestoAura";
+export { useAvatars, useDiagnosiAvatar } from "./hooks/useAvatar";
+export { codiceAvatar } from "./types";
+export type { Avatar, DiagnosiAvatar as Diagnosi } from "./types";
+
+// Fase Avatar dal 25/11/2026: una mappa per cliente + da una a tre schede.
+export { ElencoSchede } from "./components/mappa/ElencoSchede";
+export { InizioAvatar } from "./components/mappa/InizioAvatar";
+export { MappaPonte } from "./components/mappa/MappaPonte";
+export { DubbiAvatar, PassiAvatar } from "./components/mappa/PassiAvatar";
+export { RicominciaAvatar } from "./components/mappa/RicominciaAvatar";
+export { EtichettaOrigine } from "./components/mappa/RigaAvatar";
+export { SchedaDocumento } from "./components/mappa/SchedaDocumento";
+export { chiaviMappa, useIniziaMappa, useInviaMappa, useMappaAvatar, useMessaggiMappa, useModificaRiga, useStatoMappa, type MappaConSchede } from "./hooks/useMappaAvatar";
+export { FASI_MAPPA, LINK_LEZIONE_AVATAR, contaVere, titoloScheda } from "./mappa";
+export type { MappaAvatar, MessaggioMappa, SchedaAvatar } from "./mappa";

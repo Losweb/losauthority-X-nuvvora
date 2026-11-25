@@ -29,7 +29,8 @@
       "@/*": ["./src/*"],
       "@contratti/*": ["./supabase/functions/_shared/contratti/*"],
       "@onboarding/*": ["./supabase/functions/_shared/onboarding/*"],
-      "@area/*": ["./supabase/functions/_shared/area/*"]
+      "@area/*": ["./supabase/functions/_shared/area/*"],
+      "@avatar-forma/*": ["./supabase/functions/_shared/avatar/*"]
     }
   },
   "include": ["src"]

@@ -1,76 +1,116 @@
 import { useState } from "react";
-import { CartaAvatar, codiceAvatar, DiagnosiAvatar, DossierAvatar, useAvatars, useDiagnosiAvatar } from "@/features/avatar";
+import { CheckCircle2, ChevronDown, RotateCcw } from "lucide-react";
+import {
+  CartaAvatar,
+  DiagnosiAvatar,
+  DossierAvatar,
+  ElencoSchede,
+  MappaPonte,
+  PassiAvatar,
+  SchedaDocumento,
+  useAvatars,
+  useDiagnosiAvatar,
+  useMappaAvatar,
+  useStatoMappa,
+  type Avatar,
+} from "@/features/avatar";
 import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import { ErroreCaricamento, SkeletonBlocco, StatoVuoto } from "@/shared/components/layout/StatoCaricamento";
 import { formatDate } from "@/shared/utils/formatDate";
-import { cn } from "@/lib/utils";
 import type { ClienteDettaglio } from "../types";
-import { STRISCIA_MOBILE, VOCE_STRISCIA_MOBILE } from "./striscia";
 
 /**
- * Tab "Avatar" della scheda cliente: gli avatar che il cliente ha definito con
- * Aura. Il team vede la carta, il dossier e, in più, la DIAGNOSI per Wesley
- * (tabella avatar_diagnosi, che il cliente non legge).
+ * Tab "Avatar" della scheda cliente. Dal 25/11/2026: la mappa disegnata a ponte
+ * e le schede che il cliente costruisce con Aura (sola lettura), con «Segna come
+ * rivista» per Wesley. Sotto, piegati, gli avatar del sistema di prima con la
+ * diagnosi per Wesley (che il cliente non vede).
  */
 export function AvatarTab({ cliente }: { cliente: ClienteDettaglio }) {
-  const { data, isLoading, isError } = useAvatars(cliente.id);
-  const [sceltoId, setSceltoId] = useState<string | null>(null);
-  const avatars = data ?? [];
-  const scelto = avatars.find((a) => a.id === sceltoId) ?? avatars.find((a) => a.stato === "completo") ?? avatars[0] ?? null;
-  const numero = scelto ? avatars.findIndex((a) => a.id === scelto.id) + 1 : 1;
-  const diagnosi = useDiagnosiAvatar(scelto?.id);
+  const dati = useMappaAvatar(cliente.id);
+  const vecchi = useAvatars(cliente.id);
+  const statoMappa = useStatoMappa(cliente.id);
+  const [aperta, setAperta] = useState<number | null>(null);
 
-  if (isLoading) return <SkeletonBlocco altezza="h-64" />;
-  if (isError) return <ErroreCaricamento />;
-  if (avatars.length === 0) {
-    return <StatoVuoto titolo="Nessun avatar ancora" testo="Il cliente lo definisce dalla sua area: Cervello del tuo branding → Avatar, in conversazione con Aura." />;
+  if (dati.isLoading || vecchi.isLoading) return <SkeletonBlocco altezza="h-64" />;
+  if (dati.isError) return <ErroreCaricamento />;
+  const avatarVecchi = vecchi.data ?? [];
+
+  if (!dati.data) {
+    return (
+      <div className="grid gap-6">
+        <StatoVuoto titolo="Mappa non ancora iniziata" testo="Il cliente la costruisce dalla sua area: Cervello del tuo branding → Avatar, in conversazione con Aura." />
+        <AvatarDiPrima avatars={avatarVecchi} nome={cliente.utente.nombre} />
+      </div>
+    );
   }
 
-  return (
-    <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
-      {/* Telefono, con più voci: una striscia che scorre di lato, così la carta scelta resta subito sotto. */}
-      <nav aria-label="Avatar del cliente" className={cn("grid gap-2", avatars.length > 1 && STRISCIA_MOBILE)}>
-        {avatars.map((a, i) => {
-          const attivo = scelto?.id === a.id;
-          return (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => setSceltoId(a.id)}
-              aria-current={attivo ? "true" : undefined}
-              className={cn(
-                "grid gap-1 rounded-lg border p-3 text-left transition-colors",
-                avatars.length > 1 && VOCE_STRISCIA_MOBILE,
-                attivo ? "border-foreground/40 bg-card shadow-xs" : "border-border bg-card/60 hover:bg-card",
-              )}
-            >
-              <span className="flex items-center justify-between gap-2">
-                <span className="figure text-[12px] tracking-[0.12em] text-muted-foreground">{codiceAvatar(i + 1)}</span>
-                <Badge variant={a.stato === "completo" ? "active" : "neutral"} dot>
-                  {a.stato === "completo" ? "Completo" : "In compilazione"}
-                </Badge>
-              </span>
-              <span className="truncate font-display text-[20px] leading-tight font-semibold">{a.nome ?? "Senza nome"}</span>
-              <span className="truncate text-xs text-muted-foreground">
-                {[a.eta, a.genere, a.situazione].filter(Boolean).join(" · ") || `Creato il ${formatDate(a.created_at)}`}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+  const { mappa, schede } = dati.data;
+  const rivista = mappa.stato === "rivista";
+  const scheda = aperta !== null ? schede.find((s) => s.ordine === aperta) : schede.find((s) => s.principale);
 
-      {scelto ? (
-        <div className="grid min-w-0 gap-5">
-          <CartaAvatar
-            avatar={scelto}
-            numero={numero}
-            titolare={`${cliente.utente.nombre}${scelto.settore ? ` · ${scelto.settore}` : ""}`}
-            inCompilazione={scelto.stato !== "completo"}
-          />
+  return (
+    <div className="grid gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4">
+        <div className="grid min-w-0 flex-1 basis-[360px] gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={rivista ? "active" : "neutral"} dot>
+              {rivista ? `Rivista${mappa.rivista_il ? ` il ${formatDate(mappa.rivista_il)}` : ""}` : "Bozza di Aura"}
+            </Badge>
+            {mappa.offerta_da_costruire ? <Badge variant="expiring">L'offerta va costruita</Badge> : null}
+            {mappa.convertita ? <Badge variant="outline">Nata dagli avatar di prima</Badge> : null}
+          </div>
+          <PassiAvatar passo={mappa.passo} />
+        </div>
+        <Button variant={rivista ? "outline" : "default"} disabled={statoMappa.isPending} onClick={() => statoMappa.mutate({ mappaId: mappa.id, rivista: !rivista })}>
+          {rivista ? <RotateCcw aria-hidden /> : <CheckCircle2 aria-hidden />}
+          {rivista ? "Rimetti in bozza" : "Segna come rivista"}
+        </Button>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] xl:items-start">
+        <div className="grid min-w-0 content-start gap-5">
+          <MappaPonte mappa={mappa} schede={schede} />
+          <ElencoSchede schede={schede} onApri={setAperta} />
+        </div>
+        {scheda ? <SchedaDocumento scheda={scheda} stato={mappa.stato} /> : <StatoVuoto titolo="Nessuna scheda ancora" testo="Aura scrive le schede dopo la mappa, partendo dall'avatar principale." />}
+      </div>
+
+      <AvatarDiPrima avatars={avatarVecchi} nome={cliente.utente.nombre} />
+    </div>
+  );
+}
+
+/** Gli avatar del sistema di prima (tabella `avatar`), piegati: carta, dossier e diagnosi per Wesley. */
+function AvatarDiPrima({ avatars, nome }: { avatars: Avatar[]; nome: string }) {
+  const [aperto, setAperto] = useState(false);
+  const [sceltoId, setSceltoId] = useState<string | null>(null);
+  const scelto = avatars.find((a) => a.id === sceltoId) ?? avatars[0] ?? null;
+  const diagnosi = useDiagnosiAvatar(aperto ? scelto?.id : undefined);
+  if (avatars.length === 0) return null;
+  const numero = scelto ? avatars.findIndex((a) => a.id === scelto.id) + 1 : 1;
+  return (
+    <section className="grid gap-4 border-t pt-5">
+      <Button variant="ghost" className="w-fit" aria-expanded={aperto} onClick={() => setAperto((v) => !v)}>
+        <ChevronDown aria-hidden className={aperto ? "rotate-180 transition-transform" : "transition-transform"} />
+        Avatar del sistema di prima ({avatars.length}) · con la diagnosi per Wesley
+      </Button>
+      {aperto && scelto ? (
+        <div className="grid gap-4">
+          {avatars.length > 1 ? (
+            <div className="flex flex-wrap gap-2">
+              {avatars.map((a, i) => (
+                <Button key={a.id} size="sm" variant={a.id === scelto.id ? "secondary" : "outline"} onClick={() => setSceltoId(a.id)}>
+                  {a.nome ?? `Avatar ${i + 1}`}
+                </Button>
+              ))}
+            </div>
+          ) : null}
+          <CartaAvatar avatar={scelto} numero={numero} titolare={`${nome}${scelto.settore ? ` · ${scelto.settore}` : ""}`} inCompilazione={scelto.stato !== "completo"} />
           <DossierAvatar avatar={scelto} numero={numero} />
           {diagnosi.isError ? <ErroreCaricamento /> : <DiagnosiAvatar diagnosi={diagnosi.data ?? null} completo={scelto.stato === "completo"} />}
         </div>
       ) : null}
-    </div>
+    </section>
   );
 }

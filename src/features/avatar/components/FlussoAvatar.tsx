@@ -4,6 +4,7 @@ import { PensieroAura } from "@/features/idee";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
 import { Button } from "@/shared/components/ui/button";
 import { FASI_AVATAR } from "../types";
+import { TestoAura } from "./TestoAura";
 
 /** Il minimo che serve a disegnare un messaggio: vale per avatar_messaggi e offerta_messaggi. */
 export interface MessaggioChat {
@@ -53,7 +54,7 @@ export function FlussoAvatar<M extends MessaggioChat>({ messaggi, pendente, occu
           <div key={m.id} className="flex items-start gap-3">
             <AuraSfera dimensione={30} conNome={false} className="mt-0.5" />
             <div className="min-w-0 flex-1 pt-1">
-              {m.stato === "completato" && m.contenuto ? <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground">{m.contenuto}</p> : null}
+              {m.stato === "completato" && m.contenuto ? <TestoAura testo={m.contenuto} /> : null}
               {m.stato === "errore" ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <p className="text-sm text-muted-foreground">Aura non è riuscita a rispondere{m.errore ? ` (${m.errore.toLowerCase()})` : ""}.</p>

@@ -6,6 +6,8 @@ interface SceltaVistaProps {
   vista: VistaMobile;
   onCambia: (vista: VistaMobile) => void;
   className?: string;
+  /** Il nome della seconda vista (default «Carta»; la fase Avatar usa «Mappa»). */
+  seconda?: string;
 }
 
 const VOCI: Array<{ valore: VistaMobile; etichetta: string }> = [
@@ -18,7 +20,7 @@ const VOCI: Array<{ valore: VistaMobile; etichetta: string }> = [
  * quale vedere. Da md in su non si vede e le due colonne restano come sempre.
  * La usano l'avatar e l'offerta.
  */
-export function SceltaVista({ vista, onCambia, className }: SceltaVistaProps) {
+export function SceltaVista({ vista, onCambia, className, seconda }: SceltaVistaProps) {
   return (
     <div role="group" aria-label="Cosa vedere" className={cn("grid grid-cols-2 gap-1 rounded-full border bg-muted/50 p-1 md:hidden", className)}>
       {VOCI.map((v) => {
@@ -34,7 +36,7 @@ export function SceltaVista({ vista, onCambia, className }: SceltaVistaProps) {
               attiva ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {v.etichetta}
+            {v.valore === "carta" && seconda ? seconda : v.etichetta}
           </button>
         );
       })}

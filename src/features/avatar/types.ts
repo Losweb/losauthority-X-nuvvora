@@ -2,8 +2,6 @@ import type { Tables } from "@/integrations/supabase/types";
 
 /** Un avatar (cliente ideale) del cliente: carta d'identità + dossier + diagnosi. */
 export type Avatar = Tables<"avatar">;
-/** Un messaggio della conversazione che compila un avatar (cliente o Aura). */
-export type MessaggioAvatar = Tables<"avatar_messaggi">;
 /** La lettura di Aura per Wesley su un avatar: la legge solo il team. */
 export type DiagnosiAvatar = Tables<"avatar_diagnosi">;
 
@@ -24,17 +22,6 @@ export const ETICHETTA_ORIGINE: Record<string, string> = {
 
 /** Numero di serie sulla carta: AV-0001, AV-0002… (posizione dell'avatar tra quelli del cliente). */
 export const codiceAvatar = (numero: number) => `AV-${String(numero).padStart(4, "0")}`;
-
-/** I campi del fronte della carta, per contare quanto è compilata. */
-const CAMPI_CARTA = ["nome", "eta", "genere", "situazione", "momento", "origine", "frase"] as const;
-
-export function campiCompilati(a: Avatar): { fatti: number; totale: number } {
-  const fatti = CAMPI_CARTA.filter((k) => {
-    const v = a[k];
-    return typeof v === "string" && v.trim().length > 0;
-  }).length;
-  return { fatti, totale: CAMPI_CARTA.length };
-}
 
 /** Tutto quello che il retro della carta (DossierAvatar) mostra oltre al fronte. */
 const DOSSIER_TESTO = ["snapshot", "contesto", "desiderio_pratico", "desiderio_emotivo", "dove_cerca", "cosa_manca", "ponte", "arrivo", "nemico"] as const;
