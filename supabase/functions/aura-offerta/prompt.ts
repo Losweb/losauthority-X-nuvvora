@@ -101,41 +101,6 @@ export function renderCarta(offerta: Record<string, unknown>, diagnosi: Record<s
   return `${righe.join("\n")}\nMancano ancora: ${mancanti.join(", ") || "niente"}`;
 }
 
-/** Gli avatar del cliente in testo compatto: la carta e il dossier, così Aura scrive la trasformazione con le parole giuste. */
-export function renderAvatar(avatars: Array<Record<string, unknown>>): string {
-  if (avatars.length === 0) return "(nessun avatar definito: metti a fuoco il minimo, chi / che problema / in che momento, prima di costruire)";
-  const CHIAVI = [
-    "nome",
-    "eta",
-    "genere",
-    "situazione",
-    "contesto",
-    "momento",
-    "frase",
-    "snapshot",
-    "dolori_superficie",
-    "dolori_profondi",
-    "credenze_limitanti",
-    "desiderio_pratico",
-    "desiderio_emotivo",
-    "linguaggio",
-    "piattaforme",
-    "obiezioni",
-    "trigger_acquisto",
-  ];
-  return avatars
-    .map((a) => {
-      const righe = CHIAVI.map((k) => {
-        const v = a[k];
-        if (Array.isArray(v) && v.length > 0) return `${k}: ${(v as string[]).join(" · ")}`;
-        if (typeof v === "string" && v.trim()) return `${k}: ${v}`;
-        return null;
-      }).filter((r): r is string => !!r);
-      return `## Avatar "${typeof a.nome === "string" ? a.nome : "senza nome"}" (${a.stato === "completo" ? "completo" : "in compilazione"})\n${righe.join("\n")}`;
-    })
-    .join("\n\n");
-}
-
 /** Tre tratti per il prompt caching: regole+metodo (fissi), cliente+avatar (fissi nella conversazione), carta+storico+messaggio. */
 export function costruisciPrompt(d: DatiPrompt): Blocco[] {
   const fisso = [`=== REGOLE PRIMA DI PARLARE CON IL CLIENTE (valgono sempre) ===\n${REGOLE_AGENTI}`];
@@ -143,7 +108,7 @@ export function costruisciPrompt(d: DatiPrompt): Blocco[] {
   const cliente = [
     `=== CLIENTE: ${d.nome} ===\n--- Profilo onboarding (quello che sai già di lui: usalo, non richiederlo) ---${taglia(d.scheda, 7000)}`,
     `=== FOTOGRAFIA DELL'ONBOARDING (lettura di Aura per Wesley) E NOTE PER TE ===\n${taglia(d.lettura, 4000)}`,
-    `=== IL SUO AVATAR (cliente ideale: la trasformazione, le obiezioni e il linguaggio vengono da qui) ===\n${taglia(d.avatar, 5000)}`,
+    `=== IL SUO AVATAR (cliente ideale: la trasformazione, le obiezioni e il linguaggio vengono da qui) ===\n${taglia(d.avatar, 12000)}`,
   ];
   if (d.kitBrand) cliente.push(d.kitBrand);
   const variabile = [`=== CARTA DELL'OFFERTA FINORA ===\n${renderCarta(d.offerta, d.diagnosi)}`];

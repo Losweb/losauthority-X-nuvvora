@@ -21,7 +21,8 @@ import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { leggiLettura, renderLettura } from "../_shared/onboarding/lettura.ts";
 import { bloccoKitBrand } from "../_shared/kit-brand.ts";
-import { costruisciPrompt, messaggioApertura, renderAvatar, SYSTEM, type Storico } from "./prompt.ts";
+import { costruisciPrompt, messaggioApertura, SYSTEM, type Storico } from "./prompt.ts";
+import { avatarDi, renderAvatar } from "./avatar.ts";
 import { campiMancanti, estraiScheda, type CampiDiagnosi, type CampiOfferta } from "./scheda.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
@@ -35,7 +36,6 @@ const MAX_OFFERTE = 12;
 const MSG_ERRORE_AURA = "Aura non riesce a rispondere in questo momento. Riprova tra poco.";
 
 type Offerta = Record<string, unknown> & { id: string; stato: string; nome: string | null };
-type AvatarRiga = Record<string, unknown> & { id: string; nome: string | null; stato: string };
 
 /** L'offerta del cliente (404 se non esiste o è di un altro). */
 async function offertaDi(admin: SupabaseClient, clienteId: string, offertaId: string): Promise<Offerta> {
@@ -44,21 +44,15 @@ async function offertaDi(admin: SupabaseClient, clienteId: string, offertaId: st
   return data as Offerta;
 }
 
-/** Gli avatar del cliente, i completi per primi (il più recente in testa). */
-async function avatarDi(admin: SupabaseClient, clienteId: string): Promise<AvatarRiga[]> {
-  const { data } = await admin.from("avatar").select("*").eq("cliente_id", clienteId).order("created_at", { ascending: false });
-  const righe = (data ?? []) as AvatarRiga[];
-  return [...righe.filter((a) => a.stato === "completo"), ...righe.filter((a) => a.stato !== "completo")];
-}
-
 /** Nuova offerta in costruzione + il primo messaggio di Aura (statico). */
 async function crea(admin: SupabaseClient, clienteId: string) {
   const { count } = await admin.from("offerta").select("id", { count: "exact", head: true }).eq("cliente_id", clienteId);
   if ((count ?? 0) >= MAX_OFFERTE) throw new HttpError(409, `Hai già ${MAX_OFFERTE} offerte: elimina quelle che non usi prima di crearne altre.`);
-  const avatar = (await avatarDi(admin, clienteId)).find((a) => a.stato === "completo") ?? null;
+  // Dal 25/11/2026 gli avatar sono la mappa + le schede: offerta.avatar_id (FK alla tabella vecchia) resta null.
+  const avatar = (await avatarDi(admin, clienteId)).avatars.find((a) => a.principale) ?? null;
   const { data: offerta, error } = await admin
     .from("offerta")
-    .insert({ cliente_id: clienteId, modello: ANTHROPIC_MODEL, avatar_id: avatar?.id ?? null })
+    .insert({ cliente_id: clienteId, modello: ANTHROPIC_MODEL, avatar_id: null })
     .select("id")
     .single();
   if (error || !offerta) throw error ?? new Error("offerta non creata");
@@ -119,7 +113,7 @@ async function contesto(admin: SupabaseClient, clienteId: string, offertaId: str
     lettura: lettura ? renderLettura(lettura, "offerta") : "(non disponibile)",
     kitBrand,
     conoscenza: blocchi.join("\n\n"),
-    avatar: renderAvatar(avatars.slice(0, 3)),
+    avatar: renderAvatar(avatars),
     storico: ((storico.data ?? []) as Storico[]).reverse(),
     diagnosi: (diagnosi.data as Record<string, unknown> | null) ?? null,
   };
