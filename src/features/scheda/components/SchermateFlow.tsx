@@ -24,19 +24,19 @@ export function SchermataBenvenuto({ scheda, nome, riprende, onInizia }: Scherma
         <p className="eyebrow">
           {scheda.occhiello} · {scheda.titolo}
         </p>
-        <p
-          aria-live="polite"
-          className="font-display text-[clamp(20px,3vw,27px)] leading-[1.45] font-bold tracking-[-0.01em] text-foreground"
-        >
-          {saluto} {scheda.sottotitolo} Sono circa venti domande in cinque passi, una decina di minuti: vedrai solo quelle
-          che riguardano il tuo lavoro e puoi fermarti quando vuoi. Niente risposte perfette, solo quelle vere.
+        {/* Un titolo e una riga (26/11/2026): prima era un paragrafo intero in grassetto. */}
+        <h1 aria-live="polite" className="font-display text-[clamp(26px,4vw,36px)] leading-tight font-bold tracking-[-0.01em] text-foreground">
+          {saluto} Raccontami il tuo lavoro.
+        </h1>
+        <p className="mx-auto max-w-[440px] text-[15px] leading-relaxed text-muted-foreground">
+          Cinque passi, una decina di minuti. Niente risposte perfette, solo quelle vere.
         </p>
       </div>
       <div className="flex flex-col items-center gap-3">
         <Button type="button" size="lg" onClick={onInizia}>
           {riprende ? "Riprendi" : "Iniziamo"}
         </Button>
-        <span className="text-xs text-muted-foreground">Le tue risposte si salvano automaticamente: puoi fermarti e riprendere.</span>
+        <span className="text-xs text-muted-foreground">Si salva da solo: puoi fermarti e riprendere.</span>
       </div>
     </div>
   );
