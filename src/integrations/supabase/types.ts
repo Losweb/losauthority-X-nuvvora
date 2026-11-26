@@ -374,50 +374,6 @@ export type Database = {
           },
         ]
       }
-      avatar_messaggi: {
-        Row: {
-          avatar_id: string
-          contenuto: string
-          created_at: string
-          errore: string | null
-          id: string
-          modello: string | null
-          ruolo: string
-          stato: string
-          updated_at: string
-        }
-        Insert: {
-          avatar_id: string
-          contenuto?: string
-          created_at?: string
-          errore?: string | null
-          id?: string
-          modello?: string | null
-          ruolo: string
-          stato?: string
-          updated_at?: string
-        }
-        Update: {
-          avatar_id?: string
-          contenuto?: string
-          created_at?: string
-          errore?: string | null
-          id?: string
-          modello?: string | null
-          ruolo?: string
-          stato?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "avatar_messaggi_avatar_id_fkey"
-            columns: ["avatar_id"]
-            isOneToOne: false
-            referencedRelation: "avatar"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       avatar_mappa: {
         Row: {
           arrivo: Json | null
@@ -491,6 +447,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "avatar_mappa_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: true
+            referencedRelation: "vista_clienti"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "avatar_mappa_rivista_da_fkey"
             columns: ["rivista_da"]
             isOneToOne: false
@@ -545,10 +508,61 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "avatar_mappa_messaggi_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vista_clienti"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "avatar_mappa_messaggi_mappa_id_fkey"
             columns: ["mappa_id"]
             isOneToOne: false
             referencedRelation: "avatar_mappa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avatar_messaggi: {
+        Row: {
+          avatar_id: string
+          contenuto: string
+          created_at: string
+          errore: string | null
+          id: string
+          modello: string | null
+          ruolo: string
+          stato: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_id: string
+          contenuto?: string
+          created_at?: string
+          errore?: string | null
+          id?: string
+          modello?: string | null
+          ruolo: string
+          stato?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_id?: string
+          contenuto?: string
+          created_at?: string
+          errore?: string | null
+          id?: string
+          modello?: string | null
+          ruolo?: string
+          stato?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatar_messaggi_avatar_id_fkey"
+            columns: ["avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatar"
             referencedColumns: ["id"]
           },
         ]
@@ -593,6 +607,13 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avatar_scheda_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vista_clienti"
             referencedColumns: ["id"]
           },
           {
@@ -944,89 +965,6 @@ export type Database = {
           },
         ]
       }
-      concorrenti: {
-        Row: {
-          cliente_id: string
-          cosa_fa: string | null
-          created_at: string
-          id: string
-          nome: string
-          social: string[]
-          tipo: string
-          updated_at: string
-        }
-        Insert: {
-          cliente_id: string
-          cosa_fa?: string | null
-          created_at?: string
-          id?: string
-          nome: string
-          social?: string[]
-          tipo?: string
-          updated_at?: string
-        }
-        Update: {
-          cliente_id?: string
-          cosa_fa?: string | null
-          created_at?: string
-          id?: string
-          nome?: string
-          social?: string[]
-          tipo?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "concorrenti_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "clienti"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "concorrenti_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "vista_clienti"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      concorrenti_video: {
-        Row: {
-          concorrente_id: string
-          created_at: string
-          descrizione: string | null
-          id: string
-          ordine: number
-          url: string
-        }
-        Insert: {
-          concorrente_id: string
-          created_at?: string
-          descrizione?: string | null
-          id?: string
-          ordine?: number
-          url: string
-        }
-        Update: {
-          concorrente_id?: string
-          created_at?: string
-          descrizione?: string | null
-          id?: string
-          ordine?: number
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "concorrenti_video_concorrente_id_fkey"
-            columns: ["concorrente_id"]
-            isOneToOne: false
-            referencedRelation: "concorrenti"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       contenuti: {
         Row: {
           cliente_id: string
@@ -1035,20 +973,20 @@ export type Database = {
           descrizione: string | null
           drive_url: string | null
           id: string
+          instagram_stato: string
           note: string | null
           ora_prevista: string | null
-          instagram_stato: string
-          tiktok_stato: string
-          youtube_stato: string
           ordine: number
           pubblicato_il: string | null
           pubblicazione_prevista: string | null
           riferimenti: string[]
           script: string | null
           stato: string
+          tiktok_stato: string
           tipologia_id: string | null
           titolo: string
           updated_at: string
+          youtube_stato: string
         }
         Insert: {
           cliente_id: string
@@ -1057,20 +995,20 @@ export type Database = {
           descrizione?: string | null
           drive_url?: string | null
           id?: string
+          instagram_stato?: string
           note?: string | null
           ora_prevista?: string | null
-          instagram_stato?: string
-          tiktok_stato?: string
-          youtube_stato?: string
           ordine?: number
           pubblicato_il?: string | null
           pubblicazione_prevista?: string | null
           riferimenti?: string[]
           script?: string | null
           stato?: string
+          tiktok_stato?: string
           tipologia_id?: string | null
           titolo: string
           updated_at?: string
+          youtube_stato?: string
         }
         Update: {
           cliente_id?: string
@@ -1079,20 +1017,20 @@ export type Database = {
           descrizione?: string | null
           drive_url?: string | null
           id?: string
+          instagram_stato?: string
           note?: string | null
           ora_prevista?: string | null
-          instagram_stato?: string
-          tiktok_stato?: string
-          youtube_stato?: string
           ordine?: number
           pubblicato_il?: string | null
           pubblicazione_prevista?: string | null
           riferimenti?: string[]
           script?: string | null
           stato?: string
+          tiktok_stato?: string
           tipologia_id?: string | null
           titolo?: string
           updated_at?: string
+          youtube_stato?: string
         }
         Relationships: [
           {
@@ -2587,198 +2525,6 @@ export type Database = {
         }
         Relationships: []
       }
-      kit_brand: {
-        Row: {
-          created_at: string
-          id: string
-          logo_path: string | null
-          logo_scuro_path: string | null
-          nome_brand: string | null
-          note: string | null
-          payoff: string | null
-          tono_voce: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          logo_path?: string | null
-          logo_scuro_path?: string | null
-          nome_brand?: string | null
-          note?: string | null
-          payoff?: string | null
-          tono_voce?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          logo_path?: string | null
-          logo_scuro_path?: string | null
-          nome_brand?: string | null
-          note?: string | null
-          payoff?: string | null
-          tono_voce?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "kit_brand_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "clienti"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kit_brand_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "vista_clienti"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      kit_brand_colori: {
-        Row: {
-          cliente_id: string
-          created_at: string
-          hex: string
-          id: string
-          nome: string | null
-          ordine: number
-          ruolo: string
-        }
-        Insert: {
-          cliente_id: string
-          created_at?: string
-          hex: string
-          id?: string
-          nome?: string | null
-          ordine?: number
-          ruolo?: string
-        }
-        Update: {
-          cliente_id?: string
-          created_at?: string
-          hex?: string
-          id?: string
-          nome?: string | null
-          ordine?: number
-          ruolo?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "kit_brand_colori_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "clienti"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kit_brand_colori_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "vista_clienti"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      kit_brand_documenti: {
-        Row: {
-          cliente_id: string
-          created_at: string
-          descrizione: string | null
-          dimensione: number
-          estrazione_stato: string
-          id: string
-          nome: string
-          storage_path: string
-          testo_estratto: string | null
-        }
-        Insert: {
-          cliente_id: string
-          created_at?: string
-          descrizione?: string | null
-          dimensione: number
-          estrazione_stato?: string
-          id?: string
-          nome: string
-          storage_path: string
-          testo_estratto?: string | null
-        }
-        Update: {
-          cliente_id?: string
-          created_at?: string
-          descrizione?: string | null
-          dimensione?: number
-          estrazione_stato?: string
-          id?: string
-          nome?: string
-          storage_path?: string
-          testo_estratto?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "kit_brand_documenti_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "clienti"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kit_brand_documenti_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "vista_clienti"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      kit_brand_font: {
-        Row: {
-          cliente_id: string
-          created_at: string
-          id: string
-          nome: string
-          ordine: number
-          ruolo: string
-          storage_path: string | null
-        }
-        Insert: {
-          cliente_id: string
-          created_at?: string
-          id?: string
-          nome: string
-          ordine?: number
-          ruolo?: string
-          storage_path?: string | null
-        }
-        Update: {
-          cliente_id?: string
-          created_at?: string
-          id?: string
-          nome?: string
-          ordine?: number
-          ruolo?: string
-          storage_path?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "kit_brand_font_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "clienti"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kit_brand_font_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "vista_clienti"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       lead: {
         Row: {
           cliente_id: string | null
@@ -2886,30 +2632,25 @@ export type Database = {
       }
       offerta: {
         Row: {
+          ancora: string | null
+          avatar_id: string | null
           avatar_letto_il: string | null
+          bonus: string[]
           brand: string | null
           breve_fatta_il: string | null
+          buchi_credibilita: string[]
+          cliente_id: string
+          clienti_attuali: string | null
           completa_fatta_il: string | null
+          completato_il: string | null
+          created_at: string
+          da_confermare: string[]
+          erogazione: string | null
           fermo: Json | null
           fermo_il: string | null
           frase: string | null
           frase_il: string | null
           frase_origine: string | null
-          nuova_dal: string | null
-          passo: number | null
-          scheda: Json
-          strada: string | null
-          tipo_vendita: string | null
-          ancora: string | null
-          avatar_id: string | null
-          bonus: string[]
-          buchi_credibilita: string[]
-          cliente_id: string
-          clienti_attuali: string | null
-          completato_il: string | null
-          created_at: string
-          da_confermare: string[]
-          erogazione: string | null
           frase_presentazione: string | null
           garanzia: string | null
           id: string
@@ -2920,8 +2661,10 @@ export type Database = {
           nome: string | null
           nomi_alternativi: string[]
           non_incluso: string[]
+          nuova_dal: string | null
           obiezioni_risposte: string[]
           ostacoli_soluzioni: string[]
+          passo: number | null
           per_chi: string | null
           permanenza_uscita: string | null
           piano_validazione: string | null
@@ -2937,41 +2680,39 @@ export type Database = {
           scala_gratis: string | null
           scala_vetta: string | null
           scarsita_urgenza: string | null
+          scheda: Json
           snapshot: string | null
           stack: string[]
           stato: string
           stato_partenza: string | null
+          strada: string | null
           tipo: string | null
+          tipo_vendita: string | null
           trasformazione: string | null
           unita: string | null
           updated_at: string
           valore_risultato: string | null
         }
         Insert: {
+          ancora?: string | null
+          avatar_id?: string | null
           avatar_letto_il?: string | null
+          bonus?: string[]
           brand?: string | null
           breve_fatta_il?: string | null
+          buchi_credibilita?: string[]
+          cliente_id: string
+          clienti_attuali?: string | null
           completa_fatta_il?: string | null
+          completato_il?: string | null
+          created_at?: string
+          da_confermare?: string[]
+          erogazione?: string | null
           fermo?: Json | null
           fermo_il?: string | null
           frase?: string | null
           frase_il?: string | null
           frase_origine?: string | null
-          nuova_dal?: string | null
-          passo?: number | null
-          scheda?: Json
-          strada?: string | null
-          tipo_vendita?: string | null
-          ancora?: string | null
-          avatar_id?: string | null
-          bonus?: string[]
-          buchi_credibilita?: string[]
-          cliente_id: string
-          clienti_attuali?: string | null
-          completato_il?: string | null
-          created_at?: string
-          da_confermare?: string[]
-          erogazione?: string | null
           frase_presentazione?: string | null
           garanzia?: string | null
           id?: string
@@ -2982,8 +2723,10 @@ export type Database = {
           nome?: string | null
           nomi_alternativi?: string[]
           non_incluso?: string[]
+          nuova_dal?: string | null
           obiezioni_risposte?: string[]
           ostacoli_soluzioni?: string[]
+          passo?: number | null
           per_chi?: string | null
           permanenza_uscita?: string | null
           piano_validazione?: string | null
@@ -2999,41 +2742,39 @@ export type Database = {
           scala_gratis?: string | null
           scala_vetta?: string | null
           scarsita_urgenza?: string | null
+          scheda?: Json
           snapshot?: string | null
           stack?: string[]
           stato?: string
           stato_partenza?: string | null
+          strada?: string | null
           tipo?: string | null
+          tipo_vendita?: string | null
           trasformazione?: string | null
           unita?: string | null
           updated_at?: string
           valore_risultato?: string | null
         }
         Update: {
+          ancora?: string | null
+          avatar_id?: string | null
           avatar_letto_il?: string | null
+          bonus?: string[]
           brand?: string | null
           breve_fatta_il?: string | null
+          buchi_credibilita?: string[]
+          cliente_id?: string
+          clienti_attuali?: string | null
           completa_fatta_il?: string | null
+          completato_il?: string | null
+          created_at?: string
+          da_confermare?: string[]
+          erogazione?: string | null
           fermo?: Json | null
           fermo_il?: string | null
           frase?: string | null
           frase_il?: string | null
           frase_origine?: string | null
-          nuova_dal?: string | null
-          passo?: number | null
-          scheda?: Json
-          strada?: string | null
-          tipo_vendita?: string | null
-          ancora?: string | null
-          avatar_id?: string | null
-          bonus?: string[]
-          buchi_credibilita?: string[]
-          cliente_id?: string
-          clienti_attuali?: string | null
-          completato_il?: string | null
-          created_at?: string
-          da_confermare?: string[]
-          erogazione?: string | null
           frase_presentazione?: string | null
           garanzia?: string | null
           id?: string
@@ -3044,8 +2785,10 @@ export type Database = {
           nome?: string | null
           nomi_alternativi?: string[]
           non_incluso?: string[]
+          nuova_dal?: string | null
           obiezioni_risposte?: string[]
           ostacoli_soluzioni?: string[]
+          passo?: number | null
           per_chi?: string | null
           permanenza_uscita?: string | null
           piano_validazione?: string | null
@@ -3061,11 +2804,14 @@ export type Database = {
           scala_gratis?: string | null
           scala_vetta?: string | null
           scarsita_urgenza?: string | null
+          scheda?: Json
           snapshot?: string | null
           stack?: string[]
           stato?: string
           stato_partenza?: string | null
+          strada?: string | null
           tipo?: string | null
+          tipo_vendita?: string | null
           trasformazione?: string | null
           unita?: string | null
           updated_at?: string
@@ -3330,6 +3076,51 @@ export type Database = {
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "data_onboarding"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posizionamento: {
+        Row: {
+          cliente_id: string
+          contenuto: Json
+          created_at: string
+          errore: string | null
+          id: string
+          stato: string
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: string
+          contenuto?: Json
+          created_at?: string
+          errore?: string | null
+          id?: string
+          stato?: string
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string
+          contenuto?: Json
+          created_at?: string
+          errore?: string | null
+          id?: string
+          stato?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posizionamento_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: true
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posizionamento_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: true
+            referencedRelation: "vista_clienti"
             referencedColumns: ["id"]
           },
         ]
@@ -4048,18 +3839,6 @@ export type Database = {
         }[]
       }
       registra_sito: { Args: { p_url: string }; Returns: undefined }
-      salva_concorrente: {
-        Args: {
-          p_cosa_fa: string
-          p_id: string
-          p_nome: string
-          p_social: string[]
-          p_tipo: string
-          p_video_descrizione: string[]
-          p_video_url: string[]
-        }
-        Returns: string
-      }
     }
     Enums: {
       [_ in never]: never

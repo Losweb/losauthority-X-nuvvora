@@ -14,8 +14,7 @@ export interface RigaPosizionamento {
 
 export const chiavePosizionamento = (clienteId: string) => ["posizionamento", clienteId] as const;
 
-// La tabella è nuova (migrazione 20261126000076): finché i tipi generati non la conoscono si legge senza tipi.
-const tabella = () => supabase.from("posizionamento" as "offerta");
+const tabella = () => supabase.from("posizionamento");
 
 /** Il posizionamento del cliente, null finché non l'ha creato. Mentre Aura scrive si ricarica ogni 3 s. */
 export function usePosizionamento(clienteId: string | undefined) {
