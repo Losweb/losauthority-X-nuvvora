@@ -5,6 +5,10 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 const CAMPI = [
+  // Dal 26/11/2026: la frase della fase Offerta (versione breve) è il ponte da cui parte l'avatar.
+  ["frase", "La frase dell'offerta (il ponte)"],
+  ["tipo_vendita", "Servizio o prodotto"],
+  ["brand", "Brand"],
   ["nome", "Nome"],
   ["tipo", "Cos'è"],
   ["prezzo", "Prezzo"],
