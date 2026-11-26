@@ -1,84 +1,65 @@
-import { Link, NavLink } from "react-router-dom";
-import { BarChart3, Brain, GraduationCap, LayoutGrid, Palette, Plug, Route, Users, WandSparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BarChart3, CalendarDays, GraduationCap, Layers, Palette, Plug, Route, Swords, Tag, UserRound, Users, WandSparkles } from "lucide-react";
 import { TornaAlGestionale, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
 import { BottoneTemaCompatto } from "@/shared/components/layout/InterruttoreTema";
 import { ContenutoPagina } from "@/shared/components/layout/ContenutoPagina";
 import { MenuMobile } from "@/shared/components/layout/MenuMobile";
-import { CardUtente, FinestraSeto, SidebarSeto, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
-import { useSidebarCompattaAttiva } from "@/shared/hooks/useSidebarCompatta";
-import { cn } from "@/lib/utils";
+import { CardUtente, FinestraSeto, SidebarSeto, TitoloSezioneNav, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
 
-/** Sezioni del percorso; il "Cervello del tuo branding" è a parte, con una voce in evidenza. */
-const VOCI_PERCORSO: VoceNavBase[] = [
-  { href: "/area/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { href: "/area/stili", label: "Stili", icon: Palette },
-  { href: "/area/crea-idee", label: "Crea idee", icon: WandSparkles },
-  { href: "/area/workflow", label: "Workflow", icon: Route },
-  { href: "/area/pubblicazioni", label: "Pubblicazioni", icon: BarChart3 },
-  { href: "/area/clienti", label: "Clienti", icon: Users },
+/**
+ * Il menu segue il metodo (26/11/2026, studio dell'esperienza cliente): prima il percorso, poi le
+ * fondamenta nell'ordine in cui si fanno, i contenuti, i risultati; in fondo gli aiuti.
+ */
+const VOCE_PERCORSO: VoceNavBase = { href: "/area/dashboard", label: "Il tuo percorso", icon: Route };
+const GRUPPI: Array<{ titolo: string; voci: VoceNavBase[] }> = [
+  {
+    titolo: "Fondamenta",
+    voci: [
+      { href: "/area/cervello/offerta", label: "Offerta", icon: Tag },
+      { href: "/area/cervello/avatar", label: "Avatar", icon: UserRound },
+      { href: "/area/cervello/concorrenti", label: "Concorrenti", icon: Swords },
+      { href: "/area/cervello/kit-brand", label: "Marca", icon: Palette },
+    ],
+  },
+  {
+    titolo: "Contenuti",
+    voci: [
+      { href: "/area/crea-idee", label: "Idee", icon: WandSparkles },
+      { href: "/area/stili", label: "Stili", icon: Layers },
+      { href: "/area/workflow", label: "Calendario", icon: CalendarDays },
+    ],
+  },
+  {
+    titolo: "Risultati",
+    voci: [
+      { href: "/area/pubblicazioni", label: "Numeri", icon: BarChart3 },
+      { href: "/area/clienti", label: "Clienti", icon: Users },
+    ],
+  },
+];
+const VOCI_AIUTO: VoceNavBase[] = [
   { href: "/area/coach", label: "Wesley Coach", icon: GraduationCap },
   { href: "/area/claude", label: "Collega Claude", icon: Plug },
 ];
 
-const HREF_CERVELLO = "/area/cervello";
-
-const TITOLO_CERVELLO = "Cervello del tuo branding";
-
-/**
- * La voce "Cervello del tuo branding": più importante delle altre, quindi una card (Seto action card)
- * con il cervello su disco `action`; attiva anche nelle sottopagine. Nella sidebar compatta resta
- * solo il disco, con un anello quando è attiva.
- */
-function VoceCervello() {
-  const compatta = useSidebarCompattaAttiva();
-  if (compatta) {
-    return (
-      <NavLink
-        to={HREF_CERVELLO}
-        title={TITOLO_CERVELLO}
-        aria-label={TITOLO_CERVELLO}
-        className={({ isActive }) =>
-          cn(
-            "mx-auto grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-xs transition-[transform,box-shadow] duration-300 hover:scale-105",
-            isActive && "ring-2 ring-primary/30 ring-offset-2 ring-offset-sidebar",
-          )
-        }
-      >
-        <Brain className="size-[18px]" strokeWidth={2} aria-hidden />
-      </NavLink>
-    );
-  }
-  return (
-    <NavLink
-      to={HREF_CERVELLO}
-      className={({ isActive }) =>
-        cn(
-          "group flex items-center gap-3 rounded-lg border px-3 py-3 transition-[border-color,background-color,box-shadow] duration-300",
-          isActive ? "border-line bg-surface-hover" : "border-line bg-card shadow-xs hover:bg-surface",
-        )
-      }
-    >
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-transform duration-300 group-hover:scale-105">
-        <Brain className="size-[18px]" strokeWidth={2} aria-hidden />
-      </span>
-      <span className="min-w-0">
-        <span className="eyebrow block">Il tuo branding</span>
-        <span className="block text-[15px] leading-tight font-bold tracking-[-0.01em] text-foreground">{TITOLO_CERVELLO}</span>
-      </span>
-    </NavLink>
-  );
-}
-
 function NavPercorso() {
   return (
     <nav aria-label="Il tuo percorso" className="flex flex-1 flex-col gap-0.5 px-4 pt-2 pb-4 md:px-0 md:pt-0">
-      {VOCI_PERCORSO.map((v) => (
-        <VoceNavSeto key={v.href} voce={v} />
+      <VoceNavSeto voce={VOCE_PERCORSO} />
+      {GRUPPI.map((g) => (
+        <div key={g.titolo} className="mt-3 flex flex-col gap-0.5">
+          <TitoloSezioneNav className="text-[12px] font-semibold text-muted-foreground">{g.titolo}</TitoloSezioneNav>
+          {g.voci.map((v) => (
+            <VoceNavSeto key={v.href} voce={v} />
+          ))}
+        </div>
       ))}
-      <div className="pt-5">
-        <VoceCervello />
+      <div className="mt-3 flex flex-col gap-0.5 border-t border-line pt-3">
+        {VOCI_AIUTO.map((v) => (
+          <VoceNavSeto key={v.href} voce={v} />
+        ))}
       </div>
     </nav>
   );
@@ -102,9 +83,8 @@ interface ClientShellProps {
 
 /**
  * Shell dell'area cliente (Seto). Durante l'onboarding: solo marchio + «Esci» e colonna centrale
- * da 820px. Con `conNav`: sidebar a sinistra (Dashboard, Stili, Crea idee, Workflow, Pubblicazioni,
- * Clienti, Wesley Coach) e, in evidenza, la card "Cervello del tuo branding"; in fondo la card utente
- * con «Esci». Sotto md la sidebar diventa il pannello ☰ (`MenuMobile`).
+ * da 820px. Con `conNav`: sidebar a sinistra con «Il tuo percorso» e i tre gruppi (Fondamenta,
+ * Contenuti, Risultati), in fondo gli aiuti e la card utente con «Esci». Sotto md la sidebar diventa il pannello ☰ (`MenuMobile`).
  */
 export function ClientShell({ conNav = false }: ClientShellProps) {
   const { utente, signOut } = useAuth();

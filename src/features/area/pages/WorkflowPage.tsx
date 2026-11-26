@@ -63,7 +63,7 @@ export default function WorkflowPage() {
     <div className="grid gap-2">
       <PageHeader
         occhiello={`Il tuo percorso${nome ? ` · ${nome}` : ""}`}
-        titolo="Workflow"
+        titolo="Calendario"
         sottotitolo={`${conteggio} ${SUGGERIMENTO[vista]}`}
         azioni={
           <>

@@ -60,7 +60,7 @@ export default function PubblicazioniPage() {
     <div className="grid gap-2">
       <PageHeader
         occhiello={`Il tuo percorso${nome ? ` · ${nome}` : ""}`}
-        titolo="Pubblicazioni"
+        titolo="Numeri"
         sottotitolo="I tuoi ultimi video Instagram con visualizzazioni, mi piace e commenti, e come crescono follower e lead. I numeri si aggiornano da soli; puoi aggiungere una rilevazione quando vuoi."
       />
 

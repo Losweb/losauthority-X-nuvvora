@@ -30,6 +30,7 @@ import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { scorriInCima } from "@/shared/utils/scroll";
 import { cn } from "@/lib/utils";
+import { PassoDopo } from "../components/percorso/PassoDopo";
 
 /**
  * /area/cervello/avatar → la fase Avatar (dal 25/11/2026): UNA conversazione
@@ -85,11 +86,11 @@ export default function AvatarPage() {
 
   const intestazione = (
     <>
-      <Link to="/area/cervello" className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground pointer-coarse:-my-2 pointer-coarse:min-h-9 pointer-coarse:py-2">
-        <ArrowLeft className="size-3.5" aria-hidden /> Cervello del tuo branding
+      <Link to="/area/dashboard" className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground pointer-coarse:-my-2 pointer-coarse:min-h-9 pointer-coarse:py-2">
+        <ArrowLeft className="size-3.5" aria-hidden /> Il tuo percorso
       </Link>
       <PageHeader
-        occhiello={`Cervello del tuo branding${nome ? ` · ${nome}` : ""}`}
+        occhiello={`Fondamenta${nome ? ` · ${nome}` : ""}`}
         titolo="Avatar"
         sottotitolo="A chi parlano i tuoi contenuti. Aura legge quello che sa già di te, fa l'analisi e ti propone la mappa: tu correggi."
         azioni={
@@ -134,6 +135,8 @@ export default function AvatarPage() {
           <RicominciaAvatar clienteId={clienteId} mappaId={mappa.id} disabilitato={auraScrive} />
         </div>
       </div>
+
+      {fatto && !scheda ? <PassoDopo testo="Il tuo avatar è pronto. Il prossimo passo è la tua offerta completa: mercato, promessa, prezzo." href="/area/cervello/offerta" /> : null}
 
       {scheda ? (
         <div className="grid gap-4">

@@ -39,7 +39,7 @@ export default function KitBrandPage() {
           {/* Frontespizio: occhiello a sinistra, colophon a destra, poi il nome del brand composto grande. */}
           <header className="grid gap-6">
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b pb-3 text-[12px] tracking-[0.18em] text-muted-foreground uppercase">
-              <span>Kit Brand{nome ? ` · ${nome}` : ""}</span>
+              <span>Marca{nome ? ` · ${nome}` : ""}</span>
               <span className="figure normal-case tracking-normal">{kit?.updated_at ? `Aggiornato il ${formatDate(kit.updated_at)}` : "Prima stesura"}</span>
             </div>
             <div className="grid gap-3">

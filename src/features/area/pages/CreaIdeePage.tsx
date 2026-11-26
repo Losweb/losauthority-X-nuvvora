@@ -225,7 +225,7 @@ export default function CreaIdeePage() {
             ) : null}
             <div>
               <p className="eyebrow">Il tuo percorso{nome ? ` · ${nome}` : ""}</p>
-              <h2 className="text-[28px] leading-tight">Crea idee</h2>
+              <h2 className="text-[28px] leading-tight">Idee</h2>
             </div>
           </div>
           {/* Su telefono il gruppo va a capo e si stringe (la select per prima): «Salvate» resta visibile. */}

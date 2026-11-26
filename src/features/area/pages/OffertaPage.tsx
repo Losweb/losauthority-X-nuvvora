@@ -74,11 +74,11 @@ export default function OffertaPage() {
 
   const intestazione = (
     <>
-      <Link to="/area/cervello" className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground pointer-coarse:-my-2 pointer-coarse:min-h-9 pointer-coarse:py-2">
-        <ArrowLeft className="size-3.5" aria-hidden /> Cervello del tuo branding
+      <Link to="/area/dashboard" className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground pointer-coarse:-my-2 pointer-coarse:min-h-9 pointer-coarse:py-2">
+        <ArrowLeft className="size-3.5" aria-hidden /> Il tuo percorso
       </Link>
       <PageHeader
-        occhiello={`Cervello del tuo branding${nome ? ` · ${nome}` : ""}`}
+        occhiello={`Fondamenta${nome ? ` · ${nome}` : ""}`}
         titolo="Offerta"
         sottotitolo="Cosa vendi, a chi, dove lo porti e perché proprio tu. Aura legge quello che sa già di te e propone; tu correggi."
         azioni={

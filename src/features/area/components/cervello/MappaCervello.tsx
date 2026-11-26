@@ -12,8 +12,8 @@ interface Nodo {
 const NODI: Nodo[] = [
   { href: "/area/cervello/avatar", titolo: "Avatar", testo: "Il tuo cliente ideale: chi è, cosa vuole, cosa lo blocca.", icon: UserRound },
   { href: "/area/cervello/offerta", titolo: "Offerta", testo: "Promessa, struttura e prezzo di quello che vendi.", icon: Sparkles },
-  { href: "/area/cervello/concorrenti", titolo: "Competitors", testo: "Chi vende la stessa cosa e chi ti ispira: cosa fanno, cosa dicono, dove sei diverso.", icon: Swords },
-  { href: "/area/cervello/kit-brand", titolo: "Kit Brand", testo: "Logo, colori, font, tono di voce e documenti: quello che ti rende riconoscibile.", icon: Shapes },
+  { href: "/area/cervello/concorrenti", titolo: "Concorrenti", testo: "Chi vende la stessa cosa e chi ti ispira: cosa fanno, cosa dicono, dove sei diverso.", icon: Swords },
+  { href: "/area/cervello/kit-brand", titolo: "Marca", testo: "Logo, colori, font, tono di voce e documenti: quello che ti rende riconoscibile.", icon: Shapes },
 ];
 
 /** Punto d'arrivo delle linee nel viewBox 800×140: il centro di ciascuna delle quattro colonne. */

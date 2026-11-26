@@ -28,6 +28,12 @@ export function AvvisiOfferta({ o, avatarAggiornatoIl }: { o: OffertaNuova; avat
           <p>Il tuo avatar è cambiato dopo l'ultima volta che ne abbiamo parlato qui. Scrivi ad Aura «rivediamo il per chi» e sistema la frase con la partenza principale.</p>
         </div>
       ) : null}
+      {o.completa_fatta_il ? (
+        <Link to="/area/crea-idee" className="flex items-center justify-between gap-3 rounded-lg border border-foreground/25 bg-card p-3 text-[14px] font-medium transition-colors hover:bg-surface-hover">
+          <span>La tua offerta è pronta. Il prossimo passo sono i primi video: chiedi le idee ad Aura.</span>
+          <ArrowRight className="size-4 shrink-0" aria-hidden />
+        </Link>
+      ) : null}
       {o.strada === "breve" && o.breve_fatta_il ? (
         <Link to="/area/cervello/avatar" className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3 text-[14px] transition-colors hover:bg-surface-hover">
           <span>La frase è pronta. Il prossimo passo è la fase Avatar: da lì si apre la scheda completa.</span>

@@ -36,7 +36,7 @@ export default function ConcorrentiPage() {
       </Link>
       <PageHeader
         occhiello={`Cervello del tuo branding${nome ? ` · ${nome}` : ""}`}
-        titolo="Competitors"
+        titolo="Concorrenti"
         sottotitolo="Chi fa quello che fai tu e i profili che ti ispirano: dove li trovi, cosa fanno e i video che ti servono da esempio, con quello che c'è dentro."
         azioni={
           concorrenti.length > 0 ? (
