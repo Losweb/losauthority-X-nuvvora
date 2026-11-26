@@ -92,7 +92,7 @@ Da decidere con Wesley, perché toccano il manuale Seto: il bordo dei campi più
 
 Fatte in locale (non ancora pubblicate): 1, 2, 3, 4, 6, 7, 8, 9, 10.
 
-- 4: sotto la frase di stato c'è «Può volerci fino a un minuto» (non «30-60 secondi»: le risposte brevi arrivano in pochi secondi); le frasi cambiano ogni 9 secondi; il tasto stop ferma Aura. Lo stop vero lato server parte quando si pubblicano `aura-avatar` e `aura-offerta`.
+- 4: sotto la frase di stato c'è «Può volerci fino a un minuto» (non «30-60 secondi»: le risposte brevi arrivano in pochi secondi); le frasi cambiano ogni 9 secondi; il tasto stop ferma Aura. Lo stop è un comando esplicito alla funzione: la risposta fermata viene scartata e non cambia mappa né offerta.
 - 5: fatto a metà. «Scheda» ora vuol dire solo la scheda di un avatar o dell'offerta; l'onboarding si chiama «onboarding». Resta da scegliere una parola sola tra «lettura» (Avatar) e «ipotesi» (Offerta): decide Wesley.
 - 10: l'avviso sta su Idee (a studio vuoto), Stili e Calendario; sparisce da solo quando la mappa Avatar è chiusa.
 

@@ -16,6 +16,6 @@ export { DubbiAvatar, PassiAvatar } from "./components/mappa/PassiAvatar";
 export { RicominciaAvatar } from "./components/mappa/RicominciaAvatar";
 export { EtichettaOrigine } from "./components/mappa/RigaAvatar";
 export { SchedaDocumento } from "./components/mappa/SchedaDocumento";
-export { chiaviMappa, useIniziaMappa, useInviaMappa, useMappaAvatar, useMessaggiMappa, useModificaRiga, useStatoMappa, type MappaConSchede } from "./hooks/useMappaAvatar";
+export { chiaviMappa, useFermaMappa, useIniziaMappa, useInviaMappa, useMappaAvatar, useMessaggiMappa, useModificaRiga, useStatoMappa, type MappaConSchede } from "./hooks/useMappaAvatar";
 export { FASI_MAPPA, LINK_LEZIONE_AVATAR, contaVere, titoloScheda } from "./mappa";
 export type { MappaAvatar, MessaggioMappa, SchedaAvatar } from "./mappa";

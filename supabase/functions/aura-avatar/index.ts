@@ -7,6 +7,7 @@
  *                                       con `messaggio` = uno dei tre dubbi, prima risponde a quello). { ok, mappa_id }
  *   { messaggio }                     → turno di conversazione.   { ok, messaggio_id, risposta }
  *   { riprova_messaggio_id }          → rifà una risposta finita in errore.
+ *   { azione: "ferma" }               → tasto stop: le risposte in corso diventano «Fermata» e quando arrivano si scartano. { ok }
  *   { azione: "modifica", dove, percorso, valore?, fatto? } → il cliente corregge una riga (conta come «vera»). { ok }
  * Ricominciare da capo = il cliente elimina la sua mappa (RLS) e richiama "crea".
  * Rate limit (solo per le chiamate ad Aura): aura_help_allowed(user, 40, 3600, 'avatar').
@@ -93,6 +94,9 @@ async function turno(admin: SupabaseClient, clienteId: string, auraId: string, e
     await logError("aura-avatar:anthropic", "Nessuna risposta da Aura", { user: clienteId, mappa: mappa.id }, { silent: true });
     throw new HttpError(503, MSG_ERRORE_AURA);
   }
+  // Stop esplicito ({ azione: "ferma" }): la riga non è più in corso, la risposta si scarta e non tocca la mappa.
+  const { data: ancora } = await admin.from("avatar_mappa_messaggi").select("stato").eq("id", auraId).maybeSingle();
+  if ((ancora as { stato: string } | null)?.stato !== "in_corso") throw new HttpError(499, "Fermata dal cliente.");
   const { risposta, dati: nuovi, motivo, grezzo } = estraiDati(testo);
   if (motivo !== "ok") await logError(`aura-avatar:dati_${motivo}`, `Blocco <dati> ${motivo}`, { mappa: mappa.id, estratto: grezzo.slice(0, 500) }, { silent: true });
   await applicaDati(admin, mappa, schede, nuovi, ANTHROPIC_MODEL);
@@ -124,6 +128,11 @@ Deno.serve(async (req: Request) => {
     if (body.azione === "modifica") {
       const { mappa, schede } = await richiediMappa(admin, c.id);
       await modifica(admin, mappa, schede, body);
+      return json({ ok: true });
+    }
+
+    if (body.azione === "ferma") {
+      await admin.from("avatar_mappa_messaggi").update({ stato: "errore", errore: "Fermata" }).eq("cliente_id", c.id).eq("ruolo", "aura").eq("stato", "in_corso");
       return json({ ok: true });
     }
 

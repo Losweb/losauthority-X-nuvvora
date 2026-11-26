@@ -48,6 +48,15 @@ export function useInviaOffertaCliente() {
   });
 }
 
+/** Tasto stop: chiude la richiesta nel browser e dice alla funzione di scartare la risposta in corso. */
+export function useFermaOfferta() {
+  const invalida = useInvalida();
+  return (controller: AbortController | null) => {
+    controller?.abort();
+    void invocaEdge<Record<string, never>>("aura-offerta", { azione: "ferma" }).catch(() => null).finally(invalida);
+  };
+}
+
 /** Ricomincia da capo: elimina l'offerta e la sua conversazione (i lead del CRM perdono il collegamento). */
 export function useRicominciaOfferta() {
   const invalida = useInvalida();

@@ -9,6 +9,7 @@
  *                                       (con `messaggio`, parte da quello che la persona ha scritto). { ok, offerta_id }
  *   { messaggio }                     → turno di conversazione. { ok, messaggio_id, risposta }
  *   { riprova_messaggio_id }          → rifà una risposta finita in errore.
+ *   { azione: "ferma" }               → tasto stop: le risposte in corso diventano «Fermata» e quando arrivano si scartano. { ok }
  * Nel prompt entrano solo i messaggi da `nuova_dal` in poi (quelli del metodo di prima no).
  * Un «Fermo» avvisa il team su Telegram (dati.ts). Rate limit: aura_help_allowed(user, 40, 3600, 'offerta').
  */
@@ -105,6 +106,9 @@ async function turno(admin: SupabaseClient, clienteId: string, auraId: string, e
     await logError("aura-offerta:anthropic", "Nessuna risposta da Aura", { user: clienteId, offerta: o.id }, { silent: true });
     throw new HttpError(503, MSG_ERRORE_AURA);
   }
+  // Stop esplicito ({ azione: "ferma" }): la riga non è più in corso, la risposta si scarta e non tocca l'offerta.
+  const { data: ancora } = await admin.from("offerta_messaggi").select("stato").eq("id", auraId).maybeSingle();
+  if ((ancora as { stato: string } | null)?.stato !== "in_corso") throw new HttpError(499, "Fermata dal cliente.");
   const { risposta, dati, motivo, grezzo } = estraiDati(testo);
   if (motivo !== "ok") await logError(`aura-offerta:dati_${motivo}`, `Blocco <dati> ${motivo}`, { offerta: o.id, estratto: grezzo.slice(0, 500) }, { silent: true });
   await applicaDati(admin, o, dati, nome);
@@ -122,6 +126,12 @@ Deno.serve(async (req: Request) => {
     if (c.rol !== "cliente") throw new HttpError(403, "La fase Offerta è riservata ai clienti.");
     const body = await leggiBody<Body>(req);
     const admin = adminClient();
+
+    if (body.azione === "ferma") {
+      const o = await offertaDi(admin, c.id);
+      if (o) await admin.from("offerta_messaggi").update({ stato: "errore", errore: "Fermata" }).eq("offerta_id", o.id).eq("ruolo", "aura").eq("stato", "in_corso");
+      return json({ ok: true });
+    }
 
     const { data: permesso, error: errLimite } = await admin.rpc("aura_help_allowed", { p_user: c.id, p_max: 40, p_window_secs: 3600, p_scope: "offerta" });
     if (errLimite) await logError("aura-offerta:rate_limit", errLimite, { user: c.id }, { silent: true });

@@ -15,6 +15,7 @@ import {
   RicominciaOfferta,
   SchedaOffertaNuova,
   useIniziaOfferta,
+  useFermaOfferta,
   useInviaOffertaCliente,
   useMessaggiOfferta,
   useOffertaCliente,
@@ -43,6 +44,7 @@ export default function OffertaPage() {
 
   const inizia = useIniziaOfferta();
   const invia = useInviaOffertaCliente();
+  const ferma = useFermaOfferta();
   const offerta = useOffertaCliente(utente?.id, attivo || inizia.isPending);
   const avatar = useMappaAvatar(utente?.id);
   const messaggi = useMessaggiOfferta(offerta.data?.id);
@@ -152,7 +154,7 @@ export default function OffertaPage() {
             {messaggi.data ? <FlussoAvatar messaggi={lista} pendente={pendenteVisibile === null ? null : pendenteVisibile.testo} occupato={invia.isPending} onRiprova={riprova} fasi={FASI_AURA_OFFERTA} stima="Può volerci fino a un minuto. Se serve, puoi fermarla." /> : null}
           </div>
           <div className="shrink-0 p-2 md:p-3">
-            <ComposerAura inAttesa={auraScrive} onInvia={manda} onFerma={invia.isPending ? () => fermaRef.current?.abort() : undefined} suggerito={daRipristinare} onSuggeritoUsato={() => setDaRipristinare(undefined)} placeholder="Rispondi ad Aura…" />
+            <ComposerAura inAttesa={auraScrive} onInvia={manda} onFerma={auraScrive ? () => ferma(fermaRef.current) : undefined} suggerito={daRipristinare} onSuggeritoUsato={() => setDaRipristinare(undefined)} placeholder="Rispondi ad Aura…" />
           </div>
         </section>
 

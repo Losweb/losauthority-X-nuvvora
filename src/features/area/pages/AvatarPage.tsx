@@ -15,6 +15,7 @@ import {
   SceltaVista,
   SchedaDocumento,
   useIniziaMappa,
+  useFermaMappa,
   useInviaMappa,
   useMappaAvatar,
   useMessaggiMappa,
@@ -49,6 +50,7 @@ export default function AvatarPage() {
 
   const inizia = useIniziaMappa(clienteId);
   const invia = useInviaMappa(clienteId);
+  const ferma = useFermaMappa(clienteId);
   const modifica = useModificaRiga(clienteId);
   const [attivo, setAttivo] = useState(false);
   const dati = useMappaAvatar(utente?.id, attivo || inizia.isPending);
@@ -177,7 +179,7 @@ export default function AvatarPage() {
             <ComposerAura
               inAttesa={auraScrive}
               onInvia={manda}
-              onFerma={invia.isPending ? () => fermaRef.current?.abort() : undefined}
+              onFerma={auraScrive ? () => ferma(fermaRef.current) : undefined}
               suggerito={daRipristinare}
               onSuggeritoUsato={() => setDaRipristinare(undefined)}
               placeholder={fatto ? "Vuoi cambiare qualcosa? Dillo ad Aura…" : "Rispondi ad Aura…"}

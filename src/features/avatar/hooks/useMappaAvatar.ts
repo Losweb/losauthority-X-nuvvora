@@ -77,6 +77,15 @@ export function useInviaMappa(clienteId: string) {
   });
 }
 
+/** Tasto stop: chiude la richiesta nel browser e dice alla funzione di scartare la risposta in corso. */
+export function useFermaMappa(clienteId: string) {
+  const invalida = useInvalida(clienteId);
+  return (controller: AbortController | null) => {
+    controller?.abort();
+    void invocaEdge<Record<string, never>>("aura-avatar", { azione: "ferma" }).catch(() => null).finally(invalida);
+  };
+}
+
 export interface Modifica {
   /** "mappa" o il numero della scheda. */
   dove: "mappa" | number;

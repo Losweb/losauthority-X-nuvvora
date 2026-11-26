@@ -9,7 +9,7 @@ export type { DiagnosiOfferta as DiagnosiOffertaRiga, MessaggioOfferta, Offerta 
 export { AvvisiOfferta, OffertaDiPrima, RicominciaOfferta } from "./components/nuova/AvvisiOfferta";
 export { BadgeOrigine, FermoOfferta, FraseOfferta, PassiOfferta } from "./components/nuova/PezziBase";
 export { SchedaOffertaNuova } from "./components/nuova/SchedaOffertaNuova";
-export { chiaveOffertaCliente, useIniziaOfferta, useInviaOffertaCliente, useOffertaCliente, useRicominciaOfferta } from "./hooks/useOffertaCliente";
+export { chiaveOffertaCliente, useFermaOfferta, useIniziaOfferta, useInviaOffertaCliente, useOffertaCliente, useRicominciaOfferta } from "./hooks/useOffertaCliente";
 export { asNuova, FASI_AURA_OFFERTA, haOffertaDiPrima, schedaIniziata } from "./nuova";
 export type { OffertaNuova } from "./nuova";
 
