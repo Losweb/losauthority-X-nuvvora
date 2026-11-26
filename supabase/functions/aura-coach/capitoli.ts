@@ -11,6 +11,8 @@ export interface Capitolo {
   /** Tempo normalizzato: "27:40" oppure "1:12:00". */
   tempo: string;
   titolo: string;
+  /** Minuti fino al capitolo dopo (arrotondati); null per l'ultimo, di cui non si sa la fine. */
+  minuti: number | null;
 }
 
 const RE_TEMPO = /(?:(\d{1,2}):)?(\d{1,2}):(\d{2})(?!\d)/g;
@@ -35,6 +37,13 @@ export function formattaTempo(secondi: number): string {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
 }
 
+/** La descrizione prima del primo minutaggio (il riassunto della live), vuota se non c'è. */
+export function introCapitoli(descrizione: string | null): string {
+  if (!descrizione) return "";
+  const primo = new RegExp(RE_TEMPO.source).exec(descrizione);
+  return (primo ? descrizione.slice(0, primo.index) : descrizione).replace(/\s+/g, " ").trim();
+}
+
 /** I capitoli della descrizione, nell'ordine in cui compaiono (vuoto se non ha minutaggio). */
 export function estraiCapitoli(descrizione: string | null): Capitolo[] {
   if (!descrizione) return [];
@@ -52,7 +61,12 @@ export function estraiCapitoli(descrizione: string | null): Capitolo[] {
       .replace(/^[\s\-–·/:]+|[\s\-–·/:]+$/g, "")
       .trim();
     if (!titolo) continue;
-    capitoli.push({ secondi, tempo: formattaTempo(secondi), titolo: titolo.slice(0, 160) });
+    capitoli.push({ secondi, tempo: formattaTempo(secondi), titolo: titolo.slice(0, 160), minuti: null });
+  }
+  // Quanto dura ogni capitolo: dice al coach se è un accenno di pochi minuti o una parte lunga (26/11/2026).
+  for (let i = 0; i + 1 < capitoli.length; i++) {
+    const durata = capitoli[i + 1].secondi - capitoli[i].secondi;
+    capitoli[i].minuti = durata > 0 ? Math.max(1, Math.round(durata / 60)) : null;
   }
   return capitoli;
 }

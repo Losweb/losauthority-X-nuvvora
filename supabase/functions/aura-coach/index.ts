@@ -16,7 +16,7 @@ import { ANTHROPIC_MODEL, HAS_ANTHROPIC, streamAnthropicText } from "../_shared/
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { bloccoPosizionamento } from "../_shared/posizionamento/blocco.ts";
-import { costruisciPrompt, estraiRisposta, lezioniPertinenti, SYSTEM, type Lezione, type Storico } from "./prompt.ts";
+import { costruisciPrompt, eLive, estraiRisposta, lezioniPertinenti, SYSTEM, type Lezione, type Storico, type TestoCapitolo } from "./prompt.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 type Body = { messaggio?: unknown; riprova_messaggio_id?: unknown };
@@ -78,6 +78,32 @@ async function contesto(admin: SupabaseClient, clienteId: string, escludiAuraId:
   };
 }
 
+/**
+ * Per le live tra le pertinenti pubblicate dal gestionale (`skool_video`, stesso url
+ * della lezione): i capitoli con quello che Wesley dice davvero. Così il coach vede
+ * se un capitolo è un tutorial o solo un accenno (26/11/2026). Se fallisce, si va avanti senza.
+ */
+async function testiCapitoli(admin: SupabaseClient, pertinenti: Lezione[]): Promise<Map<string, TestoCapitolo[]>> {
+  const mappa = new Map<string, TestoCapitolo[]>();
+  const urls = pertinenti.filter(eLive).map((l) => l.url).filter((u): u is string => !!u).slice(0, 3);
+  if (urls.length === 0) return mappa;
+  const { data: video, error } = await admin.from("skool_video").select("id, skool_url").in("skool_url", urls);
+  if (error || !video?.length) return mappa;
+  const perVideo = new Map((video as Array<{ id: string; skool_url: string }>).map((v) => [v.id, v.skool_url]));
+  const { data: capitoli, error: e2 } = await admin
+    .from("skool_video_capitoli")
+    .select("video_id, inizio_sec, titolo, testo")
+    .in("video_id", [...perVideo.keys()])
+    .order("ordine");
+  if (e2) return mappa;
+  for (const c of (capitoli ?? []) as Array<{ video_id: string; inizio_sec: number; titolo: string; testo: string | null }>) {
+    const url = perVideo.get(c.video_id);
+    if (!url || !c.testo) continue;
+    mappa.set(url, [...(mappa.get(url) ?? []), { inizio_sec: c.inizio_sec, titolo: c.titolo, testo: c.testo }]);
+  }
+  return mappa;
+}
+
 Deno.serve(async (req: Request) => {
   const pre = preflight(req);
   if (pre) return pre;
@@ -112,7 +138,8 @@ Deno.serve(async (req: Request) => {
 
     const dati = await contesto(admin, c.id, auraId);
     const pertinenti = lezioniPertinenti(dati.lezioni, messaggio);
-    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, pertinenti, messaggio }), maxTokens: 1200, tag: "aura-coach", utente: c.id });
+    const testi = await testiCapitoli(admin, pertinenti).catch(() => new Map<string, TestoCapitolo[]>());
+    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, pertinenti, testiCapitoli: testi, messaggio }), maxTokens: 1200, tag: "aura-coach", utente: c.id });
     if (!testo) {
       await admin.from("coach_messaggi").update({ stato: "errore", errore: "Nessuna risposta dal modello" }).eq("id", auraId);
       await logError("aura-coach:anthropic", "Nessuna risposta da Aura", { user: c.id }, { silent: true });

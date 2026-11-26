@@ -60,6 +60,7 @@ function consegna(v: Video): string {
 Per ogni capitolo:
 - «inizio» = il tempo «h:mm:ss» della riga della trascrizione in cui quel tema comincia;
 - «titolo» = UN'emoji + massimo 8 parole che dicono il tema in modo concreto, con le parole che userebbe chi cerca proprio quella risposta (es. «🎯 Come qualificare il cliente prima della call», non «🎯 Il cliente»); se è un passaggio di una procedura: «🔑 Step 2 — Inserire la chiave API»;
+  il titolo dice anche QUANTO A FONDO se ne parla: «Come fare…» SOLO se Wesley mostra davvero i passaggi; se racconta, accenna, dà un'opinione o fa un esempio veloce, il titolo lo dice («🤖 Wesley racconta come edita con Claude», «💬 Accenno: …»), così nessuno ci va pensando di trovare un tutorial;
 - «testo» = markdown, da 30 a 100 parole: cosa dice Wesley in quel pezzo. Se spiega come fare qualcosa, i passaggi in elenco «- »; se spiega un'idea, 2-3 frasi corte con il **grassetto** sulle parole chiave. Chiudi con UNA riga speciale se c'è materia: «💡 Nota: …», «⚠️ Attenzione: …», «💬 Concetto chiave: …» o «✅ Risultato: …». Niente titoli «##» dentro il testo del capitolo (il titolo c'è già).
 «apertura» = 2-3 frasi: di cosa parla il video e per chi è utile, con il **grassetto** sul tema centrale. Senza titolo e senza emoji.
 ${PAROLE_CHIAVE}
