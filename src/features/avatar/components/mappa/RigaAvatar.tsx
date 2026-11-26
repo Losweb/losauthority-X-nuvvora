@@ -104,7 +104,7 @@ export function RigaAvatar({ percorso, origine, valori, chiavi, etichette, child
       size="icon-xs"
       variant="ghost"
       aria-label="Correggi questa riga"
-      className="-mt-0.5 text-muted-foreground opacity-60 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+      className="-mt-0.5 text-muted-foreground opacity-60 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:size-10 pointer-coarse:opacity-100"
       onClick={() => {
         setBozza(valori);
         setAperta(true);

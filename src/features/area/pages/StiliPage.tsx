@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { primoNome } from "@/features/scheda";
 import { CardStile, CardStileInArrivo, NuovoStileDialog, StileSheet, useCreaStile, useStili, type Stile } from "@/features/idee";
+import { AvvisoSenzaAvatar } from "../components/percorso/AvvisoSenzaAvatar";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco, StatoVuoto } from "@/shared/components/layout/StatoCaricamento";
 import { Button } from "@/shared/components/ui/button";
@@ -44,7 +45,7 @@ export default function StiliPage() {
       <PageHeader
         occhiello={`Il tuo percorso${nome ? ` · ${nome}` : ""}`}
         titolo="Stili"
-        sottotitolo="Ogni stile è un tipo di video che Aura ha imparato dai tuoi script. In «Crea idee» lo richiami scrivendo / e lei scrive nuovi script in quello stile, per il tuo nicho."
+        sottotitolo="Ogni stile è un tipo di video che Aura ha imparato dai tuoi script. In «Crea idee» lo richiami scrivendo / e lei scrive nuovi script in quello stile, per la tua nicchia."
         azioni={
           <Button size="sm" onClick={() => setNuovo(true)}>
             <Plus aria-hidden />
@@ -52,6 +53,7 @@ export default function StiliPage() {
           </Button>
         }
       />
+      <AvvisoSenzaAvatar clienteId={utente.id} />
 
       {stili.isLoading ? <SkeletonBlocco altezza="h-64" /> : null}
       {stili.isError ? <ErroreCaricamento /> : null}

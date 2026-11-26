@@ -1,3 +1,4 @@
+import { AvvisoSenzaAvatar } from "../components/percorso/AvvisoSenzaAvatar";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PanelLeftOpen, Plus } from "lucide-react";
@@ -253,6 +254,7 @@ export default function CreaIdeePage() {
         </header>
 
         <div data-chat-scroll className="min-h-0 flex-1 overflow-y-auto px-1 pb-4 [scrollbar-width:thin]" aria-live="polite">
+          {vuota ? <div className="mx-auto mb-4 w-full max-w-[860px]"><AvvisoSenzaAvatar clienteId={utente.id} /></div> : null}
           {vuota ? <StudioVuoto nome={nome} onSpunto={setSpunto} /> : null}
           {!vuota && sessioneId !== null && sessione.isLoading ? <SkeletonBlocco altezza="h-48" /> : null}
           {!vuota && sessione.isError ? <ErroreCaricamento /> : null}

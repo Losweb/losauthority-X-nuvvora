@@ -49,7 +49,7 @@ function SelectStage({ lead, onSposta, compatta = true }: { lead: Lead; onSposta
 }
 
 function ProssimaAzione({ lead, scaduta }: { lead: Lead; scaduta: boolean }) {
-  if (!lead.prossima_azione && !lead.prossima_azione_il) return <span className="text-muted-foreground/70">—</span>;
+  if (!lead.prossima_azione && !lead.prossima_azione_il) return <span className="text-muted-foreground">—</span>;
   return (
     <span>
       {lead.prossima_azione_il ? (

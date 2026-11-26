@@ -34,7 +34,7 @@ function Pill({ label, dati, attivo, onClick, mostraValore }: { label: string; d
         <span className="figure text-[13px] text-muted-foreground">{dati.count}</span>
       </span>
       {mostraValore ? (
-        <span className="figure text-[12px] text-muted-foreground/80">{dati.valore > 0 ? formatCurrency(dati.valore) : "—"}</span>
+        <span className="figure text-[12px] text-muted-foreground">{dati.valore > 0 ? formatCurrency(dati.valore) : "—"}</span>
       ) : null}
     </button>
   );

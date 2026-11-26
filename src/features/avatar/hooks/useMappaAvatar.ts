@@ -64,14 +64,14 @@ export function useIniziaMappa(clienteId: string) {
   });
 }
 
-type InvioInput = { messaggio: string } | { riprovaId: string };
+type InvioInput = ({ messaggio: string } | { riprovaId: string }) & { signal?: AbortSignal };
 
 /** Un turno con Aura o la riprova di una risposta in errore. */
 export function useInviaMappa(clienteId: string) {
   const invalida = useInvalida(clienteId);
   return useMutation({
     mutationFn: async (input: InvioInput) =>
-      invocaEdge<{ messaggio_id: string; risposta: string }>("aura-avatar", "riprovaId" in input ? { riprova_messaggio_id: input.riprovaId } : { messaggio: input.messaggio }),
+      invocaEdge<{ messaggio_id: string; risposta: string }>("aura-avatar", "riprovaId" in input ? { riprova_messaggio_id: input.riprovaId } : { messaggio: input.messaggio }, { signal: input.signal }),
     onSettled: invalida,
     onError: erroreMutation("Aura non ha risposto"),
   });

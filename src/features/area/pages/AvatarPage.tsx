@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowLeft, PlayCircle, RotateCcw, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/features/auth";
@@ -60,12 +60,17 @@ export default function AvatarPage() {
   const auraScrive = pendenteVisibile !== null || invia.isPending || inizia.isPending || lista.some((m) => m.stato === "in_corso");
   if (auraScrive !== attivo) setAttivo(auraScrive);
 
+  const fermaRef = useRef<AbortController | null>(null);
   if (!utente) return null;
 
+  function nuovoStop() {
+    fermaRef.current = new AbortController();
+    return fermaRef.current.signal;
+  }
   function manda(testo: string) {
     setPendente({ testo, auraId: null });
     invia.mutate(
-      { messaggio: testo },
+      { messaggio: testo, signal: nuovoStop() },
       {
         onSuccess: (r) => setPendente({ testo, auraId: r.messaggio_id }),
         onError: () => {
@@ -77,7 +82,7 @@ export default function AvatarPage() {
   }
   function riprova(m: MessaggioMappa) {
     setPendente({ testo: "", auraId: null });
-    invia.mutate({ riprovaId: m.id }, { onSuccess: (r) => setPendente({ testo: "", auraId: r.messaggio_id }), onError: () => setPendente(null) });
+    invia.mutate({ riprovaId: m.id, signal: nuovoStop() }, { onSuccess: (r) => setPendente({ testo: "", auraId: r.messaggio_id }), onError: () => setPendente(null) });
   }
   function apriScheda(ordine: number | null) {
     setSchedaAperta(ordine);
@@ -165,13 +170,14 @@ export default function AvatarPage() {
           <div data-chat-scroll className="min-h-0 flex-1 overflow-y-auto p-4 [scrollbar-width:thin] md:p-5" aria-live="polite">
             {messaggi.isLoading ? <SkeletonBlocco altezza="h-40" /> : null}
             {messaggi.isError ? <ErroreCaricamento /> : null}
-            {messaggi.data ? <FlussoAvatar messaggi={lista} pendente={pendenteVisibile === null ? null : pendenteVisibile.testo} occupato={invia.isPending} onRiprova={riprova} fasi={FASI_MAPPA} /> : null}
+            {messaggi.data ? <FlussoAvatar messaggi={lista} pendente={pendenteVisibile === null ? null : pendenteVisibile.testo} occupato={invia.isPending} onRiprova={riprova} fasi={FASI_MAPPA} stima="Può volerci fino a un minuto. Se serve, puoi fermarla." /> : null}
           </div>
           <div className="grid shrink-0 gap-2 p-2 md:p-3">
             <DubbiAvatar compatti onDubbio={manda} disabilitato={auraScrive} />
             <ComposerAura
               inAttesa={auraScrive}
               onInvia={manda}
+              onFerma={invia.isPending ? () => fermaRef.current?.abort() : undefined}
               suggerito={daRipristinare}
               onSuggeritoUsato={() => setDaRipristinare(undefined)}
               placeholder={fatto ? "Vuoi cambiare qualcosa? Dillo ad Aura…" : "Rispondi ad Aura…"}

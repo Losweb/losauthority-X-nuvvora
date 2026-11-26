@@ -72,7 +72,7 @@ async function contesto(admin: SupabaseClient, clienteId: string, mappaId: strin
 }
 
 /** Un turno di Aura sulla riga `auraId` già creata 'in_corso'. */
-async function turno(admin: SupabaseClient, clienteId: string, auraId: string, escludi: string[], messaggio: string) {
+async function turno(admin: SupabaseClient, clienteId: string, auraId: string, escludi: string[], messaggio: string, signal?: AbortSignal) {
   const { mappa, schede } = await richiediMappa(admin, clienteId);
   const dati = await contesto(admin, clienteId, mappa.id, escludi);
   const testo = await streamAnthropicText({
@@ -81,7 +81,13 @@ async function turno(admin: SupabaseClient, clienteId: string, auraId: string, e
     maxTokens: 8000,
     tag: "aura-avatar",
     utente: clienteId,
+    signal,
   });
+  if (!testo && signal?.aborted) {
+    // Tasto stop: il browser ha chiuso la richiesta. La riga resta riprovabile, senza errore nei log.
+    await admin.from("avatar_mappa_messaggi").update({ stato: "errore", errore: "Fermata" }).eq("id", auraId);
+    throw new HttpError(499, "Fermata dal cliente.");
+  }
   if (!testo) {
     await admin.from("avatar_mappa_messaggi").update({ stato: "errore", errore: "Nessuna risposta dal modello" }).eq("id", auraId);
     await logError("aura-avatar:anthropic", "Nessuna risposta da Aura", { user: clienteId, mappa: mappa.id }, { silent: true });
@@ -150,7 +156,7 @@ Deno.serve(async (req: Request) => {
       }
       const auraId = await nuovaRigaAura(admin, mappaId, c.id);
       const messaggio = dubbio.length >= 2 ? `${dubbio}\n\n${APERTURA_CON_DUBBIO}` : APERTURA;
-      await turno(admin, c.id, auraId, [auraId, ...escludi], messaggio);
+      await turno(admin, c.id, auraId, [auraId, ...escludi], messaggio, req.signal);
       return json({ ok: true, mappa_id: mappaId });
     }
 
@@ -176,7 +182,7 @@ Deno.serve(async (req: Request) => {
       await admin.from("avatar_mappa_messaggi").update({ stato: "in_corso", errore: null, contenuto: "" }).eq("id", a.id);
       // Senza un messaggio del cliente prima era l'apertura: si rifà quella.
       const p = prec as { id: string; contenuto: string } | null;
-      return json({ ok: true, ...(await turno(admin, c.id, a.id, p ? [a.id, p.id] : [a.id], p?.contenuto ?? APERTURA)) });
+      return json({ ok: true, ...(await turno(admin, c.id, a.id, p ? [a.id, p.id] : [a.id], p?.contenuto ?? APERTURA, req.signal)) });
     }
 
     const messaggio = typeof body.messaggio === "string" ? body.messaggio.trim().slice(0, MAX_MESSAGGIO) : "";
@@ -189,7 +195,7 @@ Deno.serve(async (req: Request) => {
       .single();
     if (e1 || !mio) throw e1 ?? new Error("messaggio cliente non creato");
     const auraId = await nuovaRigaAura(admin, mappa.id, c.id);
-    return json({ ok: true, ...(await turno(admin, c.id, auraId, [auraId, (mio as { id: string }).id], messaggio)) });
+    return json({ ok: true, ...(await turno(admin, c.id, auraId, [auraId, (mio as { id: string }).id], messaggio, req.signal)) });
   } catch (err) {
     return gestisciErrore(err);
   }

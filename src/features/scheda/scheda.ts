@@ -16,7 +16,7 @@ export interface Scheda {
 export const SCHEDA_ONBOARDING: Scheda = {
   slug: "onboarding",
   titolo: TITOLO_SCHEDA,
-  occhiello: "La tua scheda",
+  occhiello: "Primo passo",
   sottotitolo: "Raccontaci il tuo lavoro così com'è oggi: Aura lo legge con te e Wesley arriva alla prima call sapendo già da dove partire.",
   icona: "📋",
   definizione: BLOCCHI,

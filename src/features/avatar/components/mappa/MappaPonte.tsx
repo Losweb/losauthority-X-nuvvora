@@ -15,7 +15,7 @@ interface MappaPonteProps {
 }
 
 function Vuoto({ testo }: { testo: string }) {
-  return <p className="text-[13px] text-muted-foreground/70">{testo}</p>;
+  return <p className="text-[13px] text-muted-foreground">{testo}</p>;
 }
 
 /** Le linee che dalle partenze scendono e si uniscono sul ponte (da md; sul telefono una linea sola). */

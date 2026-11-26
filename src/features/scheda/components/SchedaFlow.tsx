@@ -247,7 +247,7 @@ function FlowCompilazione({ utente, iniziale, onInviata }: FlowCompilazioneProps
       {schermata === "benvenuto" ? null : schermata === "blocco" ? (
         <PassiScheda indice={indice} totale={totale} onVai={vaiABlocco} />
       ) : (
-        <Progress value={progresso} aria-label="Avanzamento della scheda" />
+        <Progress value={progresso} aria-label="Avanzamento dell'onboarding" />
       )}
 
       {schermata === "benvenuto" ? (

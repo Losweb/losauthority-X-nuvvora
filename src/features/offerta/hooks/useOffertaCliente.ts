@@ -41,8 +41,8 @@ export function useIniziaOfferta() {
 export function useInviaOffertaCliente() {
   const invalida = useInvalida();
   return useMutation({
-    mutationFn: async (input: { messaggio: string } | { riprovaId: string }) =>
-      invocaEdge<{ messaggio_id: string; risposta: string }>("aura-offerta", "riprovaId" in input ? { riprova_messaggio_id: input.riprovaId } : { messaggio: input.messaggio }),
+    mutationFn: async (input: ({ messaggio: string } | { riprovaId: string }) & { signal?: AbortSignal }) =>
+      invocaEdge<{ messaggio_id: string; risposta: string }>("aura-offerta", "riprovaId" in input ? { riprova_messaggio_id: input.riprovaId } : { messaggio: input.messaggio }, { signal: input.signal }),
     onSettled: invalida,
     onError: erroreMutation("Aura non ha risposto"),
   });

@@ -211,7 +211,7 @@ function RigaContenuto({ c, tipologia, onApri, onSposta }: { c: Contenuto; tipol
             const programmato = c[CAMPO_PIATTAFORMA[p]] === "programmato";
             const etichetta = `${ETICHETTA_PIATTAFORMA_CONTENUTO[p]}: ${programmato ? "programmato" : "da programmare"}`;
             return (
-              <span key={p} title={etichetta} className={cn("inline-flex", programmato ? "text-status-active" : "text-muted-foreground/45")}>
+              <span key={p} title={etichetta} className={cn("inline-flex", programmato ? "text-status-active" : "text-muted-foreground")}>
                 <Icona className="size-4" aria-hidden />
                 <span className="sr-only">{etichetta}</span>
               </span>

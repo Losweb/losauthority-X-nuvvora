@@ -14,6 +14,7 @@ import {
   type Contenuto,
   type ContenutoPredefiniti,
 } from "@/features/contenuti";
+import { AvvisoSenzaAvatar } from "../components/percorso/AvvisoSenzaAvatar";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { Button } from "@/shared/components/ui/button";
@@ -85,6 +86,7 @@ export default function WorkflowPage() {
           </>
         }
       />
+      <AvvisoSenzaAvatar clienteId={utente.id} />
 
       {contenuti.isLoading ? <SkeletonBlocco altezza="h-64" /> : null}
       {contenuti.isError ? <ErroreCaricamento /> : null}

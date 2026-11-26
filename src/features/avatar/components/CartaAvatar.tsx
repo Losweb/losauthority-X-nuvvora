@@ -29,7 +29,7 @@ function Campo({ etichetta, valore, inCompilazione, className }: { etichetta: st
           {valore}
         </p>
       ) : (
-        <p className={cn("mt-0.5 text-[15px] leading-snug text-muted-foreground/50", inCompilazione && "animate-pulse")}>
+        <p className={cn("mt-0.5 text-[15px] leading-snug text-muted-foreground", inCompilazione && "animate-pulse")}>
           <span aria-hidden>—</span>
           <span className="sr-only">Non ancora compilato</span>
         </p>
@@ -62,7 +62,7 @@ export function CartaAvatar({ avatar, numero, titolare, inCompilazione, onGira, 
               {iniziale}
             </span>
           ) : (
-            <span className={cn("font-display text-[44px] leading-none text-muted-foreground/40 sm:text-[72px]", inCompilazione && "animate-pulse")}>?</span>
+            <span className={cn("font-display text-[44px] leading-none text-muted-foreground sm:text-[72px]", inCompilazione && "animate-pulse")}>?</span>
           )}
         </div>
 
@@ -74,7 +74,7 @@ export function CartaAvatar({ avatar, numero, titolare, inCompilazione, onGira, 
                 {avatar.nome}
               </h3>
             ) : (
-              <p className={cn("font-display text-[26px] leading-tight text-muted-foreground/50 sm:text-[30px]", inCompilazione && "animate-pulse")}>In compilazione…</p>
+              <p className={cn("font-display text-[26px] leading-tight text-muted-foreground sm:text-[30px]", inCompilazione && "animate-pulse")}>In compilazione…</p>
             )}
           </div>
           <div className="col-span-2 grid gap-4 sm:col-span-1 sm:grid-cols-2">
@@ -90,7 +90,7 @@ export function CartaAvatar({ avatar, numero, titolare, inCompilazione, onGira, 
               «{avatar.frase}»
             </p>
           ) : (
-            <p className={cn("col-span-2 font-display text-[19px] text-muted-foreground/40 sm:col-span-1 sm:mt-2", inCompilazione && "animate-pulse")}>«…»</p>
+            <p className={cn("col-span-2 font-display text-[19px] text-muted-foreground sm:col-span-1 sm:mt-2", inCompilazione && "animate-pulse")}>«…»</p>
           )}
         </div>
       </div>

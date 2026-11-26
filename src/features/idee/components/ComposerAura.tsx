@@ -94,10 +94,11 @@ export function ComposerAura({
     return () => window.clearTimeout(timer);
   }, [inAttesa, sent, speaking, done, fermaDettatura]);
 
-  if (suggerito && testo !== suggerito) {
-    setTesto(suggerito);
-    onSuggeritoUsato?.();
-  }
+  // Il testo suggerito entra nel campo durante il render; il genitore si avvisa dopo (mai mentre si disegna).
+  if (suggerito && testo !== suggerito) setTesto(suggerito);
+  useEffect(() => {
+    if (suggerito) onSuggeritoUsato?.();
+  }, [suggerito, onSuggeritoUsato]);
 
   const query = onStileChange ? queryComando(testo) : null;
   const pronti = stili.filter((s) => s.stato === "pronta");

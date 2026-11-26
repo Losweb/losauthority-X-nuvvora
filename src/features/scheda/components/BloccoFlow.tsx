@@ -6,6 +6,7 @@ import { conParole } from "../format";
 import type { ErroriDomande } from "../schema";
 import type { Blocco, IdDomanda, Parole, Risposte, ValoreRisposta } from "../types";
 import { DomandaCampo } from "./domande/DomandaCampo";
+import { NOMI_PASSI } from "./PassiScheda";
 
 interface BloccoFlowProps {
   blocco: Blocco;
@@ -89,10 +90,10 @@ export function BloccoFlow(props: BloccoFlowProps) {
 
       <div className="flex items-center justify-between gap-3">
         <Button type="button" variant="outline" onClick={props.onIndietro} disabled={avanzando}>
-          Indietro
+          {indice > 0 && NOMI_PASSI[indice - 1] ? `Indietro: ${NOMI_PASSI[indice - 1]}` : "Indietro"}
         </Button>
         <Button type="button" onClick={props.onAvanti} disabled={avanzando}>
-          {ultimo ? (avanzando ? "Un attimo…" : "Fai leggere ad Aura") : "Continua"}
+          {ultimo ? (avanzando ? "Un attimo…" : "Fai leggere ad Aura") : NOMI_PASSI[indice + 1] ? `Avanti: ${NOMI_PASSI[indice + 1]}` : "Avanti"}
         </Button>
       </div>
     </div>

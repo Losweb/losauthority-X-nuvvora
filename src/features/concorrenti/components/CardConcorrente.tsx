@@ -70,7 +70,7 @@ export function CardConcorrente({ concorrente: c, onModifica }: CardConcorrenteP
                   {v.descrizione ? (
                     <p className="text-[13px] leading-relaxed whitespace-pre-line text-muted-foreground wrap-anywhere">{v.descrizione}</p>
                   ) : (
-                    <p className="text-[13px] text-muted-foreground/70">Senza descrizione.</p>
+                    <p className="text-[13px] text-muted-foreground">Senza descrizione.</p>
                   )}
                 </li>
               );

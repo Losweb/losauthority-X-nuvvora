@@ -33,7 +33,7 @@ export function DubbiAvatar({ onDubbio, disabilitato, compatti = false }: { onDu
   return (
     <div role="group" aria-label="I tre dubbi sull'avatar" className={cn("flex gap-2", compatti ? "overflow-x-auto pb-1 [scrollbar-width:none]" : "flex-wrap")}>
       {DUBBI.map((d) => (
-        <Button key={d} type="button" variant="outline" size={compatti ? "xs" : "sm"} disabled={disabilitato} onClick={() => onDubbio(d)} className="shrink-0">
+        <Button key={d} type="button" variant="outline" size={compatti ? "xs" : "sm"} disabled={disabilitato} onClick={() => onDubbio(d)} className="shrink-0 pointer-coarse:min-h-11 pointer-coarse:px-3.5">
           <HelpCircle aria-hidden /> {d}
         </Button>
       ))}

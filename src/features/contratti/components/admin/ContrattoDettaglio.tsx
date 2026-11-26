@@ -44,7 +44,7 @@ export function ContrattoDettaglio({ c, isAdmin, onEliminato }: ContrattoDettagl
             Offerta {c.offerta_nome || c.programma} · {c.durata_mesi} mesi · <span className="figure">{euroContratto(c.prezzo)} €</span>
             {c.tipo ? ` · ${tipoLabel(c.tipo)}` : ""}
           </p>
-          {c.note ? <p className="mt-1 text-[13px] text-muted-foreground/80">{c.note}</p> : null}
+          {c.note ? <p className="mt-1 text-[13px] text-muted-foreground">{c.note}</p> : null}
         </div>
         <Badge variant={stato.tone} dot>
           {stato.label}

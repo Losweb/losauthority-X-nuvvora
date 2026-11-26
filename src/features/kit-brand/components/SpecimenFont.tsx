@@ -108,7 +108,7 @@ function NuovoFont({ clienteId, prossimoOrdine, ruoloSuggerito }: { clienteId: s
         placeholder="Nome del font, es. Playfair Display"
         aria-label="Nome del nuovo font"
         onChange={(e) => setNome(e.target.value)}
-        className="h-9 min-w-48 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground/60 md:min-w-0 md:text-[15px]"
+        className="h-9 min-w-48 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground md:min-w-0 md:text-[15px]"
       />
       <select value={ruolo} aria-label="Ruolo del nuovo font" onChange={(e) => setRuolo(e.target.value as RuoloFont)} className="h-9 rounded-sm border bg-card px-2 text-base md:text-sm">
         {RUOLI_FONT.map((r) => (

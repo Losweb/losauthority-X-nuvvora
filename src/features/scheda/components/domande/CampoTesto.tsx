@@ -16,7 +16,6 @@ export interface CampoProps<V> {
 export function CampoTesto({ domanda, valore, onChange, disabilitato, invalido, idErrore }: CampoProps<string>) {
   const comuni = {
     id: domanda.id,
-    placeholder: domanda.placeholder,
     value: valore,
     disabled: disabilitato,
     "aria-invalid": invalido,

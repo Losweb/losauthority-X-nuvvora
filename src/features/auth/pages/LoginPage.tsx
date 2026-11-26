@@ -132,7 +132,7 @@ export function LoginPage() {
             </a>
             <span>Problemi? Scrivi a Wesley.</span>
           </div>
-          <p className="mt-7 text-center text-xs text-muted-foreground/80">Accesso protetto e tracciato.</p>
+          <p className="mt-7 text-center text-xs text-muted-foreground">Accesso protetto e tracciato.</p>
         </div>
       </div>
       </div>

@@ -33,7 +33,7 @@ export function InizioAvatar({ nome, occupato, onInizia }: InizioAvatarProps) {
       ) : null}
 
       {occupato ? (
-        <PensieroAura fasi={FASI_MAPPA} />
+        <PensieroAura fasi={FASI_MAPPA} stima="Può volerci fino a un minuto." intervalloMs={9000} />
       ) : (
         <>
           <div className="grid gap-2.5">

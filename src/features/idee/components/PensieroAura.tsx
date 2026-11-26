@@ -20,19 +20,23 @@ const INTERVALLO_MS = 2600;
 interface PensieroAuraProps {
   /** Frasi di stato alternative (es. il coach che cerca la lezione). Default: quelle di Crea idee. */
   fasi?: readonly string[];
+  /** Quanto dura di solito l'attesa: sopra i 10 secondi va detto (es. «Di solito 30-60 secondi»). */
+  stima?: string;
+  /** Ogni quanto cambia la frase (default 2,6 s; le attese lunghe la allungano per coprire tutta l'attesa). */
+  intervalloMs?: number;
 }
 
 /**
  * La risposta in attesa (AURA_MANUALE «in chat»): un volto fermo accanto ai tre puntini che
  * respirano e la frase di stato che cambia ogni paio di secondi. L'Aura viva è quella del composer.
  */
-export function PensieroAura({ fasi = FASI }: PensieroAuraProps) {
+export function PensieroAura({ fasi = FASI, stima, intervalloMs = INTERVALLO_MS }: PensieroAuraProps) {
   const [indice, setIndice] = useState(0);
 
   useEffect(() => {
-    const timer = window.setInterval(() => setIndice((i) => Math.min(i + 1, fasi.length - 1)), INTERVALLO_MS);
+    const timer = window.setInterval(() => setIndice((i) => Math.min(i + 1, fasi.length - 1)), intervalloMs);
     return () => window.clearInterval(timer);
-  }, [fasi.length]);
+  }, [fasi.length, intervalloMs]);
 
   return (
     <div className="flex items-start gap-3" role="status" aria-live="polite">
@@ -46,6 +50,7 @@ export function PensieroAura({ fasi = FASI }: PensieroAuraProps) {
         <p key={indice} className="text-[14px] leading-5 text-muted-foreground animate-in fade-in slide-in-from-bottom-1 duration-500 motion-reduce:animate-none">
           {fasi[indice]}
         </p>
+        {stima ? <p className="mt-0.5 text-[13px] leading-5 text-muted-foreground">{stima}</p> : null}
       </div>
     </div>
   );

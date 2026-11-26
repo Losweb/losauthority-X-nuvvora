@@ -25,8 +25,8 @@ export default function AreaPage() {
     <div className="grid gap-7">
       <PageHeader
         occhiello={`La tua area${nome ? ` · ${nome}` : ""}`}
-        titolo="La tua scheda"
-        sottotitolo="Compila la scheda di onboarding: è la base su cui Wesley e il suo team costruiranno il tuo percorso. Appena inviata, si apre il tuo spazio di lavoro."
+        titolo="Il tuo onboarding"
+        sottotitolo="Rispondi alle domande dell'onboarding: sono la base su cui Wesley e il suo team costruiranno il tuo percorso. Appena le invii, si apre il tuo spazio di lavoro."
       />
       <CardScheda clienteId={utente.id} />
     </div>

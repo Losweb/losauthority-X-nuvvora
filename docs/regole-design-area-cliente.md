@@ -87,3 +87,12 @@ Legenda: ✅ rispettata · ⚠️ a metà · ❌ no.
 10. Strumenti dei contenuti con un avviso finché manca l'avatar (2).
 
 Da decidere con Wesley, perché toccano il manuale Seto: il bordo dei campi più visibile (31) e i due riquadri neri nella stessa vista (23).
+
+## Stato al 26/11/2026
+
+Fatte in locale (non ancora pubblicate): 1, 2, 3, 4, 6, 7, 8, 9, 10.
+
+- 4: sotto la frase di stato c'è «Può volerci fino a un minuto» (non «30-60 secondi»: le risposte brevi arrivano in pochi secondi); le frasi cambiano ogni 9 secondi; il tasto stop ferma Aura. Lo stop vero lato server parte quando si pubblicano `aura-avatar` e `aura-offerta`.
+- 5: fatto a metà. «Scheda» ora vuol dire solo la scheda di un avatar o dell'offerta; l'onboarding si chiama «onboarding». Resta da scegliere una parola sola tra «lettura» (Avatar) e «ipotesi» (Offerta): decide Wesley.
+- 10: l'avviso sta su Idee (a studio vuoto), Stili e Calendario; sparisce da solo quando la mappa Avatar è chiusa.
+

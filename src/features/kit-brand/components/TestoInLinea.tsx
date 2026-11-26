@@ -45,7 +45,7 @@ export function TestoInLinea({ valore, segnaposto, onSalva, multiriga = false, m
   }
 
   const classiCampo = cn(
-    "w-full resize-none bg-transparent outline-none ring-0 placeholder:text-muted-foreground/60",
+    "w-full resize-none bg-transparent outline-none ring-0 placeholder:text-muted-foreground",
     "rounded-sm -mx-1 px-1 box-content border-b border-dashed border-foreground/40 focus:border-foreground",
     // Sul touch una riga sola è alta almeno 36px (come il testo mostrato): si prende col dito e non salta.
     !multiriga && "pointer-coarse:min-h-9",
@@ -92,7 +92,7 @@ export function TestoInLinea({ valore, segnaposto, onSalva, multiriga = false, m
         "block w-full cursor-text rounded-sm text-left transition-colors hover:bg-foreground/[0.04] disabled:cursor-default disabled:hover:bg-transparent",
         "-mx-1 box-content px-1",
         !multiriga && "pointer-coarse:min-h-9",
-        vuoto && "text-muted-foreground/70 ",
+        vuoto && "text-muted-foreground ",
         multiriga && "whitespace-pre-wrap",
         className,
       )}

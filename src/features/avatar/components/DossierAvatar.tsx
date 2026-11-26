@@ -22,9 +22,9 @@ export function SezioneDossier({ titolo, children }: { titolo: string; children:
 }
 
 export function ElencoDossier({ voci, corsivo = false }: { voci: string[]; corsivo?: boolean }) {
-  if (voci.length === 0) return <p className="text-muted-foreground/60">—</p>;
+  if (voci.length === 0) return <p className="text-muted-foreground">—</p>;
   return (
-    <ul className="grid gap-1 pl-4 list-disc marker:text-muted-foreground/60">
+    <ul className="grid gap-1 pl-4 list-disc marker:text-muted-foreground">
       {voci.map((v) => (
         <li key={v} className={corsivo ? "text-[15px] leading-snug" : ""}>
           {corsivo ? `«${v}»` : v}
@@ -34,7 +34,7 @@ export function ElencoDossier({ voci, corsivo = false }: { voci: string[]; corsi
   );
 }
 
-export const TestoDossier = ({ v }: { v: string | null }) => (v ? <p className="whitespace-pre-wrap">{v}</p> : <p className="text-muted-foreground/60">—</p>);
+export const TestoDossier = ({ v }: { v: string | null }) => (v ? <p className="whitespace-pre-wrap">{v}</p> : <p className="text-muted-foreground">—</p>);
 
 /**
  * Il retro della carta: il dossier del cliente ideale, tutto materiale utile
@@ -73,7 +73,7 @@ export function DossierAvatar({ avatar, numero, onGira, ampio = false }: Dossier
               <TestoDossier v={avatar.contesto} />
             </SezioneDossier>
             <SezioneDossier titolo="Frase-simbolo">
-              {avatar.frase ? <p className="font-display text-[17px]">«{avatar.frase}»</p> : <p className="text-muted-foreground/60">—</p>}
+              {avatar.frase ? <p className="font-display text-[17px]">«{avatar.frase}»</p> : <p className="text-muted-foreground">—</p>}
             </SezioneDossier>
             <SezioneDossier titolo="Dolori di superficie (li dice)">
               <ElencoDossier voci={avatar.dolori_superficie} />

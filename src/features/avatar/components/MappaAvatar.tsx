@@ -10,7 +10,7 @@ function Tappa({ titolo, testo, forte = false }: { titolo: string; testo: string
   return (
     <div className={forte ? "grid gap-1.5 rounded-lg bg-foreground px-4 py-3.5 text-background" : "grid gap-1.5 rounded-lg border bg-card px-4 py-3.5"}>
       <p className={`eyebrow font-sans text-[12px] ${forte ? "text-background/70" : ""}`}>{titolo}</p>
-      {testo ? <p className="text-[14px] leading-snug">{testo}</p> : <p className={forte ? "text-background/50" : "text-muted-foreground/60"}>—</p>}
+      {testo ? <p className="text-[14px] leading-snug">{testo}</p> : <p className={forte ? "text-background/50" : "text-muted-foreground"}>—</p>}
     </div>
   );
 }

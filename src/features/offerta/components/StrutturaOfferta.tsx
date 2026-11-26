@@ -22,7 +22,7 @@ function Voce({ voce }: { voce: VoceOfferta }) {
   if (voce.lista) {
     if (voce.freccia) {
       return (
-        <ul className="grid gap-1.5 pl-4 list-disc marker:text-muted-foreground/60">
+        <ul className="grid gap-1.5 pl-4 list-disc marker:text-muted-foreground">
           {voce.lista.map((v) => (
             <li key={v}>
               <VoceFreccia testo={v} />

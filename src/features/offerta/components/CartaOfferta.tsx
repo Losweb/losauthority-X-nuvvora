@@ -27,7 +27,7 @@ function Campo({ etichetta, valore, inCompilazione, className }: { etichetta: st
           {valore}
         </p>
       ) : (
-        <p className={cn("mt-0.5 text-[15px] leading-snug text-muted-foreground/50", inCompilazione && "animate-pulse")}>
+        <p className={cn("mt-0.5 text-[15px] leading-snug text-muted-foreground", inCompilazione && "animate-pulse")}>
           <span aria-hidden>—</span>
           <span className="sr-only">Non ancora compilato</span>
         </p>
@@ -67,7 +67,7 @@ export function CartaOfferta({ offerta, numero, titolare, inCompilazione, linkPd
               {offerta.nome}
             </h3>
           ) : (
-            <p className={cn("font-display text-[30px] leading-tight text-muted-foreground/50", inCompilazione && "animate-pulse")}>In costruzione…</p>
+            <p className={cn("font-display text-[30px] leading-tight text-muted-foreground", inCompilazione && "animate-pulse")}>In costruzione…</p>
           )}
         </div>
 
@@ -85,7 +85,7 @@ export function CartaOfferta({ offerta, numero, titolare, inCompilazione, linkPd
               «{offerta.trasformazione}»
             </p>
           ) : (
-            <p className={cn("mt-1 font-display text-[20px] text-muted-foreground/40", inCompilazione && "animate-pulse")}>«…»</p>
+            <p className={cn("mt-1 font-display text-[20px] text-muted-foreground", inCompilazione && "animate-pulse")}>«…»</p>
           )}
         </div>
 

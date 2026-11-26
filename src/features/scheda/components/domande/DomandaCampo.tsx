@@ -37,6 +37,8 @@ export function DomandaCampo({ domanda, valore, risposte, parole, errore, onChan
   const comuni = { domanda, parole, disabilitato: !inBozza, invalido: !!errore, idErrore };
   const opzioni = opzioniVisibili(domanda, risposte);
 
+  const esempio = (domanda.tipo === "text" || domanda.tipo === "textarea") && domanda.placeholder ? conParole(domanda.placeholder, parole) : null;
+
   let controllo: React.ReactNode;
   switch (domanda.tipo) {
     case "text":
@@ -79,6 +81,8 @@ export function DomandaCampo({ domanda, valore, risposte, parole, errore, onChan
         {inBozza && domanda.tipo !== "file-list" ? <AiutoAura domandaId={domanda.id} /> : null}
       </div>
       {domanda.hint ? <p className="text-xs text-muted-foreground">{conParole(domanda.hint, parole)}</p> : null}
+      {/* L'esempio sta sopra il campo, non dentro: resta visibile mentre si scrive. */}
+      {esempio ? <p className="text-xs text-muted-foreground">{esempio}</p> : null}
       {controllo}
       {errore ? (
         <p id={idErrore} role="alert" className="text-sm text-destructive">

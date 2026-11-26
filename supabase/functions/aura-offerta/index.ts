@@ -43,7 +43,7 @@ async function nuovaRigaAura(admin: SupabaseClient, offertaId: string): Promise<
 }
 
 /** Un turno di Aura sulla riga `auraId` già creata 'in_corso'. */
-async function turno(admin: SupabaseClient, clienteId: string, auraId: string, escludi: string[], messaggio: string) {
+async function turno(admin: SupabaseClient, clienteId: string, auraId: string, escludi: string[], messaggio: string, signal?: AbortSignal) {
   const o = await offertaDi(admin, clienteId);
   if (!o) throw new HttpError(404, "Non hai ancora iniziato la fase Offerta.");
   const [scheda, storico, nome, lettura, kitBrand, avatar] = await Promise.all([
@@ -93,7 +93,13 @@ async function turno(admin: SupabaseClient, clienteId: string, auraId: string, e
     maxTokens: 8000,
     tag: "aura-offerta",
     utente: clienteId,
+    signal,
   });
+  if (!testo && signal?.aborted) {
+    // Tasto stop: il browser ha chiuso la richiesta. La riga resta riprovabile, senza errore nei log.
+    await admin.from("offerta_messaggi").update({ stato: "errore", errore: "Fermata" }).eq("id", auraId);
+    throw new HttpError(499, "Fermata dal cliente.");
+  }
   if (!testo) {
     await admin.from("offerta_messaggi").update({ stato: "errore", errore: "Nessuna risposta dal modello" }).eq("id", auraId);
     await logError("aura-offerta:anthropic", "Nessuna risposta da Aura", { user: clienteId, offerta: o.id }, { silent: true });
@@ -137,7 +143,7 @@ Deno.serve(async (req: Request) => {
         escludi.push((mio as { id: string }).id);
       }
       const auraId = await nuovaRigaAura(admin, offertaId);
-      await turno(admin, c.id, auraId, [auraId, ...escludi], primo.length >= 2 ? `${primo}\n\n${APERTURA_CON_MESSAGGIO}` : APERTURA);
+      await turno(admin, c.id, auraId, [auraId, ...escludi], primo.length >= 2 ? `${primo}\n\n${APERTURA_CON_MESSAGGIO}` : APERTURA, req.signal);
       return json({ ok: true, offerta_id: offertaId });
     }
 
@@ -160,7 +166,7 @@ Deno.serve(async (req: Request) => {
         .maybeSingle();
       await admin.from("offerta_messaggi").update({ stato: "in_corso", errore: null, contenuto: "" }).eq("id", a.id);
       const p = prec as { id: string; contenuto: string } | null;
-      return json({ ok: true, ...(await turno(admin, c.id, a.id, p ? [a.id, p.id] : [a.id], p?.contenuto ?? APERTURA)) });
+      return json({ ok: true, ...(await turno(admin, c.id, a.id, p ? [a.id, p.id] : [a.id], p?.contenuto ?? APERTURA, req.signal)) });
     }
 
     const messaggio = typeof body.messaggio === "string" ? body.messaggio.trim().slice(0, MAX_MESSAGGIO) : "";
@@ -168,7 +174,7 @@ Deno.serve(async (req: Request) => {
     const { data: mio, error: e1 } = await admin.from("offerta_messaggi").insert({ offerta_id: o.id, ruolo: "cliente", contenuto: messaggio }).select("id").single();
     if (e1 || !mio) throw e1 ?? new Error("messaggio cliente non creato");
     const auraId = await nuovaRigaAura(admin, o.id);
-    return json({ ok: true, ...(await turno(admin, c.id, auraId, [auraId, (mio as { id: string }).id], messaggio)) });
+    return json({ ok: true, ...(await turno(admin, c.id, auraId, [auraId, (mio as { id: string }).id], messaggio, req.signal)) });
   } catch (err) {
     return gestisciErrore(err);
   }

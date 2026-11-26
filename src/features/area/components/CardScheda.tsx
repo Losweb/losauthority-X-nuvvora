@@ -28,7 +28,7 @@ export function CardScheda({ clienteId }: { clienteId: string }) {
   if (isError || !data) return <ErroreCaricamento />;
 
   return (
-    <section aria-label="La tua scheda">
+    <section aria-label="Il tuo onboarding">
       <Link
         to={`/area/${q.slug}`}
         className="flex flex-wrap items-center gap-[18px] rounded-2xl border bg-card px-5 py-5 transition-[border-color,box-shadow] hover:border-input hover:shadow-sm sm:px-6 sm:py-[22px]"

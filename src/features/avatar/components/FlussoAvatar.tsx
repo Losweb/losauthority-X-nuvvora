@@ -23,6 +23,8 @@ interface FlussoAvatarProps<M extends MessaggioChat> {
   onRiprova: (messaggio: M) => void;
   /** Frasi di stato mentre Aura scrive (default: quelle dell'avatar; l'offerta passa le sue). */
   fasi?: readonly string[];
+  /** Attese lunghe (Avatar, Offerta): la stima da mostrare sotto la frase di stato. */
+  stima?: string;
 }
 
 function BollaCliente({ testo }: { testo: string }) {
@@ -34,7 +36,7 @@ function BollaCliente({ testo }: { testo: string }) {
 }
 
 /** La conversazione che compila l'avatar (o l'offerta): il cliente a destra, Aura a sinistra con la sfera. */
-export function FlussoAvatar<M extends MessaggioChat>({ messaggi, pendente, occupato, onRiprova, fasi = FASI_AVATAR }: FlussoAvatarProps<M>) {
+export function FlussoAvatar<M extends MessaggioChat>({ messaggi, pendente, occupato, onRiprova, fasi = FASI_AVATAR, stima }: FlussoAvatarProps<M>) {
   const fineRef = useRef<HTMLDivElement>(null);
   const ultimoId = messaggi.at(-1)?.id;
   const ultimoStato = messaggi.at(-1)?.stato;
@@ -49,7 +51,7 @@ export function FlussoAvatar<M extends MessaggioChat>({ messaggi, pendente, occu
     <div className="grid gap-5">
       {messaggi.map((m) => {
         if (m.ruolo === "cliente") return <BollaCliente key={m.id} testo={m.contenuto} />;
-        if (m.stato === "in_corso") return <PensieroAura key={m.id} fasi={fasi} />;
+        if (m.stato === "in_corso") return <PensieroAura key={m.id} fasi={fasi} stima={stima} intervalloMs={stima ? 9000 : undefined} />;
         return (
           <div key={m.id} className="flex items-start gap-3">
             <AuraSfera dimensione={30} conNome={false} className="mt-0.5" />
@@ -57,7 +59,7 @@ export function FlussoAvatar<M extends MessaggioChat>({ messaggi, pendente, occu
               {m.stato === "completato" && m.contenuto ? <TestoAura testo={m.contenuto} /> : null}
               {m.stato === "errore" ? (
                 <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-sm text-muted-foreground">Aura non è riuscita a rispondere{m.errore ? ` (${m.errore.toLowerCase()})` : ""}.</p>
+                  <p className="text-sm text-muted-foreground">{m.errore === "Fermata" ? "Hai fermato Aura." : `Aura non è riuscita a rispondere${m.errore ? ` (${m.errore.toLowerCase()})` : ""}.`}</p>
                   <Button size="sm" variant="outline" disabled={occupato} onClick={() => onRiprova(m)}>
                     <RotateCcw aria-hidden /> Riprova
                   </Button>
@@ -71,7 +73,7 @@ export function FlussoAvatar<M extends MessaggioChat>({ messaggi, pendente, occu
       {pendente !== null ? (
         <>
           {pendente ? <BollaCliente testo={pendente} /> : null}
-          <PensieroAura fasi={fasi} />
+          <PensieroAura fasi={fasi} stima={stima} intervalloMs={stima ? 9000 : undefined} />
         </>
       ) : null}
 
