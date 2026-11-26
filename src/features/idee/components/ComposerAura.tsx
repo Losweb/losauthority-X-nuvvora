@@ -23,6 +23,8 @@ interface ComposerAuraProps {
   placeholder?: string;
   /** Questa è l'Aura viva della schermata (una sola per pagina). Falso quando c'è il volto grande della schermata vuota. */
   auraViva?: boolean;
+  /** Mette il cursore nel campo appena compare (solo con il mouse: sul telefono non apre la tastiera). */
+  focusAllApertura?: boolean;
   className?: string;
 }
 
@@ -67,8 +69,12 @@ export function ComposerAura({
   onStileChange,
   placeholder = PLACEHOLDER_IDEE,
   auraViva = true,
+  focusAllApertura = false,
   className,
 }: ComposerAuraProps) {
+  useEffect(() => {
+    if (focusAllApertura && window.matchMedia("(pointer: fine)").matches) document.getElementById("composer-aura")?.focus({ preventScroll: true });
+  }, [focusAllApertura]);
   const [testo, setTesto] = useState("");
   const [attiva, setAttiva] = useState(0);
   const aura = useAuraStatus();

@@ -41,10 +41,13 @@ export function FlussoAvatar<M extends MessaggioChat>({ messaggi, pendente, occu
   const ultimoId = messaggi.at(-1)?.id;
   const ultimoStato = messaggi.at(-1)?.stato;
 
+  const giaScorsa = useRef(false);
   // Scorre solo il contenitore della chat (Safari: scrollIntoView trascina anche gli antenati).
+  // All'apertura salta subito in fondo; dopo, ai messaggi nuovi, scorre morbido.
   useEffect(() => {
     const contenitore = fineRef.current?.closest<HTMLElement>("[data-chat-scroll]");
-    if (contenitore) contenitore.scrollTo({ top: contenitore.scrollHeight, behavior: "smooth" });
+    if (contenitore) contenitore.scrollTo({ top: contenitore.scrollHeight, behavior: giaScorsa.current ? "smooth" : "auto" });
+    giaScorsa.current = true;
   }, [ultimoId, ultimoStato, pendente]);
 
   return (

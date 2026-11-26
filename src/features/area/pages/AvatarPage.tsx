@@ -31,6 +31,7 @@ import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { scorriInCima } from "@/shared/utils/scroll";
 import { cn } from "@/lib/utils";
+import { BottoneChat, InizioChatNuova } from "../components/BottoneChat";
 import { PassoDopo } from "../components/percorso/PassoDopo";
 
 /**
@@ -38,6 +39,8 @@ import { PassoDopo } from "../components/percorso/PassoDopo";
  * con Aura (a sinistra) che costruisce la mappa disegnata a ponte e le schede
  * (a destra). In alto la barra dei passi; sopra il composer i tre dubbi.
  * Una scheda aperta prende tutta la larghezza («Torna alla mappa»).
+ * A lavoro finito (26/11/2026) la conversazione sta chiusa e mappa e schede prendono tutta la
+ * larghezza; «Parla con Aura» la riapre accanto, «Chiudi la chat» la richiude.
  */
 export default function AvatarPage() {
   const { utente } = useAuth();
@@ -47,6 +50,10 @@ export default function AvatarPage() {
   const [daRipristinare, setDaRipristinare] = useState<string | undefined>(undefined);
   const [sceltaVista, setSceltaVista] = useState<VistaMobile | null>(null);
   const [schedaAperta, setSchedaAperta] = useState<number | null>(null);
+  /** A lavoro finito la chat sta chiusa: si riapre con «Parla con Aura». null = decide il passo. */
+  const [sceltaChat, setSceltaChat] = useState<boolean | null>(null);
+  /** Quanti messaggi vecchi piegare quando la chat si riapre a lavoro finito (0 = mostrali tutti). */
+  const [piegati, setPiegati] = useState(0);
 
   const inizia = useIniziaMappa(clienteId);
   const invia = useInviaMappa(clienteId);
@@ -124,7 +131,8 @@ export default function AvatarPage() {
 
   const { mappa, schede } = dati.data;
   const fatto = mappa.passo === "fatto";
-  const vista: VistaMobile = sceltaVista ?? (fatto ? "carta" : "chat");
+  const chat = auraScrive || (sceltaChat ?? !fatto);
+  const vista: VistaMobile = chat ? (sceltaVista ?? "chat") : "carta";
   const scheda = schedaAperta !== null ? schede.find((s) => s.ordine === schedaAperta) : undefined;
   const onModifica = (m: Parameters<typeof modifica.mutate>[0]) => modifica.mutate(m);
 
@@ -140,6 +148,7 @@ export default function AvatarPage() {
             {mappa.stato === "rivista" ? "Rivista da Wesley" : "Bozza"}
           </Badge>
           <RicominciaAvatar clienteId={clienteId} mappaId={mappa.id} disabilitato={auraScrive} />
+          {fatto && !scheda ? <BottoneChat aperta={chat} disabilitato={auraScrive} onCambia={(v) => { setSceltaChat(v); setSceltaVista(null); setPiegati(v ? lista.length : 0); }} /> : null}
         </div>
       </div>
 
@@ -159,24 +168,32 @@ export default function AvatarPage() {
         </div>
       ) : null}
 
-      {!scheda ? <SceltaVista vista={vista} onCambia={setSceltaVista} seconda="Mappa" /> : null}
+      {!scheda && chat ? <SceltaVista vista={vista} onCambia={setSceltaVista} seconda="Mappa" /> : null}
 
-      <div className={cn("grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(440px,560px)] lg:items-start", scheda && "hidden")}>
+      <div className={cn("grid min-w-0 grid-cols-1 gap-6 lg:items-start", chat && "lg:grid-cols-[minmax(0,1fr)_minmax(440px,560px)]", scheda && "hidden")}>
         <section
+          id="chat-aura"
           aria-label="Conversazione con Aura"
           className={cn(
-            "order-2 min-h-[360px] min-w-0 flex-col rounded-2xl border bg-card/70 h-[calc(var(--vh-finestra)-var(--header-h)-15rem)] md:h-auto md:min-h-[460px] lg:order-1 lg:h-[calc(var(--vh-finestra)-var(--header-h)-12rem)]",
-            vista === "chat" ? "flex" : "hidden md:flex",
+            "relative order-2 scroll-mt-[calc(var(--header-h)+1rem)] min-h-[360px] min-w-0 flex-col rounded-2xl border bg-card/70 h-[calc(var(--vh-finestra)-var(--header-h)-15rem)] md:h-auto md:min-h-[460px] lg:order-1 lg:h-[calc(var(--vh-finestra)-var(--header-h)-12rem)]",
+            !chat ? "hidden" : vista === "chat" ? "flex" : "hidden md:flex",
           )}
         >
+          {fatto ? (
+            <Button variant="ghost" size="icon-sm" aria-label="Chiudi la chat" className="absolute top-2 right-2 z-10 text-muted-foreground" disabled={auraScrive} onClick={() => { setSceltaChat(false); setSceltaVista(null); setPiegati(0); }}>
+              <X aria-hidden />
+            </Button>
+          ) : null}
           <div data-chat-scroll className="min-h-0 flex-1 overflow-y-auto p-4 [scrollbar-width:thin] md:p-5" aria-live="polite">
             {messaggi.isLoading ? <SkeletonBlocco altezza="h-40" /> : null}
             {messaggi.isError ? <ErroreCaricamento /> : null}
-            {messaggi.data ? <FlussoAvatar messaggi={lista} pendente={pendenteVisibile === null ? null : pendenteVisibile.testo} occupato={invia.isPending} onRiprova={riprova} fasi={FASI_MAPPA} stima="Può volerci fino a un minuto. Se serve, puoi fermarla." /> : null}
+            {messaggi.data && chat && piegati > 0 ? <InizioChatNuova nascosti={piegati} onMostra={() => setPiegati(0)} invito="Cosa vuoi cambiare? Dimmi cosa non torna nella mappa o in una scheda, oppure chiedimi un altro avatar." /> : null}
+            {messaggi.data && chat ? <FlussoAvatar messaggi={piegati > 0 ? lista.slice(piegati) : lista} pendente={pendenteVisibile === null ? null : pendenteVisibile.testo} occupato={invia.isPending} onRiprova={riprova} fasi={FASI_MAPPA} stima="Può volerci fino a un minuto. Se serve, puoi fermarla." /> : null}
           </div>
           <div className="grid shrink-0 gap-2 p-2 md:p-3">
             <DubbiAvatar compatti onDubbio={manda} disabilitato={auraScrive} />
             <ComposerAura
+              focusAllApertura={piegati > 0}
               inAttesa={auraScrive}
               onInvia={manda}
               onFerma={auraScrive ? () => ferma(fermaRef.current) : undefined}
@@ -187,7 +204,7 @@ export default function AvatarPage() {
           </div>
         </section>
 
-        <aside className={cn("order-1 grid min-w-0 content-start gap-5 lg:order-2", vista === "carta" ? "grid" : "hidden md:grid")}>
+        <aside className={cn("order-1 grid min-w-0 content-start gap-5 lg:order-2", !chat || vista === "carta" ? "grid" : "hidden md:grid")}>
           <MappaPonte mappa={mappa} schede={schede} onModifica={onModifica} occupato={modifica.isPending} />
           <ElencoSchede schede={schede} onApri={apriScheda} />
           {mappa.convertita ? (
