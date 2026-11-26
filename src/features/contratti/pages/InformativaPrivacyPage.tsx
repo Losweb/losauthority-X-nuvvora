@@ -9,9 +9,9 @@ import { TestoContratto } from "../components/TestoContratto";
  */
 export default function InformativaPrivacyPage() {
   useEffect(() => {
-    document.title = "Informativa privacy — Wesley Caicedo";
+    document.title = "Informativa privacy — UPSCALE";
     return () => {
-      document.title = "Los Authority";
+      document.title = "UPSCALE";
     };
   }, []);
   return (

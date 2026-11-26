@@ -18,7 +18,7 @@ export default function ContrattoPubblicoPage() {
   const [stato, setStato] = useState<Stato>({ tipo: "carico" });
 
   useEffect(() => {
-    document.title = "Il tuo contratto — Wesley Caicedo";
+    document.title = "Il tuo contratto — UPSCALE";
     // Il link è personale: niente motori di ricerca.
     const meta = document.createElement("meta");
     meta.name = "robots";
@@ -26,7 +26,7 @@ export default function ContrattoPubblicoPage() {
     document.head.appendChild(meta);
     return () => {
       meta.remove();
-      document.title = "Los Authority";
+      document.title = "UPSCALE";
     };
   }, []);
 

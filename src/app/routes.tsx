@@ -25,7 +25,6 @@ const SchedaPage = lazy(() => import("@/features/area/pages/SchedaPage"));
 const BenvenutoPage = lazy(() => import("@/features/area/pages/BenvenutoPage"));
 const DashboardClientePage = lazy(() => import("@/features/area/pages/DashboardClientePage"));
 const WorkflowPage = lazy(() => import("@/features/area/pages/WorkflowPage"));
-const PubblicazioniPage = lazy(() => import("@/features/area/pages/PubblicazioniPage"));
 const StiliPage = lazy(() => import("@/features/area/pages/StiliPage"));
 const CreaIdeePage = lazy(() => import("@/features/area/pages/CreaIdeePage"));
 const WesleyCoachPage = lazy(() => import("@/features/area/pages/WesleyCoachPage"));
@@ -201,7 +200,8 @@ export function AppRoutes() {
         >
           <Route path="/area/dashboard" element={<DashboardClientePage />} />
           <Route path="/area/workflow" element={<WorkflowPage />} />
-          <Route path="/area/pubblicazioni" element={<PubblicazioniPage />} />
+          {/* La pagina Numeri è tolta il 26/11/2026: i vecchi link portano al percorso. */}
+          <Route path="/area/pubblicazioni" element={<Navigate to="/area/dashboard" replace />} />
           <Route path="/area/clienti" element={<ClientiAreaPage />} />
           <Route path="/area/stili" element={<StiliPage />} />
           <Route path="/area/crea-idee" element={<CreaIdeePage />} />

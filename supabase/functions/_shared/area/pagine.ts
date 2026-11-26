@@ -19,7 +19,6 @@ export const PAGINE_AREA: readonly PaginaArea[] = [
   { chiave: "crea_idee", titolo: "Crea idee", percorso: "/area/crea-idee", descrizione: "farsi proporre idee di video da Aura (hook e script)" },
   { chiave: "stili", titolo: "Stili", percorso: "/area/stili", descrizione: "salvare uno stile di video da replicare partendo da script di esempio" },
   { chiave: "workflow", titolo: "Workflow", percorso: "/area/workflow", descrizione: "la kanban dei video: idea → script → da registrare → da editare → pubblicato, con calendario" },
-  { chiave: "pubblicazioni", titolo: "Pubblicazioni", percorso: "/area/pubblicazioni", descrizione: "collegare Instagram e seguire visualizzazioni, follower e crescita dei video pubblicati" },
   { chiave: "clienti", titolo: "Clienti", percorso: "/area/clienti", descrizione: "il CRM dei lead e clienti del cliente (da dove arrivano, stato, offerta)" },
   { chiave: "coach", titolo: "Wesley Coach", percorso: "/area/coach", descrizione: "chiedere ad Aura quale lezione Skool guardare per un blocco" },
 ] as const;

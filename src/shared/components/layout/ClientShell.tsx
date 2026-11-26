@@ -1,16 +1,20 @@
-import { Link, useNavigate } from "react-router-dom";
-import { BarChart3, CalendarDays, Compass, GraduationCap, Layers, Plug, Route, Tag, UserRound, Users, WandSparkles } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { CalendarDays, Compass, GraduationCap, Layers, Plug, Route, Tag, UserRound, Users, WandSparkles } from "lucide-react";
 import { TornaAlGestionale, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
 import { BottoneTemaCompatto } from "@/shared/components/layout/InterruttoreTema";
 import { ContenutoPagina } from "@/shared/components/layout/ContenutoPagina";
 import { MenuMobile } from "@/shared/components/layout/MenuMobile";
+import { useSidebarCompattaAttiva } from "@/shared/hooks/useSidebarCompatta";
+import { cn } from "@/lib/utils";
 import { AzioneCardUtente, CardUtente, FinestraSeto, SidebarSeto, TitoloSezioneNav, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
 
 /**
  * Il menu segue il metodo (26/11/2026, studio dell'esperienza cliente): prima il percorso, poi le
- * fondamenta nell'ordine in cui si fanno, i contenuti, i risultati; in fondo gli aiuti.
+ * fondamenta nell'ordine in cui si fanno, i contenuti, la gestione dei clienti. Wesley Coach non è
+ * una voce come le altre: è un tasto a parte, in fondo, ben visibile (richiesta di Wesley, 26/11/2026).
+ * La pagina Numeri è tolta (26/11/2026).
  */
 const VOCE_PERCORSO: VoceNavBase = { href: "/area/dashboard", label: "Il tuo percorso", icon: Route };
 const GRUPPI: Array<{ titolo: string; voci: VoceNavBase[] }> = [
@@ -31,14 +35,48 @@ const GRUPPI: Array<{ titolo: string; voci: VoceNavBase[] }> = [
     ],
   },
   {
-    titolo: "Risultati",
-    voci: [
-      { href: "/area/pubblicazioni", label: "Numeri", icon: BarChart3 },
-      { href: "/area/clienti", label: "Clienti", icon: Users },
-    ],
+    titolo: "Gestione",
+    voci: [{ href: "/area/clienti", label: "Clienti", icon: Users }],
   },
 ];
-const VOCE_COACH: VoceNavBase = { href: "/area/coach", label: "Wesley Coach", icon: GraduationCap };
+/**
+ * Wesley Coach: il tasto a cui il cliente arriva quando è bloccato. Pieno e con una riga sotto, così
+ * si distingue dalle pagine di lavoro; nella sidebar compatta resta un tondo pieno con l'icona.
+ */
+function TastoCoach() {
+  const compatta = useSidebarCompattaAttiva();
+  if (compatta) {
+    return (
+      <NavLink
+        to="/area/coach"
+        title="Wesley Coach"
+        aria-label="Wesley Coach"
+        className="mx-auto mt-auto grid size-10 place-items-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        <GraduationCap className="size-[18px]" aria-hidden />
+      </NavLink>
+    );
+  }
+  return (
+    <NavLink
+      to="/area/coach"
+      className={({ isActive }) =>
+        cn(
+          "mt-auto flex items-center gap-3 rounded-xl bg-primary px-3 py-2.5 text-primary-foreground transition-opacity hover:opacity-90",
+          isActive && "ring-2 ring-primary/30 ring-offset-2 ring-offset-sidebar",
+        )
+      }
+    >
+      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-foreground/15">
+        <GraduationCap className="size-[18px]" aria-hidden />
+      </span>
+      <span className="grid min-w-0 leading-tight">
+        <span className="truncate text-sm font-semibold">Wesley Coach</span>
+        <span className="truncate text-[12px] opacity-80">Bloccato? Chiedi qui</span>
+      </span>
+    </NavLink>
+  );
+}
 
 function NavPercorso() {
   return (
@@ -52,8 +90,8 @@ function NavPercorso() {
           ))}
         </div>
       ))}
-      <div className="mt-3 flex flex-col gap-0.5">
-        <VoceNavSeto voce={VOCE_COACH} />
+      <div className="mt-6 flex flex-1 flex-col">
+        <TastoCoach />
       </div>
     </nav>
   );
@@ -78,7 +116,7 @@ interface ClientShellProps {
 /**
  * Shell dell'area cliente (Seto). Durante l'onboarding: solo marchio + «Esci» e colonna centrale
  * da 820px. Con `conNav`: sidebar a sinistra con «Il tuo percorso» e i tre gruppi (Fondamenta,
- * Contenuti, Risultati), in fondo gli aiuti e la card utente con «Esci». Sotto md la sidebar diventa il pannello ☰ (`MenuMobile`).
+ * Contenuti, Gestione), in fondo il tasto Wesley Coach e la card utente con «Esci». Sotto md la sidebar diventa il pannello ☰ (`MenuMobile`).
  */
 export function ClientShell({ conNav = false }: ClientShellProps) {
   const { utente, signOut } = useAuth();

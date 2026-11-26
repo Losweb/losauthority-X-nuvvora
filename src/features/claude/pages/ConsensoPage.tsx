@@ -55,9 +55,9 @@ export default function ConsensoPage() {
   const decisione = useDecisioneAccesso(authorizationId);
 
   useEffect(() => {
-    document.title = "Collega Claude — Wesley Caicedo";
+    document.title = "Collega Claude — UPSCALE";
     return () => {
-      document.title = "Los Authority";
+      document.title = "UPSCALE";
     };
   }, []);
 

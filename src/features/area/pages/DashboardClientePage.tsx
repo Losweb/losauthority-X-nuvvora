@@ -31,7 +31,7 @@ export default function DashboardClientePage() {
           {percorso.ora ? (
             <TappaOra tappa={percorso.ora} numero={numeroOra} />
           ) : (
-            <p className="rounded-2xl border bg-card p-5 text-[15px]">Hai fatto tutte le tappe. Da qui in avanti si lavora sui contenuti e sui numeri, una settimana alla volta.</p>
+            <p className="rounded-2xl border bg-card p-5 text-[15px]">Hai fatto tutte le tappe. Da qui in avanti si lavora sui contenuti e sui clienti, una settimana alla volta.</p>
           )}
           <ElencoTappe tappe={percorso.tappe} />
           <ProssimaChiamata quando={percorso.prossimaCall} />
