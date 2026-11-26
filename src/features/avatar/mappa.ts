@@ -139,7 +139,8 @@ export const SEZIONI_ESSENZIALI: SezioneScheda[] = [
   { titolo: "Obiezioni", parti: [{ percorso: "obiezioni", tipo: "coppie", a: "Obiezione", b: "Direzione della risposta" }] },
 ];
 const IN_TESTA = new Set(["nome", "eta", "situazione"]);
-const ESSENZIALI = new Set(SEZIONI_ESSENZIALI.flatMap((s) => s.parti.map((p) => p.percorso)));
+// Le sue parole stanno nel quadro come etichette (non correggibili lì): si correggono in «Tutta la scheda».
+const ESSENZIALI = new Set(SEZIONI_ESSENZIALI.flatMap((s) => s.parti.map((p) => p.percorso)).filter((p) => p !== "linguaggio.parole"));
 /** Le sezioni del documento senza le parti già in testa o tra le essenziali. */
 export const SEZIONI_RESTO: SezioneScheda[] = SEZIONI_SCHEDA.map((s) => ({
   ...s,

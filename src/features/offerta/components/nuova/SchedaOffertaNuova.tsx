@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { Dettaglio } from "@/shared/components/layout/Dettaglio";
 import { cn } from "@/lib/utils";
 import {
   ETICHETTA_CRITERIO,
@@ -15,10 +15,10 @@ import { BadgeOrigine, RigaVoce, Sezione, Tabella } from "./PezziBase";
 const ETICHETTA_PROMESSA = { sicura: "Sicura", tagliente: "Tagliente", colpo_di_scena: "Colpo di scena" } as const;
 
 /**
- * La scheda Offerta (26/11/2026, «solo il necessario»): in alto il risultato che il cliente usa
- * (nome, promessa, prezzi, bonus, garanzia, come la presenti, cosa confermare); il ragionamento
- * di Aura (test, mercato, leve, valore, freni) sta piegato in «Come ci siamo arrivati».
- * `aperta` (tab del team e PDF) lo mostra già aperto; `larga` = due colonne nel ragionamento.
+ * La scheda Offerta (26/11/2026, «quadro generale»): in vista solo nome, promessa e prezzi;
+ * sotto, righe che si aprono al clic (cosa c'è dentro, bonus e garanzia, come la presenti,
+ * se ti dicono, da confermare, come ci siamo arrivati). `aperta` (tab del team e PDF) le apre
+ * tutte; `larga` = due colonne nel ragionamento.
  */
 export function SchedaOffertaNuova({ o, larga = false, aperta = false }: { o: OffertaNuova; larga?: boolean; aperta?: boolean }) {
   const s = o.scheda ?? {};
@@ -29,68 +29,71 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false }: { o: Of
   const promessa = pr?.scelta ? pr[pr.scelta] : (pr?.tagliente ?? pr?.sicura ?? null);
   const frasi = pres ? (["bio", "video", "chat"] as const).filter((k) => pres[k]) : [];
 
-  const risultato = [
-    nome || promessa ? (
-      <div key="testa" className="grid gap-1.5">
-        {nome ? <h3 className="text-[22px] leading-tight font-bold">{nome}</h3> : null}
-        {promessa ? <p className="text-[17px] leading-snug font-medium">{promessa}</p> : null}
-      </div>
+  const gradini = s.gradini ?? [];
+  const bonus = s.bonus ?? [];
+  const obiezioni = pres?.obiezioni ?? [];
+  const confermare = s.da_confermare ?? [];
+  const haQuadro = !!(nome || promessa || gradini.length);
+
+  // Le righe che si aprono al clic: titolo, riassunto corto, dettagli.
+  const righe = [
+    gradini.some((g) => g.contiene) ? (
+      <Dettaglio key="contiene" titolo="Cosa c'è dentro" riassunto={gradini.length === 1 ? "1 prezzo" : `${gradini.length} prezzi`} aperto={aperta}>
+        {gradini.map((g, i) => (
+          <div key={i} className="grid gap-0.5">
+            <p className="flex items-start gap-2 text-[15px] font-semibold">
+              <BadgeOrigine o={g.o} />
+              {g.nome || ETICHETTA_GRADINO[g.livello]} · <span className="figure">{g.prezzo}</span>
+            </p>
+            {g.contiene ? <p className="text-[15px] leading-relaxed text-muted-foreground">{g.contiene}</p> : null}
+          </div>
+        ))}
+      </Dettaglio>
     ) : null,
-    s.gradini?.length ? (
-      <Sezione key="prezzi" titolo="Prezzi">
-        <ul className="grid divide-y divide-line">
-          {s.gradini.map((g, i) => (
-            <li key={i} className="grid gap-0.5 py-2.5 first:pt-0 last:pb-0">
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="flex min-w-0 items-start gap-2 text-[15px] font-semibold">
-                  <BadgeOrigine o={g.o} />
-                  {g.nome || ETICHETTA_GRADINO[g.livello]}
-                </p>
-                <span className="figure shrink-0 text-[15px] font-semibold">{g.prezzo}</span>
-              </div>
-              {g.contiene ? <p className="text-[14px] leading-relaxed text-muted-foreground">{g.contiene}</p> : null}
-            </li>
-          ))}
-        </ul>
-      </Sezione>
-    ) : null,
-    s.bonus?.length || s.garanzia ? (
-      <Sezione key="bonus" titolo="Bonus e garanzia">
-        {s.bonus?.map((b, i) => <RigaVoce key={i} v={{ t: b.bonus, o: b.o }} />)}
-        {s.garanzia ? <RigaVoce v={s.garanzia} /> : null}
-      </Sezione>
+    bonus.length || s.garanzia ? (
+      <Dettaglio key="bonus" titolo="Bonus e garanzia" riassunto={[bonus.length ? `${bonus.length} bonus` : null, s.garanzia ? "garanzia" : null].filter(Boolean).join(" e ")} aperto={aperta}>
+        {bonus.map((b, i) => (
+          <RigaVoce key={i} v={{ t: b.bonus, o: b.o }} />
+        ))}
+        {s.garanzia ? (
+          <div className="grid gap-0.5">
+            <p className="text-[13px] text-muted-foreground">Garanzia</p>
+            <RigaVoce v={s.garanzia} />
+          </div>
+        ) : null}
+      </Dettaglio>
     ) : null,
     frasi.length ? (
-      <Sezione key="presenta" titolo="Come la presenti">
+      <Dettaglio key="presenta" titolo="Come la presenti" riassunto={frasi.map((k) => (k === "bio" ? "bio" : k === "video" ? "video" : "chat")).join(", ")} aperto={aperta}>
         {frasi.map((k) => (
           <div key={k} className="grid gap-0.5">
             <p className="text-[13px] text-muted-foreground">{k === "bio" ? "Nella bio" : k === "video" ? "All'inizio di un video" : "In chat"}</p>
             <p className="text-[15px] leading-relaxed">{pres?.[k]}</p>
           </div>
         ))}
-      </Sezione>
+      </Dettaglio>
     ) : null,
-    pres?.obiezioni?.length ? (
-      <Sezione key="obiezioni" titolo="Se ti dicono">
-        {pres.obiezioni.map((x, i) => (
+    obiezioni.length ? (
+      <Dettaglio key="obiezioni" titolo="Se ti dicono" riassunto={obiezioni.length === 1 ? "1 obiezione" : `${obiezioni.length} obiezioni`} aperto={aperta}>
+        {obiezioni.map((x, i) => (
           <div key={i} className="flex items-start gap-2">
             <BadgeOrigine o={x.o} />
             <div className="min-w-0 flex-1">
               <p className="text-[15px] leading-relaxed">«{x.a}»</p>
-              <p className="text-[14px] leading-relaxed text-muted-foreground">→ {x.b}</p>
+              <p className="text-[15px] leading-relaxed text-muted-foreground">→ {x.b}</p>
             </div>
           </div>
         ))}
-      </Sezione>
+      </Dettaglio>
     ) : null,
-    s.da_confermare?.length ? (
-      <Sezione key="confermare" titolo="Da confermare">
+    confermare.length ? (
+      <Dettaglio key="confermare" titolo="Da confermare" riassunto={<span className="text-status-expiring">{confermare.length === 1 ? "1 cosa" : `${confermare.length} cose`}</span>} aperto={aperta}>
         <ul className="grid list-disc gap-1 pl-4 text-[15px] leading-relaxed marker:text-status-expiring">
-          {s.da_confermare.map((d) => (
+          {confermare.map((d) => (
             <li key={d}>{d}</li>
           ))}
         </ul>
-      </Sezione>
+      </Dettaglio>
     ) : null,
   ].filter(Boolean);
 
@@ -187,21 +190,39 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false }: { o: Of
     ) : null,
   ].filter(Boolean);
 
-  if (risultato.length === 0 && ragionamento.length === 0) return null;
-  // Finché non c'è un risultato (fasi iniziali) il ragionamento si vede aperto: è l'unica cosa scritta.
-  const apri = aperta || risultato.length === 0;
+  if (!haQuadro && righe.length === 0 && ragionamento.length === 0) return null;
+  const sezioniRagionamento = <div className={cn("grid gap-6", larga && "lg:grid-cols-2 lg:gap-x-10")}>{ragionamento}</div>;
+  // Fasi iniziali: non c'è ancora un risultato, quindi il ragionamento è l'unica cosa scritta e si vede aperto.
+  if (!haQuadro && righe.length === 0) return <div className="rounded-lg border bg-card p-5">{sezioniRagionamento}</div>;
+
   return (
-    <div className="grid gap-6">
-      {risultato.length ? <div className="grid gap-6 rounded-lg border bg-card p-5">{risultato}</div> : null}
-      {ragionamento.length ? (
-        <details className="group/arrivati" open={apri}>
-          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[14px] font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
-            <ChevronDown className="size-4 transition-transform group-open/arrivati:rotate-180" aria-hidden />
-            Come ci siamo arrivati
-          </summary>
-          <div className={cn("grid gap-6 pt-5", larga && "lg:grid-cols-2 lg:gap-x-10")}>{ragionamento}</div>
-        </details>
+    <article aria-label="La tua offerta" className="overflow-hidden rounded-lg border bg-card">
+      {haQuadro ? (
+        <header className="grid gap-4 p-5">
+          <div className="grid gap-1.5">
+            {nome ? <h3 className="text-[22px] leading-tight font-bold">{nome}</h3> : null}
+            {promessa ? <p className="text-[17px] leading-snug font-medium">{promessa}</p> : null}
+          </div>
+          {gradini.length ? (
+            <ul className={cn("grid gap-2", gradini.length > 1 && "sm:grid-cols-2", gradini.length > 2 && "lg:grid-cols-3")}>
+              {gradini.map((g, i) => (
+                <li key={i} className="grid gap-0.5 rounded-md bg-surface px-3 py-2.5">
+                  <p className="truncate text-[13px] text-muted-foreground">{g.nome || ETICHETTA_GRADINO[g.livello]}</p>
+                  <p className="figure text-[17px] leading-snug font-semibold">{g.prezzo}</p>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </header>
       ) : null}
-    </div>
+      <div className={cn("grid divide-y divide-line px-5", haQuadro && "border-t")}>
+        {righe}
+        {ragionamento.length ? (
+          <Dettaglio titolo="Come ci siamo arrivati" riassunto="mercato, valore, freni, prezzi" aperto={aperta}>
+            {sezioniRagionamento}
+          </Dettaglio>
+        ) : null}
+      </div>
+    </article>
   );
 }
