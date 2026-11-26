@@ -8,11 +8,23 @@ import { cn } from "@/lib/utils";
 import { ETICHETTA_ORIGINE, type Origine } from "../../mappa";
 import type { Modifica } from "../../hooks/useMappaAvatar";
 
-/** «vera» verde, «riassunto» neutra, «lettura» ocra: le ipotesi di Aura si riconoscono a colpo d'occhio. */
+/**
+ * Il segno delle ipotesi di Aura (26/11/2026, «solo il necessario»): un pallino ocra davanti alla riga,
+ * niente etichetta per le righe vere o riassunte. Chi lo tocca col mouse legge cosa vuol dire.
+ */
+export function PuntoIpotesi({ className }: { className?: string }) {
+  return (
+    <span title="Ipotesi di Aura, da confermare" className={cn("relative mt-[7px] inline-block size-1.5 shrink-0 rounded-full bg-status-expiring", className)}>
+      <span className="sr-only">Ipotesi di Aura, da confermare: </span>
+    </span>
+  );
+}
+
+/** L'etichetta con la parola (vera, riassunto, ipotesi): resta per la legenda e per chi la vuole leggere esplicita. */
 export function EtichettaOrigine({ origine, className }: { origine: Origine; className?: string }) {
   const variante = origine === "vera" ? "active" : origine === "lettura" ? "expiring" : "neutral";
   return (
-    <Badge variant={variante} className={cn("shrink-0", className)} title={origine === "lettura" ? "Ipotesi di Aura, da confermare" : undefined}>
+    <Badge variant={variante} className={cn("shrink-0", className)}>
       {ETICHETTA_ORIGINE[origine]}
     </Badge>
   );
@@ -98,35 +110,34 @@ export function RigaAvatar({ percorso, origine, valori, chiavi, etichette, child
     );
   }
 
+  const apri = () => {
+    setBozza(valori);
+    setAperta(true);
+  };
+  // La matita compare solo passando sopra la riga (o col tasto Tab); sul telefono si tocca la riga.
   const matita = onModifica ? (
     <Button
       type="button"
       size="icon-xs"
       variant="ghost"
       aria-label="Correggi questa riga"
-      className="-mt-0.5 text-muted-foreground opacity-60 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:size-10 pointer-coarse:opacity-100"
-      onClick={() => {
-        setBozza(valori);
-        setAperta(true);
-      }}
+      className="-mt-0.5 shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:hidden"
+      onClick={apri}
     >
       <Pencil aria-hidden />
     </Button>
   ) : null;
   return (
-    <div className={cn("group flex items-start gap-2", compatta && "flex-col gap-1", origine === "lettura" && "border-l-2 border-dashed border-status-expiring/50 pl-2")}>
+    <div
+      className={cn("group flex items-start gap-2 rounded-md", compatta && "gap-1.5", onModifica && "-mx-1.5 px-1.5 hover:bg-surface pointer-coarse:cursor-pointer")}
+      onClick={onModifica ? (e) => {
+        // Sul telefono la matita non c'è: si corregge toccando la riga.
+        if (window.matchMedia("(pointer: coarse)").matches && !(e.target as HTMLElement).closest("a,button")) apri();
+      } : undefined}
+    >
+      {origine === "lettura" ? <PuntoIpotesi /> : null}
       <div className="min-w-0 flex-1">{children}</div>
-      {compatta ? (
-        <div className="flex items-center gap-1">
-          {origine ? <EtichettaOrigine origine={origine} /> : null}
-          {matita}
-        </div>
-      ) : (
-        <>
-          {origine ? <EtichettaOrigine origine={origine} className="mt-0.5" /> : null}
-          {matita}
-        </>
-      )}
+      {matita}
     </div>
   );
 }

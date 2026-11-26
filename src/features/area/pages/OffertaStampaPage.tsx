@@ -97,7 +97,7 @@ export default function OffertaStampaPage() {
         {schedaIniziata(asNuova(o)) ? (
           <div className="grid gap-6">
             <FraseOfferta o={asNuova(o)} />
-            <SchedaOffertaNuova o={asNuova(o)} larga />
+            <SchedaOffertaNuova o={asNuova(o)} larga aperta />
           </div>
         ) : (
           <StrutturaOfferta offerta={o} larga />

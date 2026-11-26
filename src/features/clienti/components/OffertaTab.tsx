@@ -49,7 +49,7 @@ export function OffertaTab({ cliente }: { cliente: ClienteDettaglio }) {
 
       <FermoOfferta fermo={o.fermo} />
       <FraseOfferta o={o} />
-      <SchedaOffertaNuova o={o} larga />
+      <SchedaOffertaNuova o={o} larga aperta />
       <OffertaDiPrimaTeam o={o as unknown as Offerta} nome={cliente.utente.nombre} />
     </div>
   );

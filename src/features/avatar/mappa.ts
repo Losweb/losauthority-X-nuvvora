@@ -119,6 +119,33 @@ export const SEZIONI_SCHEDA: SezioneScheda[] = [
   { titolo: "Da verificare", parti: [{ percorso: "da_verificare", tipo: "spunte" }] },
 ];
 
+/**
+ * Quello che si vede subito della scheda (26/11/2026, «solo il necessario»): chi è, cosa gli manca,
+ * cosa dice, cosa vuole, le sue parole, le obiezioni. Tutto il resto del documento di Wesley sta
+ * in «Tutta la scheda», piegato. Nome, età e situazione vanno nell'intestazione.
+ */
+export const SEZIONI_ESSENZIALI: SezioneScheda[] = [
+  {
+    titolo: "Chi è",
+    parti: [
+      { percorso: "ritratto.cosa_fa", tipo: "voce" },
+      { percorso: "ritratto.dove_oggi", tipo: "voce" },
+    ],
+  },
+  { titolo: "Cosa gli manca", parti: [{ percorso: "cosa_manca", tipo: "voce" }] },
+  { titolo: "Cosa dice", parti: [{ percorso: "dolori.dice", tipo: "voci" }] },
+  { titolo: "Cosa vuole davvero", parti: [{ percorso: "desideri.veri", tipo: "voci" }] },
+  { titolo: "Le sue parole", parti: [{ percorso: "linguaggio.parole", tipo: "voci" }] },
+  { titolo: "Obiezioni", parti: [{ percorso: "obiezioni", tipo: "coppie", a: "Obiezione", b: "Direzione della risposta" }] },
+];
+const IN_TESTA = new Set(["nome", "eta", "situazione"]);
+const ESSENZIALI = new Set(SEZIONI_ESSENZIALI.flatMap((s) => s.parti.map((p) => p.percorso)));
+/** Le sezioni del documento senza le parti già in testa o tra le essenziali. */
+export const SEZIONI_RESTO: SezioneScheda[] = SEZIONI_SCHEDA.map((s) => ({
+  ...s,
+  parti: s.parti.filter((p) => !IN_TESTA.has(p.percorso) && !ESSENZIALI.has(p.percorso)),
+})).filter((s) => s.parti.length > 0);
+
 /** Il valore a un percorso con i punti ("dolori.dice.2"). */
 export function valoreA(radice: unknown, percorso: string): unknown {
   return percorso.split(".").reduce<unknown>((v, k) => (v && typeof v === "object" ? (v as Record<string, unknown>)[k] : undefined), radice);

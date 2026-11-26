@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BarChart3, CalendarDays, GraduationCap, Layers, Palette, Plug, Route, Swords, Tag, UserRound, Users, WandSparkles } from "lucide-react";
 import { TornaAlGestionale, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
@@ -6,7 +6,7 @@ import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
 import { BottoneTemaCompatto } from "@/shared/components/layout/InterruttoreTema";
 import { ContenutoPagina } from "@/shared/components/layout/ContenutoPagina";
 import { MenuMobile } from "@/shared/components/layout/MenuMobile";
-import { CardUtente, FinestraSeto, SidebarSeto, TitoloSezioneNav, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
+import { AzioneCardUtente, CardUtente, FinestraSeto, SidebarSeto, TitoloSezioneNav, VoceNavSeto, type VoceNavBase } from "@/shared/components/layout/SetoShell";
 
 /**
  * Il menu segue il metodo (26/11/2026, studio dell'esperienza cliente): prima il percorso, poi le
@@ -39,10 +39,7 @@ const GRUPPI: Array<{ titolo: string; voci: VoceNavBase[] }> = [
     ],
   },
 ];
-const VOCI_AIUTO: VoceNavBase[] = [
-  { href: "/area/coach", label: "Wesley Coach", icon: GraduationCap },
-  { href: "/area/claude", label: "Collega Claude", icon: Plug },
-];
+const VOCE_COACH: VoceNavBase = { href: "/area/coach", label: "Wesley Coach", icon: GraduationCap };
 
 function NavPercorso() {
   return (
@@ -56,10 +53,8 @@ function NavPercorso() {
           ))}
         </div>
       ))}
-      <div className="mt-3 flex flex-col gap-0.5 border-t border-line pt-3">
-        {VOCI_AIUTO.map((v) => (
-          <VoceNavSeto key={v.href} voce={v} />
-        ))}
+      <div className="mt-3 flex flex-col gap-0.5">
+        <VoceNavSeto voce={VOCE_COACH} />
       </div>
     </nav>
   );
@@ -88,8 +83,22 @@ interface ClientShellProps {
  */
 export function ClientShell({ conNav = false }: ClientShellProps) {
   const { utente, signOut } = useAuth();
+  const navigate = useNavigate();
+  // «Collega Claude» è un'impostazione: sta nel menu dell'account, non tra le pagine di lavoro.
   const cardUtente = (
-    <CardUtente nome={utente?.nombre || "Cliente"} sotto={utente?.email} onEsci={() => void signOut()} azioni={<TornaAlGestionale />} />
+    <CardUtente
+      nome={utente?.nombre || "Cliente"}
+      sotto={utente?.email}
+      onEsci={() => void signOut()}
+      azioni={
+        <>
+          <TornaAlGestionale />
+          <AzioneCardUtente icona={Plug} variante="ghost" onClick={() => navigate("/area/claude")}>
+            Collega Claude
+          </AzioneCardUtente>
+        </>
+      }
+    />
   );
 
   if (!conNav) {

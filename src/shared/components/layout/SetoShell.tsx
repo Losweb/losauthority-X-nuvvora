@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { LogOut, PanelLeftClose, PanelLeftOpen, type LucideIcon } from "lucide-react";
+import { ChevronsUpDown, LogOut, PanelLeftClose, PanelLeftOpen, type LucideIcon } from "lucide-react";
 import { Monogramma } from "@/shared/components/brand/Monogramma";
 import { Button } from "@/shared/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { InterruttoreTema } from "@/shared/components/layout/InterruttoreTema";
 import { SidebarCompattaContext, useSidebarCompatta, useSidebarCompattaAttiva } from "@/shared/hooks/useSidebarCompatta";
 import { cn } from "@/lib/utils";
@@ -114,50 +115,64 @@ interface CardUtenteProps {
 }
 
 /**
- * Chi è collegato, le azioni dell'account e «Esci». Va dentro `PiedeUtente`, che gli dà il fondo
- * bianco e la linea sopra (sidebar e menu ☰). Compatta: avatar e bottoni rotondi in colonna.
+ * Chi è collegato (26/11/2026, «solo il necessario»): nel piede resta una riga sola con avatar e
+ * nome; toccandola si apre il menu dell'account (azioni, tema, «Esci»). Compatta: solo l'avatar.
  */
 export function CardUtente({ nome, sotto, onEsci, azioni }: CardUtenteProps) {
   const compatta = useSidebarCompattaAttiva();
-  if (compatta) {
-    return (
-      <div className="flex flex-col items-center gap-2 text-foreground">
-        <span title={sotto ? `${nome} · ${sotto}` : nome} className="mb-1">
-          <Monogramma nome={nome} tono="peach" online />
-        </span>
-        {azioni}
-        <InterruttoreTema compatta />
-        <AzioneCardUtente icona={LogOut} variante="ghost" onClick={onEsci} titolo="Esci">
-          Esci
-        </AzioneCardUtente>
-      </div>
-    );
-  }
+  const [aperto, setAperto] = useState(false);
   return (
-    <div className="flex min-w-0 flex-col gap-3 text-foreground">
-      <div className="flex min-w-0 items-center gap-3 px-1">
+    <Popover open={aperto} onOpenChange={setAperto}>
+      <PopoverTrigger
+        aria-label={`Account di ${nome}`}
+        title={compatta ? (sotto ? `${nome} · ${sotto}` : nome) : undefined}
+        className={cn(
+          "flex min-w-0 items-center rounded-md text-left text-foreground transition-colors outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-ring data-[popup-open]:bg-surface",
+          compatta ? "mx-auto size-11 justify-center" : "w-full gap-3 px-2 py-2",
+        )}
+      >
         <Monogramma nome={nome} tono="peach" online />
-        <span className="min-w-0">
-          <span className="block truncate text-sm leading-5 font-semibold">{nome}</span>
-          {sotto ? <span className="block truncate text-[12px] leading-4 font-medium text-muted-foreground">{sotto}</span> : null}
-        </span>
-      </div>
-      {/* Colonna flex e non grid: in una griglia il testo lungo allargherebbe la colonna oltre il bordo. */}
-      <div className="flex min-w-0 flex-col gap-1.5">
-        {azioni}
-        <InterruttoreTema />
-        <AzioneCardUtente icona={LogOut} variante="ghost" onClick={onEsci}>
-          Esci
-        </AzioneCardUtente>
-      </div>
-    </div>
+        {compatta ? null : (
+          <>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm leading-5 font-semibold">{nome}</span>
+              {sotto ? <span className="block truncate text-[12px] leading-4 text-muted-foreground">{sotto}</span> : null}
+            </span>
+            <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+          </>
+        )}
+      </PopoverTrigger>
+      <PopoverContent
+        side="top"
+        align="start"
+        sideOffset={8}
+        className="w-64 gap-1.5 p-2"
+        // Un link o un bottone del menu lo chiude (il tema no: si accende e si spegne restando qui).
+        onClick={(e) => {
+          const t = e.target as HTMLElement;
+          if (t.closest("a,button") && !t.closest("[role=switch],label")) setAperto(false);
+        }}
+      >
+        {/* Dentro il menu la sidebar non è compatta: i bottoni tornano a pillola con il testo. */}
+        <SidebarCompattaContext.Provider value={false}>
+          {compatta ? (
+            <p className="truncate px-2 pt-1 pb-1.5 text-sm font-semibold">{nome}</p>
+          ) : null}
+          {azioni}
+          <InterruttoreTema />
+          <AzioneCardUtente icona={LogOut} variante="ghost" onClick={onEsci}>
+            Esci
+          </AzioneCardUtente>
+        </SidebarCompattaContext.Provider>
+      </PopoverContent>
+    </Popover>
   );
 }
 
 /** Il piede dell'utente: fondo bianco a tutta larghezza e una linea sopra che lo separa dalle voci. */
 export function PiedeUtente({ children, className }: { children: ReactNode; className?: string }) {
   const compatta = useSidebarCompattaAttiva();
-  return <div className={cn("shrink-0 border-t border-line bg-card pt-4 pb-4", compatta ? "px-2" : "px-4", className)}>{children}</div>;
+  return <div className={cn("shrink-0 border-t border-line bg-card py-2", compatta ? "px-2" : "px-3", className)}>{children}</div>;
 }
 
 interface SidebarSetoProps {

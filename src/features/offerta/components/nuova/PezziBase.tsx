@@ -5,21 +5,22 @@ import { cn } from "@/lib/utils";
 import { formatDate } from "@/shared/utils/formatDate";
 import { FASI_COMPLETA, PASSI_BREVE, type Fermo, type OffertaNuova, type Origine, type Voce } from "../../nuova";
 
-/** «vera» verde, «ipotesi» ocra: le proposte di Aura si riconoscono a colpo d'occhio. */
+/** Le proposte di Aura hanno un pallino ocra; le righe vere niente (26/11/2026, «solo il necessario»). */
 export function BadgeOrigine({ o }: { o: Origine }) {
+  if (o !== "ipotesi") return null;
   return (
-    <Badge variant={o === "vera" ? "active" : "expiring"} className="shrink-0" title={o === "ipotesi" ? "Proposta di Aura, da confermare" : undefined}>
-      {o}
-    </Badge>
+    <span title="Proposta di Aura, da confermare" className="relative mt-[7px] inline-block size-1.5 shrink-0 rounded-full bg-status-expiring">
+      <span className="sr-only">Proposta di Aura, da confermare</span>
+    </span>
   );
 }
 
-/** Una riga {t, o}: il testo e l'origine; le ipotesi hanno il bordo tratteggiato. */
+/** Una riga {t, o}: il pallino se è un'ipotesi, poi il testo. */
 export function RigaVoce({ v, grande = false }: { v: Voce; grande?: boolean }) {
   return (
-    <div className={cn("flex items-start gap-2", v.o === "ipotesi" && "border-l-2 border-dashed border-status-expiring/50 pl-2")}>
-      <p className={cn("min-w-0 flex-1 leading-snug", grande ? "text-[16px] font-semibold" : "text-[14px]")}>{v.t}</p>
+    <div className="flex items-start gap-2">
       <BadgeOrigine o={v.o} />
+      <p className={cn("min-w-0 flex-1 leading-relaxed", grande ? "text-[17px] font-semibold" : "text-[15px]")}>{v.t}</p>
     </div>
   );
 }
@@ -27,7 +28,7 @@ export function RigaVoce({ v, grande = false }: { v: Voce; grande?: boolean }) {
 export function Sezione({ titolo, children, className }: { titolo: string; children: ReactNode; className?: string }) {
   return (
     <section className={cn("grid content-start gap-2.5", className)}>
-      <h4 className="eyebrow">{titolo}</h4>
+      <h4 className="text-[13px] font-semibold text-foreground">{titolo}</h4>
       {children}
     </section>
   );
@@ -43,14 +44,15 @@ export function PassiOfferta({ o }: { o: OffertaNuova }) {
   return (
     <nav aria-label="A che punto sei" className="grid gap-2">
       <p className="text-[13px] text-muted-foreground">
-        {completa ? "Scheda completa · sette fasi" : "Versione breve · la tua offerta in una frase"}
-        {finita ? " · fatta" : ""}
+        {completa ? "Scheda completa" : "Versione breve"}
+        {finita ? " · fatta" : <span className="sm:hidden"> · {completa ? `fase ${corrente} di 7` : `passo ${corrente + 1} di 6`}: {passi[corrente]}</span>}
       </p>
-      <ol className={cn("grid gap-1.5", completa ? "grid-cols-4 sm:grid-cols-8" : "grid-cols-3 sm:grid-cols-6")}>
+      {/* Sul telefono solo la barra sottile; i nomi delle fasi da sm in su. */}
+      <ol className={cn("grid gap-1.5", completa ? "grid-cols-8" : "grid-cols-6")}>
         {passi.map((p, i) => (
           <li key={p} aria-current={i === corrente ? "step" : undefined} className="grid gap-1">
             <span className={cn("h-1.5 rounded-full", i < corrente ? "bg-primary" : i === corrente ? "bg-primary/45" : "bg-secondary")} />
-            <span className={cn("flex items-center gap-1 text-[12px] leading-tight", i === corrente ? "font-semibold text-foreground" : "text-muted-foreground")}>
+            <span className={cn("hidden items-center gap-1 text-[12px] leading-tight sm:flex", i === corrente ? "font-semibold text-foreground" : "text-muted-foreground")}>
               {i < corrente ? <Check className="size-3 shrink-0" aria-hidden /> : null}
               {completa ? i : i + 1}. {p}
             </span>
@@ -64,6 +66,7 @@ export function PassiOfferta({ o }: { o: OffertaNuova }) {
 /** La frase dell'offerta, in evidenza, con la data in cui è stata approvata. */
 export function FraseOfferta({ o }: { o: OffertaNuova }) {
   if (!o.frase) {
+    if (o.strada === "completa") return null;
     return (
       <div className="rounded-lg border border-dashed border-line p-4 text-[14px] text-muted-foreground">
         La frase arriva alla fine della versione breve: chi aiuti, dove lo porti, senza cosa, grazie a cosa.

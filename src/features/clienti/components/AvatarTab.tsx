@@ -73,7 +73,7 @@ export function AvatarTab({ cliente }: { cliente: ClienteDettaglio }) {
           <MappaPonte mappa={mappa} schede={schede} />
           <ElencoSchede schede={schede} onApri={setAperta} />
         </div>
-        {scheda ? <SchedaDocumento scheda={scheda} stato={mappa.stato} /> : <StatoVuoto titolo="Nessuna scheda ancora" testo="Aura scrive le schede dopo la mappa, partendo dall'avatar principale." />}
+        {scheda ? <SchedaDocumento scheda={scheda} stato={mappa.stato} apertaTutta /> : <StatoVuoto titolo="Nessuna scheda ancora" testo="Aura scrive le schede dopo la mappa, partendo dall'avatar principale." />}
       </div>
 
       <AvatarDiPrima avatars={avatarVecchi} nome={cliente.utente.nombre} />
