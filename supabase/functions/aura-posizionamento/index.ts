@@ -15,7 +15,7 @@ import { adminClient, richiediUtente } from "../_shared/supabase.ts";
 import { HAS_ANTHROPIC, streamAnthropicText } from "../_shared/anthropic.ts";
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
-import { pulisciPosizionamento, type Posizionamento } from "../_shared/posizionamento/forma.ts";
+import { LIMITI, pulisciPosizionamento, tagliaParola, type Posizionamento } from "../_shared/posizionamento/forma.ts";
 import { avatarDi, renderAvatar } from "../aura-offerta/avatar.ts";
 import { costruisciPrompt, SYSTEM } from "./prompt.ts";
 
@@ -55,6 +55,21 @@ function estrai(testo: string): Posizionamento | null {
   }
 }
 
+/** Aura conta male i caratteri: se un testo supera il limite di Instagram, glielo fa accorciare (poi si taglia a fine parola). */
+async function accorcia(testo: string, max: number, cosa: string, clienteId: string): Promise<string> {
+  if (testo.length <= max) return testo;
+  const corto = await streamAnthropicText({
+    system: "Accorci testi per profili Instagram in italiano. Rispondi SOLO con il testo accorciato, niente virgolette, niente spiegazioni.",
+    user: `Accorcia ${cosa} a massimo ${max} caratteri (adesso sono ${testo.length}), spazi, emoji e a capo compresi. Tieni il senso, le parole chiave e gli a capo.\n\n${testo}`,
+    maxTokens: 400,
+    tag: "aura-posizionamento-accorcia",
+    utente: clienteId,
+    timeoutMs: 30_000,
+  });
+  const t = corto?.trim().replace(/^["«]|["»]$/g, "") ?? "";
+  return tagliaParola(t && t.length < testo.length ? t : testo, max);
+}
+
 /** Fa scrivere il posizionamento ad Aura e lo salva. Lancia HttpError se non riesce. */
 async function scrivi(admin: SupabaseClient, clienteId: string, richiesta?: string, attuale?: Posizionamento) {
   const o = await offertaDi(admin, clienteId);
@@ -79,6 +94,14 @@ async function scrivi(admin: SupabaseClient, clienteId: string, richiesta?: stri
     await logError("aura-posizionamento:scrivi", new Error(testo ? "risposta senza dati" : "nessuna risposta"), { cliente: clienteId, inizio: testo?.slice(0, 200) ?? null }, { silent: true });
     await admin.from("posizionamento").update({ stato: attuale ? "pronto" : "errore", errore: attuale ? null : "Aura non è riuscita a scriverlo" }).eq("cliente_id", clienteId);
     throw new HttpError(502, "Aura non è riuscita a scrivere il posizionamento. Riprova tra poco.");
+  }
+  if (p.profilo) {
+    const [nome, bio] = await Promise.all([
+      accorcia(p.profilo.nome, LIMITI.nome, "questo nome del profilo Instagram (nome della persona | mestiere)", clienteId),
+      accorcia(p.profilo.bio, LIMITI.bio, "questa bio di Instagram", clienteId),
+    ]);
+    p.profilo.nome = nome;
+    p.profilo.bio = bio;
   }
   const { error } = await admin.from("posizionamento").update({ contenuto: p, stato: "pronto", errore: null }).eq("cliente_id", clienteId);
   if (error) throw error;

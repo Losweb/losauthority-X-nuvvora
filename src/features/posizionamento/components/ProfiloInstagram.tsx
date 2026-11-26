@@ -45,9 +45,11 @@ export function ProfiloInstagram({ p }: { p: Profilo }) {
       {p.evidenza.length ? (
         <ul aria-label="Storie in evidenza" className="flex gap-4 overflow-x-auto px-4 pt-1 pb-4 [scrollbar-width:none]">
           {p.evidenza.map((e, i) => (
-            <li key={i} className="grid w-[64px] shrink-0 justify-items-center gap-1">
+            <li key={i} className="grid w-[68px] shrink-0 justify-items-center gap-1">
               <span className="grid size-[60px] place-items-center rounded-full border border-neutral-300 p-[3px]">
-                <span className="grid size-full place-items-center rounded-full bg-neutral-100 text-[11px] font-semibold text-neutral-500">{e.titolo.slice(0, 2).toUpperCase()}</span>
+                <span className="grid size-full place-items-center rounded-full bg-neutral-100 text-[24px] leading-none" aria-hidden>
+                  {e.icona || e.titolo.slice(0, 1).toUpperCase()}
+                </span>
               </span>
               <span className="w-full truncate text-center text-[12px]">{e.titolo}</span>
             </li>

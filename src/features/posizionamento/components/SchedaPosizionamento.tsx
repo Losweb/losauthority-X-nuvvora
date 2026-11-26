@@ -53,7 +53,7 @@ export function SchedaPosizionamento({ p, aperta = false, onModifica, occupato }
           <div className="grid items-start gap-6 lg:grid-cols-[400px_minmax(0,1fr)]">
             <ProfiloInstagram p={pr} />
             <div className="grid divide-y divide-line rounded-lg border bg-card px-5">
-              <Campo etichetta="Nome">
+              <Campo etichetta="Nome" nota={<span className={cn(pr.nome.length > LIMITI.nome && "font-medium text-status-churn")}>{pr.nome.length}/{LIMITI.nome}</span>}>
                 <RigaAvatar percorso="profilo.nome" valori={[pr.nome]} semplice {...c}>
                   <p className="text-[15px] font-semibold">{pr.nome}</p>
                 </RigaAvatar>

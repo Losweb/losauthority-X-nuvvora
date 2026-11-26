@@ -28,11 +28,11 @@ import { PassoDopo } from "../components/percorso/PassoDopo";
 const FASI = ["Rileggo il tuo avatar e la tua offerta", "Scrivo la bio", "Scelgo le storie in evidenza", "Scrivo chi sei nel tuo mercato"] as const;
 
 /** Il riquadro centrale degli stati senza scheda (prima l'offerta, crea, errore). */
-function Riquadro({ titolo, testo, children }: { titolo: string; testo: string; children: ReactNode }) {
+function Riquadro({ titolo, testo, children, sfera = true }: { titolo: string; testo: string; children: ReactNode; /** Mentre Aura scrive la sfera c'è già nel pensiero: una sola. */ sfera?: boolean }) {
   return (
     <section className="grid w-full max-w-[680px] gap-5 rounded-2xl border bg-card/70 p-6 md:p-8">
       <div className="flex items-start gap-4">
-        <AuraSfera dimensione={56} conNome={false} />
+        {sfera ? <AuraSfera dimensione={56} conNome={false} /> : null}
         <div className="grid gap-2">
           <h2 className="text-[22px] leading-tight font-bold">{titolo}</h2>
           <p className="text-[15px] leading-relaxed text-muted-foreground">{testo}</p>
@@ -63,12 +63,13 @@ export default function PosizionamentoPage() {
   const [ricomincia, setRicomincia] = useState(false);
   if (!utente) return null;
 
-  const intestazione = (azioni?: ReactNode, conSottotitolo = true) => (
+  // Senza frase sotto il titolo: la spiegazione sta già nel riquadro (prima) o si vede dalla pagina (dopo).
+  const intestazione = (azioni?: ReactNode) => (
     <>
       <Link to="/area/dashboard" className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground pointer-coarse:-my-2 pointer-coarse:min-h-9 pointer-coarse:py-2">
         <ArrowLeft className="size-3.5" aria-hidden /> Il tuo percorso
       </Link>
-      <PageHeader titolo="Posizionamento" sottotitolo={conSottotitolo ? "Chi sei nel tuo mercato e come si vede dal tuo profilo Instagram. Lo scrive Aura dal tuo avatar e dalla tua offerta: tu correggi." : undefined} azioni={azioni} />
+      <PageHeader titolo="Posizionamento" azioni={azioni} />
     </>
   );
 
@@ -102,7 +103,7 @@ export default function PosizionamentoPage() {
     return (
       <div className="grid gap-7">
         {intestazione()}
-        <Riquadro titolo="Aura sta scrivendo il tuo posizionamento" testo="Rilegge avatar e offerta e scrive il profilo e chi sei nel tuo mercato.">
+        <Riquadro sfera={false} titolo="Aura sta scrivendo il tuo posizionamento" testo="Rilegge avatar e offerta e scrive il profilo e chi sei nel tuo mercato.">
           <PensieroAura fasi={FASI} stima="Può volerci un minuto." intervalloMs={12000} />
         </Riquadro>
       </div>
@@ -148,7 +149,7 @@ export default function PosizionamentoPage() {
 
   return (
     <div className="grid gap-6">
-      {intestazione(azioni, false)}
+      {intestazione(azioni)}
 
       {richiestaAperta || cambia.isPending ? (
         <section aria-label="Chiedi ad Aura di cambiare" className="relative grid max-w-[860px] gap-3 rounded-2xl border bg-card/70 p-4 md:p-5">

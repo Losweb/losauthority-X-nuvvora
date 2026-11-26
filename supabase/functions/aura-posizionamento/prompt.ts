@@ -15,12 +15,12 @@ IL POSIZIONAMENTO (le quattro parti)
 - "come_lo_dimostri": come si vede nei contenuti, in pratica: formati, serie, cosa mostra e cosa racconta. Da 3 a 5 righe.
 
 IL PROFILO INSTAGRAM (come si vedrebbe)
-- "nome": il nome in grassetto, max ${LIMITI.nome} caratteri. Nome della persona + il mestiere detto come lo cerca il suo avatar (Instagram lo usa nella ricerca). Esempio: «Giulia Rossi | Psicologa per manager».
+- "nome": il nome in grassetto, MASSIMO ${LIMITI.nome} caratteri (contali). Nome della persona + il mestiere detto come lo cerca il suo avatar (Instagram lo usa nella ricerca). Esempio: «Giulia Rossi | Psicologa per manager».
 - "utente": il nome utente senza @, max ${LIMITI.utente} caratteri, minuscolo, semplice da dire e da ricordare. Niente numeri a caso.
 - "categoria": la categoria del profilo professionale (es. «Psicologo», «Avvocato», «Personal trainer»).
-- "bio": max ${LIMITI.bio} caratteri spazi compresi, 3 o 4 righe separate da a capo. Chi aiuti e dove li porti (dall'offerta), una prova vera (dal materiale), la chiamata verso il link. Con le parole dell'avatar, niente hashtag, al massimo un'emoji per riga.
+- "bio": MASSIMO ${LIMITI.bio} caratteri spazi, emoji e a capo compresi (contali: Instagram taglia il resto), 3 o 4 righe separate da a capo. Chi aiuti e dove li porti (dall'offerta), una prova vera (dal materiale), la chiamata verso il link. Con le parole dell'avatar, niente hashtag, al massimo un'emoji per riga.
 - "link": il testo del link in bio: porta al primo passo dell'offerta (il gradino d'entrata se c'è). Corto, un verbo: «Prenota il primo colloquio».
-- "evidenza": da 4 a 5 storie in evidenza. "titolo" max ${LIMITI.titoloEvidenza} caratteri (Instagram lo taglia), "contiene" = cosa ci va dentro. Pensale per chi arriva sul profilo la prima volta: chi sei, il metodo o l'offerta, i casi, le domande e le obiezioni dell'avatar.
+- "evidenza": da 4 a 5 storie in evidenza. "titolo" max ${LIMITI.titoloEvidenza} caratteri (Instagram lo taglia), "icona" = UNA emoji per la copertina, "contiene" = cosa ci va dentro. Pensale per chi arriva sul profilo la prima volta: chi sei, il metodo o l'offerta, i casi, le domande e le obiezioni dell'avatar.
 - "post": i 3 post da fissare in cima. "titolo" = il titolo in copertina, "perche" = perché fissarlo. Di solito: chi sei e perché proprio tu, un caso o un risultato, la risposta all'obiezione più forte.
 
 REGOLE
@@ -31,7 +31,7 @@ REGOLE
 COME RISPONDI
 Solo il blocco qui sotto, niente testo prima o dopo, JSON valido:
 <dati>
-{"profilo": {"nome": "…", "utente": "…", "categoria": "…", "bio": "riga 1\\nriga 2\\nriga 3", "link": "…", "evidenza": [{"titolo": "…", "contiene": "…"}], "post": [{"titolo": "…", "perche": "…"}]}, "chi_sei": "…", "perche_tu": ["…"], "cosa_dicono_tutti": ["…"], "come_lo_dimostri": ["…"]}
+{"profilo": {"nome": "…", "utente": "…", "categoria": "…", "bio": "riga 1\\nriga 2\\nriga 3", "link": "…", "evidenza": [{"titolo": "…", "icona": "🧠", "contiene": "…"}], "post": [{"titolo": "…", "perche": "…"}]}, "chi_sei": "…", "perche_tu": ["…"], "cosa_dicono_tutti": ["…"], "come_lo_dimostri": ["…"]}
 </dati>`;
 
 export interface DatiPrompt {

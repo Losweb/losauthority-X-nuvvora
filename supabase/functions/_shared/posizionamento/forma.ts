@@ -9,8 +9,10 @@
  */
 
 export interface Evidenza {
-  /** Il titolo sotto il cerchio delle storie in evidenza (max 15 caratteri: Instagram lo taglia). */
+  /** Il titolo sotto il cerchio delle storie in evidenza (max 12 caratteri: Instagram lo taglia). */
   titolo: string;
+  /** Un'emoji per la copertina del cerchio. */
+  icona: string;
   /** Cosa ci va dentro. */
   contiene: string;
 }
@@ -45,13 +47,20 @@ export interface Posizionamento {
   come_lo_dimostri?: string[];
 }
 
-export const LIMITI = { nome: 64, utente: 30, categoria: 40, bio: 150, link: 60, titoloEvidenza: 15 } as const;
+export const LIMITI = { nome: 64, utente: 30, categoria: 40, bio: 150, link: 60, titoloEvidenza: 12 } as const;
 
 const testo = (v: unknown, max = 400): string | null => {
   if (typeof v !== "string") return null;
   const t = v.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
   return t ? t.slice(0, max) : null;
 };
+/** Taglia a fine parola (mai a metà: «lavor»). */
+export function tagliaParola(t: string, max: number): string {
+  if (t.length <= max) return t;
+  const corto = t.slice(0, max + 1);
+  const spazio = Math.max(corto.lastIndexOf(" "), corto.lastIndexOf("\n"));
+  return (spazio > max * 0.6 ? corto.slice(0, spazio) : t.slice(0, max)).replace(/[\s|,–—-]+$/u, "");
+}
 const obj = (v: unknown): Record<string, unknown> | null => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null);
 const righe = (v: unknown, max = 5, lung = 300): string[] | undefined => {
   if (!Array.isArray(v)) return undefined;
@@ -68,15 +77,16 @@ export function pulisciPosizionamento(v: unknown): Posizionamento {
   if (pr) {
     const utente = (testo(pr.utente, 60) ?? "").replace(/^@+/, "").replace(/\s+/g, "").toLowerCase().slice(0, LIMITI.utente);
     p.profilo = {
-      nome: testo(pr.nome, LIMITI.nome) ?? "",
+      // Il nome può arrivare lungo: aura-posizionamento lo fa accorciare ad Aura; qui solo un tetto.
+      nome: tagliaParola(testo(pr.nome, 200) ?? "", 120),
       utente,
       categoria: testo(pr.categoria, LIMITI.categoria) ?? "",
       bio: testo(pr.bio, LIMITI.bio + 20) ?? "",
-      link: testo(pr.link, LIMITI.link) ?? "",
+      link: tagliaParola(testo(pr.link, 200) ?? "", LIMITI.link),
       evidenza: (Array.isArray(pr.evidenza) ? pr.evidenza : [])
         .map((x) => obj(x))
         .filter((x): x is Record<string, unknown> => !!x)
-        .map((x) => ({ titolo: testo(x.titolo, LIMITI.titoloEvidenza + 5) ?? "", contiene: testo(x.contiene, 250) ?? "" }))
+        .map((x) => ({ titolo: tagliaParola(testo(x.titolo, 60) ?? "", LIMITI.titoloEvidenza), icona: (testo(x.icona, 16) ?? "").split(/\s+/)[0] ?? "", contiene: testo(x.contiene, 250) ?? "" }))
         .filter((x) => x.titolo)
         .slice(0, 5),
       post: (Array.isArray(pr.post) ? pr.post : [])
