@@ -78,6 +78,11 @@ export interface Domanda {
   min?: number;
   max?: number;
   mostraSe?: Condizione;
+  /**
+   * Domanda tolta dall'onboarding il 26/11/2026 (studio dell'esperienza cliente): non si chiede più
+   * ai clienti nuovi, ma resta qui perché chi aveva già risposto continui a vederla (e Aura a leggerla).
+   */
+  ritirata?: boolean;
 }
 
 export interface Blocco {
@@ -166,9 +171,16 @@ export function soddisfa(cond: Condizione | undefined, r: Risposte): boolean {
   return true;
 }
 
-/** Le domande di un blocco visibili con queste risposte (le versioni non attive spariscono). */
+function haRisposta(v: ValoreRisposta | undefined): boolean {
+  if (v == null) return false;
+  if (typeof v === "string") return v.trim() !== "";
+  if (Array.isArray(v)) return v.some((x) => x.trim() !== "");
+  return Object.values(v).some((x) => x.trim() !== "" && x !== "0");
+}
+
+/** Le domande di un blocco visibili con queste risposte (le versioni non attive spariscono; le ritirate solo se hanno già una risposta). */
 export function domandeVisibili(blocco: Blocco, r: Risposte): Domanda[] {
-  return blocco.domande.filter((d) => soddisfa(d.mostraSe, r));
+  return blocco.domande.filter((d) => soddisfa(d.mostraSe, r) && (!d.ritirata || haRisposta(r[d.id])));
 }
 
 /** Le opzioni di una domanda visibili con queste risposte. */

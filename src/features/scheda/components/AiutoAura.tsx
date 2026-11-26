@@ -36,11 +36,18 @@ export function AiutoAura({ domandaId }: AiutoAuraProps) {
     <Popover>
       <PopoverTrigger
         render={
-          <Button type="button" variant="ghost" size="xs" className="pointer-coarse:h-9" aria-label="Chiedi ad Aura un aiuto su questa domanda" />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="text-muted-foreground hover:text-foreground"
+            title="Chiedi ad Aura un aiuto su questa domanda"
+            aria-label="Chiedi ad Aura un aiuto su questa domanda"
+          />
         }
       >
+        {/* Solo l'icona (26/11/2026): con il testo su ogni domanda il modulo era pieno di bottoni. */}
         <Sparkles aria-hidden />
-        Chiedi ad Aura
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[min(20rem,calc(100vw-2rem))]">
         <PopoverHeader>

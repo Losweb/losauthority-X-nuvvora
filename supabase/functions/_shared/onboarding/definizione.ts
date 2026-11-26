@@ -25,7 +25,13 @@ import {
 
 export const TITOLO_SCHEDA = "Onboarding";
 
-export const BLOCCHI: Blocco[] = [BLOCCO_INIZIO, BLOCCO_A, BLOCCO_B, BLOCCO_C, BLOCCO_D, BLOCCO_E, BLOCCO_F];
+/**
+ * Dal 26/11/2026 i passi sono cinque: i blocchi D (tempo) ed E (IA) non hanno più una pagina loro.
+ * Le loro domande (quasi tutte ritirate; resta solo «strumenti di IA») stanno in testa all'ultimo passo.
+ */
+const BLOCCO_FINALE: Blocco = { ...BLOCCO_F, domande: [...BLOCCO_D.domande, ...BLOCCO_E.domande, ...BLOCCO_F.domande] };
+
+export const BLOCCHI: Blocco[] = [BLOCCO_INIZIO, BLOCCO_A, BLOCCO_B, BLOCCO_C, BLOCCO_FINALE];
 
 /** Tutte le versioni di tutte le domande, in ordine. */
 export const DOMANDE: Domanda[] = BLOCCHI.flatMap((b) => b.domande);

@@ -26,6 +26,10 @@ export function BloccoFlow(props: BloccoFlowProps) {
   const { blocco, indice, totale, risposte, parole, errori, avanzando } = props;
   const ultimo = indice === totale - 1;
   const domande = domandeVisibili(blocco, risposte);
+  const obbligatorie = domande.filter((d) => d.obbligatoria);
+  const facoltative = domande.filter((d) => !d.obbligatoria);
+  // Aperte da subito se c'è già una risposta o un errore lì dentro.
+  const facoltativeAperte = facoltative.some((d) => errori[d.id] || (typeof risposte[d.id] === "string" ? (risposte[d.id] as string).trim() !== "" : risposte[d.id] != null));
 
   return (
     <div className="grid gap-4">
@@ -48,11 +52,11 @@ export function BloccoFlow(props: BloccoFlowProps) {
       <Card className="max-sm:[--card-spacing:--spacing(4)]">
         <CardHeader>
           <CardTitle className="font-display text-2xl font-semibold">
-            <span aria-hidden>{blocco.emoji}</span> {conParole(blocco.titolo, parole)}
+            {conParole(blocco.titolo, parole)}
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-6">
-          {domande.map((domanda) => (
+        <CardContent className="grid gap-8">
+          {obbligatorie.map((domanda) => (
             <DomandaCampo
               key={`${domanda.id}-${domanda.codice}`}
               domanda={domanda}
@@ -65,6 +69,29 @@ export function BloccoFlow(props: BloccoFlowProps) {
               inBozza
             />
           ))}
+          {/* Le facoltative stanno piegate: il passo resta corto, chi vuole aggiunge (26/11/2026). */}
+          {facoltative.length > 0 ? (
+            <details className="group rounded-lg border border-line bg-surface p-4" open={facoltativeAperte}>
+              <summary className="cursor-pointer list-none text-[14px] font-semibold marker:hidden">
+                Vuoi aggiungere altro? <span className="font-normal text-muted-foreground">Facoltativo · {facoltative.length} {facoltative.length === 1 ? "domanda" : "domande"}</span>
+              </summary>
+              <div className="mt-5 grid gap-6">
+                {facoltative.map((domanda) => (
+            <DomandaCampo
+              key={`${domanda.id}-${domanda.codice}`}
+              domanda={domanda}
+              valore={risposte[domanda.id]}
+              risposte={risposte}
+              parole={parole}
+              errore={errori[domanda.id]}
+              onChange={props.onChange}
+              clienteId={props.clienteId}
+              inBozza
+            />
+                ))}
+              </div>
+            </details>
+          ) : null}
         </CardContent>
       </Card>
 

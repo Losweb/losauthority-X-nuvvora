@@ -6,7 +6,7 @@ export const BLOCCO_INIZIO: Blocco = {
   chiave: "0",
   titolo: "Da dove parti",
   emoji: "🧭",
-  intro: "Sei domande veloci. Servono a farti vedere solo le domande che riguardano davvero il tuo lavoro.",
+  intro: "Poche domande veloci. Servono a farti vedere solo quelle che riguardano davvero il tuo lavoro.",
   domande: [
     { id: "nome", codice: "0.1", testo: "Come ti chiami?", tipo: "text", obbligatoria: true, placeholder: "Nome e cognome" },
     { id: "nome_attivita", codice: "0.1", testo: "Come si chiama la tua attività?", tipo: "text", obbligatoria: true, placeholder: "Il nome con cui ti conoscono (anche il tuo, se lavori col tuo nome)" },

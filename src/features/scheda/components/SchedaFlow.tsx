@@ -70,7 +70,10 @@ function FlowCompilazione({ utente, iniziale, onInviata }: FlowCompilazioneProps
 
   const [schermata, setSchermata] = useState<Schermata>(() => schermataIniziale(iniziale));
   const [indice, setIndice] = useState(() => Math.min(Math.max(iniziale.riga.sezione_indice ?? 0, 0), totale - 1));
-  const [risposte, setRisposte] = useState<Risposte>(iniziale.risposte);
+  // Il nome il sito lo sa già: si precompila (resta modificabile) invece di richiederlo da zero.
+  const [risposte, setRisposte] = useState<Risposte>(() =>
+    iniziale.risposte.nome || !utente.nombre || utente.nombre.includes("@") ? iniziale.risposte : { ...iniziale.risposte, nome: utente.nombre },
+  );
   const [parole, setParole] = useState<Parole>(() => paroleDi(iniziale.risposte, iniziale.riga));
   const [errori, setErrori] = useState<ErroriDomande>({});
   const [chiarimenti, setChiarimenti] = useState<RigaChiarimento[] | null>(null);
@@ -241,7 +244,7 @@ function FlowCompilazione({ utente, iniziale, onInviata }: FlowCompilazioneProps
       <Progress value={progresso} aria-label="Avanzamento della scheda" />
 
       {schermata === "benvenuto" ? (
-        <SchermataBenvenuto scheda={scheda} nome={primoNome(utente.nombre)} riprende={haRisposte(risposte)} onInizia={() => vaiABlocco(0)} />
+        <SchermataBenvenuto scheda={scheda} nome={primoNome(utente.nombre)} riprende={haRisposte(iniziale.risposte)} onInizia={() => vaiABlocco(0)} />
       ) : null}
 
       {schermata === "blocco" && blocco ? (

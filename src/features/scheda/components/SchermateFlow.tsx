@@ -28,8 +28,8 @@ export function SchermataBenvenuto({ scheda, nome, riprende, onInizia }: Scherma
           aria-live="polite"
           className="font-display text-[clamp(20px,3vw,27px)] leading-[1.45] font-bold tracking-[-0.01em] text-foreground"
         >
-          {saluto} {scheda.sottotitolo} Sei domande veloci all'inizio decidono cosa ti chiedo dopo: vedrai solo quello che
-          riguarda il tuo lavoro. Se hai un dubbio chiedi pure a me. Niente risposte perfette, solo quelle vere.
+          {saluto} {scheda.sottotitolo} Sono circa venti domande in cinque passi, una decina di minuti: vedrai solo quelle
+          che riguardano il tuo lavoro e puoi fermarti quando vuoi. Niente risposte perfette, solo quelle vere.
         </p>
       </div>
       <div className="flex flex-col items-center gap-3">

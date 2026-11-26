@@ -21,7 +21,7 @@ export const BLOCCO_A: Blocco = {
       codice: "A1",
       testo: "Racconta il tuo lavoro come lo racconteresti a un nuovo socio in 2 minuti: cosa fai, per chi, da quanto tempo e perché le persone scelgono te.",
       tipo: "textarea",
-      obbligatoria: true,
+      obbligatoria: false,
       opinione: true,
     },
     {
@@ -89,7 +89,8 @@ export const BLOCCO_A: Blocco = {
       codice: "A6-s",
       testo: "Racconta l'ultimo {cliente} che hai chiuso: dove ti ha trovato, cosa ti ha scritto, cosa è successo fino al pagamento.",
       tipo: "textarea",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       mostraSe: { ramo: ["servizi"], clienti: CON_CLIENTI },
     },
     {
@@ -99,7 +100,8 @@ export const BLOCCO_A: Blocco = {
       tipo: "number",
       unita: "su 10",
       max: 10,
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       mostraSe: { ramo: ["servizi"], clienti: CON_CLIENTI },
     },
     {
@@ -107,7 +109,8 @@ export const BLOCCO_A: Blocco = {
       codice: "A6-p",
       testo: "Come compra oggi un {cliente}?",
       tipo: "multiselect-text",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       consentiAltro: true,
       opzioni: [
         { value: "sito", label: "Da solo sul sito" },
@@ -123,7 +126,8 @@ export const BLOCCO_A: Blocco = {
       testo: "Quanti ordini fai in un mese normale?",
       tipo: "number",
       unita: "ordini",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       mostraSe: { ramo: RAMI_PRODOTTI, clienti: CON_CLIENTI },
     },
     {
@@ -131,7 +135,8 @@ export const BLOCCO_A: Blocco = {
       codice: "A7-s",
       testo: "Quanto resta di solito un {cliente} con te? Torna o ti manda altre persone?",
       tipo: "textarea",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       mostraSe: { ramo: ["servizi"], clienti: CON_CLIENTI },
     },
     {
@@ -139,7 +144,8 @@ export const BLOCCO_A: Blocco = {
       codice: "A7-p",
       testo: "Ogni quanto ricompra un {cliente}? Su 10 {clienti}, quanti tornano?",
       tipo: "textarea",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       mostraSe: { ramo: RAMI_PRODOTTI, clienti: CON_CLIENTI },
     },
     {
@@ -147,7 +153,8 @@ export const BLOCCO_A: Blocco = {
       codice: "A8-s",
       testo: "Quanti {clienti} al mese riusciresti a seguire bene, al massimo, contando anche quelli che hai già?",
       tipo: "text",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       placeholder: "Un numero, anche a occhio",
       mostraSe: { ramo: ["servizi"] },
     },
@@ -156,7 +163,8 @@ export const BLOCCO_A: Blocco = {
       codice: "A8-pf",
       testo: "Quanti pezzi al mese riusciresti a produrre e spedire, al massimo? Quanto tempo ti serve per farne uno?",
       tipo: "textarea",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       mostraSe: { ramo: ["prodotti_fisici"] },
     },
     {
@@ -164,7 +172,8 @@ export const BLOCCO_A: Blocco = {
       codice: "A8-pd",
       testo: "Come arriva il prodotto al {cliente}? Per esempio una piattaforma per corsi, una email, un gruppo o una community.",
       tipo: "textarea",
-      obbligatoria: true,
+      obbligatoria: false,
+      ritirata: true,
       mostraSe: { ramo: ["prodotti_digitali"] },
     },
     {

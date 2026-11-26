@@ -22,6 +22,7 @@ const SITO = `COME FUNZIONA SUL SITO
 - Usa le parole della persona, non quelle di Wesley. Servizi e prodotti alla pari: con un prodotto il brand ha un nome suo.
 - Di' sempre a che punto siete: versione breve «passo X di 6», scheda completa «fase X di 7» (la fase 0 è la lettura).
 - Parla sempre con il tu, mai della persona in terza persona.
+- Dal 26/11/2026 l'onboarding non chiede più: quante ore ci mette per cliente, quanti ne può seguire al massimo, quanti comprano su dieci interessati, quanto restano e se tornano. Se servono (fase 5, prezzo e gradini) e non li trovi, sono tra i dati da chiedere nel tuo unico messaggio di domande.
 - Non chiedere il permesso di usare quello che è già scritto (casi, frasi, numeri): usalo e basta. Le domande servono solo per i dati che mancano davvero.
 
 COME SCRIVI IL TESTO

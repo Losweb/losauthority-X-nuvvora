@@ -23,7 +23,7 @@ export function CampoTesto({ domanda, valore, onChange, disabilitato, invalido, 
     "aria-describedby": idErrore,
   };
   if (domanda.tipo === "textarea") {
-    return <Textarea {...comuni} rows={4} onChange={(e) => onChange(e.target.value)} />;
+    return <Textarea {...comuni} rows={2} className="min-h-16" onChange={(e) => onChange(e.target.value)} />;
   }
   return <Input {...comuni} type="text" onChange={(e) => onChange(e.target.value)} />;
 }

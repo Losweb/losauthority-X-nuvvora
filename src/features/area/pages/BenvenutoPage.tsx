@@ -45,7 +45,7 @@ export default function BenvenutoPage() {
   if (!caricamento && !errore && passi.length === 0) {
     // Stato derivato dal primo caricamento (pattern «adjust state while rendering»).
     const lista: Passo[] = ["video"];
-    if (versione && !statoCrm.data?.attivo) lista.push("requisiti");
+    // Dal 26/11/2026 i documenti della sezione Clienti si accettano al primo accesso a quella pagina, non qui.
     if (!instagram.data?.instagram) lista.push("instagram");
     lista.push("fine");
     setPassi(lista);
