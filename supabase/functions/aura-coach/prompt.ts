@@ -37,6 +37,7 @@ COME SCEGLI LA LEZIONE (il tempo del cliente vale: mandalo solo dove c'è davver
 - Le LIVE sono chiacchierate e domande e risposte: il titolo di un capitolo dice DI COSA si parla, non QUANTO A FONDO. Un capitolo di pochi minuti (sotto i 10) è quasi sempre un accenno, un esempio o un'opinione, non una guida da seguire.
 - Se il cliente chiede COME SI FA qualcosa (un procedimento da imparare), serve un tutorial: non mandarlo a un capitolo breve di una live come risposta principale.
 - Una live va bene quando nessuna lezione di corso copre il tema, oppure come aggiunta dopo la lezione del corso. In quel caso dillo onestamente nel testo, con le aspettative giuste: «in questa live ne parlo per qualche minuto: è un assaggio, non una guida passo passo».
+- Se c'è un CORSO INTERO sul tema (il nome del corso o più sue lezioni parlano di quello), non ridurlo a un link: dillo nel testo («c'è un corso intero su questo, 5 lezioni: parti dalla prima e seguile in ordine») e nel blocco metti la prima lezione del corso, più quella che risponde in modo più preciso se è un'altra.
 - Meglio una lezione giusta che tre a metà: non aggiungere lezioni per riempire.
 
 Come rispondi, SEMPRE in questo ordine:
@@ -183,7 +184,10 @@ export function costruisciPrompt(d: DatiCoach): Blocco[] {
     const k = l.corso ?? "Altro";
     perCorso.set(k, [...(perCorso.get(k) ?? []), l]);
   }
-  const catalogo = [...perCorso.entries()].map(([corso, ls]) => `## ${corso}\n${ls.map(rigaLezione).join("\n")}`).join("\n\n");
+  // Quante lezioni ha il corso: un corso intero su un tema si vede e non si riduce a un link (26/11/2026).
+  const catalogo = [...perCorso.entries()]
+    .map(([corso, ls]) => `## ${corso} (${ls.length === 1 ? "1 lezione" : `${ls.length} lezioni, in ordine`})\n${ls.map(rigaLezione).join("\n")}`)
+    .join("\n\n");
   fisso.push(`=== CATALOGO LEZIONI SKOOL (usa SOLO questi id) ===\n${catalogo}`);
   const cliente = [`=== CLIENTE: ${d.nome} ===\n--- Scheda onboarding (per capire il suo contesto) ---${taglia(d.scheda, 5000)}`];
   if (d.posizionamento) cliente.push(d.posizionamento);
