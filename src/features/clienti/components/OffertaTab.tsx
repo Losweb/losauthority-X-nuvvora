@@ -1,69 +1,77 @@
 import { useState } from "react";
-import { CartaOfferta, codiceOfferta, DiagnosiOfferta, linkPdfOfferta, useDiagnosiOfferta, useOfferte } from "@/features/offerta";
+import { ChevronDown, FileDown } from "lucide-react";
+import {
+  CartaOfferta,
+  DiagnosiOfferta,
+  FermoOfferta,
+  FraseOfferta,
+  linkPdfOfferta,
+  PassiOfferta,
+  SchedaOffertaNuova,
+  useDiagnosiOfferta,
+  useOffertaCliente,
+  type Offerta,
+} from "@/features/offerta";
 import { Badge } from "@/shared/components/ui/badge";
+import { Button, buttonVariants } from "@/shared/components/ui/button";
 import { ErroreCaricamento, SkeletonBlocco, StatoVuoto } from "@/shared/components/layout/StatoCaricamento";
 import { formatDate } from "@/shared/utils/formatDate";
-import { cn } from "@/lib/utils";
 import type { ClienteDettaglio } from "../types";
-import { STRISCIA_MOBILE, VOCE_STRISCIA_MOBILE } from "./striscia";
 
 /**
- * Tab "Offerta" della scheda cliente: le offerte che il cliente ha costruito
- * con Aura. Il team vede la carta con tutta la struttura (e può scaricare il
- * PDF) e, in più, la DIAGNOSI per Wesley (tabella offerta_diagnosi, che il
- * cliente non legge).
+ * Tab "Offerta" della scheda cliente. Dal 26/11/2026: l'offerta del cliente
+ * (una sola) con la strada, la frase, il blocco «Fermo» in evidenza (che arriva
+ * anche su Telegram) e la scheda nuova. Sotto, piegata, la carta di prima con
+ * la diagnosi per Wesley (che il cliente non vede).
  */
 export function OffertaTab({ cliente }: { cliente: ClienteDettaglio }) {
-  const { data, isLoading, isError } = useOfferte(cliente.id);
-  const [sceltaId, setSceltaId] = useState<string | null>(null);
-  const offerte = data ?? [];
-  const scelta = offerte.find((o) => o.id === sceltaId) ?? offerte.find((o) => o.stato === "completo") ?? offerte[0] ?? null;
-  const numero = scelta ? offerte.findIndex((o) => o.id === scelta.id) + 1 : 1;
-  const diagnosi = useDiagnosiOfferta(scelta?.id);
+  const { data: o, isLoading, isError } = useOffertaCliente(cliente.id);
 
   if (isLoading) return <SkeletonBlocco altezza="h-64" />;
   if (isError) return <ErroreCaricamento />;
-  if (offerte.length === 0) {
-    return <StatoVuoto titolo="Nessuna offerta ancora" testo="Il cliente la costruisce dalla sua area: Cervello del tuo branding → Offerta, in conversazione con Aura." />;
-  }
+  if (!o) return <StatoVuoto titolo="Offerta non ancora iniziata" testo="Il cliente la costruisce dalla sua area: Cervello del tuo branding → Offerta, in conversazione con Aura." />;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
-      {/* Telefono, con più voci: una striscia che scorre di lato, così la carta scelta resta subito sotto. */}
-      <nav aria-label="Offerte del cliente" className={cn("grid gap-2", offerte.length > 1 && STRISCIA_MOBILE)}>
-        {offerte.map((o, i) => {
-          const attiva = scelta?.id === o.id;
-          return (
-            <button
-              key={o.id}
-              type="button"
-              onClick={() => setSceltaId(o.id)}
-              aria-current={attiva ? "true" : undefined}
-              className={cn(
-                "grid gap-1 rounded-lg border p-3 text-left transition-colors",
-                offerte.length > 1 && VOCE_STRISCIA_MOBILE,
-                attiva ? "border-foreground/40 bg-card shadow-xs" : "border-border bg-card/60 hover:bg-card",
-              )}
-            >
-              <span className="flex items-center justify-between gap-2">
-                <span className="figure text-[12px] tracking-[0.12em] text-muted-foreground">{codiceOfferta(i + 1)}</span>
-                <Badge variant={o.stato === "completo" ? "active" : "neutral"} dot>
-                  {o.stato === "completo" ? "Completa" : "In costruzione"}
-                </Badge>
-              </span>
-              <span className="line-clamp-2 font-display text-[19px] leading-tight font-semibold">{o.nome ?? "Senza nome"}</span>
-              <span className="truncate text-xs text-muted-foreground">{[o.prezzo, o.per_chi].filter(Boolean).join(" · ") || `Creata il ${formatDate(o.created_at)}`}</span>
-            </button>
-          );
-        })}
-      </nav>
+    <div className="grid gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4">
+        <div className="grid min-w-0 flex-1 basis-[360px] gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {o.fermo ? <Badge variant="churn">Ferma dal {formatDate(o.fermo_il ?? o.updated_at)}</Badge> : null}
+            {o.completa_fatta_il ? <Badge variant="active">Scheda completa fatta</Badge> : o.breve_fatta_il ? <Badge variant="active">Frase fatta</Badge> : <Badge variant="neutral">In corso</Badge>}
+            {o.tipo_vendita ? <Badge variant="outline">{o.tipo_vendita === "prodotto" ? `Prodotto${o.brand ? ` · ${o.brand}` : ""}` : "Servizio"}</Badge> : null}
+          </div>
+          {o.strada ? <PassiOfferta o={o} /> : <p className="text-[13px] text-muted-foreground">Non ha ancora parlato con Aura col metodo nuovo.</p>}
+        </div>
+        <a href={linkPdfOfferta(o.id)} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline" })}>
+          <FileDown aria-hidden /> Scarica PDF
+        </a>
+      </div>
 
-      {scelta ? (
-        <div className="grid min-w-0 gap-5">
-          <CartaOfferta offerta={scelta} numero={numero} titolare={cliente.utente.nombre} inCompilazione={scelta.stato !== "completo"} linkPdf={linkPdfOfferta(scelta.id)} larga />
-          {diagnosi.isError ? <ErroreCaricamento /> : <DiagnosiOfferta diagnosi={diagnosi.data ?? null} completa={scelta.stato === "completo"} />}
+      <FermoOfferta fermo={o.fermo} />
+      <FraseOfferta o={o} />
+      <SchedaOffertaNuova o={o} larga />
+      <OffertaDiPrimaTeam o={o as unknown as Offerta} nome={cliente.utente.nombre} />
+    </div>
+  );
+}
+
+/** La carta scritta col metodo di prima, piegata, con la diagnosi per Wesley. */
+function OffertaDiPrimaTeam({ o, nome }: { o: Offerta; nome: string }) {
+  const [aperta, setAperta] = useState(false);
+  const diagnosi = useDiagnosiOfferta(aperta ? o.id : undefined);
+  if (!o.nome && !o.trasformazione && !o.prezzo) return null;
+  return (
+    <section className="grid gap-4 border-t pt-5">
+      <Button variant="ghost" className="w-fit" aria-expanded={aperta} onClick={() => setAperta((v) => !v)}>
+        <ChevronDown aria-hidden className={aperta ? "rotate-180 transition-transform" : "transition-transform"} />
+        L'offerta di prima{o.nome ? `: ${o.nome}` : ""} · con la diagnosi per Wesley
+      </Button>
+      {aperta ? (
+        <div className="grid gap-5">
+          <CartaOfferta offerta={o} numero={1} titolare={nome} inCompilazione={o.stato !== "completo"} larga />
+          {diagnosi.isError ? <ErroreCaricamento /> : <DiagnosiOfferta diagnosi={diagnosi.data ?? null} completa={o.stato === "completo"} />}
         </div>
       ) : null}
-    </div>
+    </section>
   );
 }

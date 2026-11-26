@@ -2886,6 +2886,20 @@ export type Database = {
       }
       offerta: {
         Row: {
+          avatar_letto_il: string | null
+          brand: string | null
+          breve_fatta_il: string | null
+          completa_fatta_il: string | null
+          fermo: Json | null
+          fermo_il: string | null
+          frase: string | null
+          frase_il: string | null
+          frase_origine: string | null
+          nuova_dal: string | null
+          passo: number | null
+          scheda: Json
+          strada: string | null
+          tipo_vendita: string | null
           ancora: string | null
           avatar_id: string | null
           bonus: string[]
@@ -2934,6 +2948,20 @@ export type Database = {
           valore_risultato: string | null
         }
         Insert: {
+          avatar_letto_il?: string | null
+          brand?: string | null
+          breve_fatta_il?: string | null
+          completa_fatta_il?: string | null
+          fermo?: Json | null
+          fermo_il?: string | null
+          frase?: string | null
+          frase_il?: string | null
+          frase_origine?: string | null
+          nuova_dal?: string | null
+          passo?: number | null
+          scheda?: Json
+          strada?: string | null
+          tipo_vendita?: string | null
           ancora?: string | null
           avatar_id?: string | null
           bonus?: string[]
@@ -2982,6 +3010,20 @@ export type Database = {
           valore_risultato?: string | null
         }
         Update: {
+          avatar_letto_il?: string | null
+          brand?: string | null
+          breve_fatta_il?: string | null
+          completa_fatta_il?: string | null
+          fermo?: Json | null
+          fermo_il?: string | null
+          frase?: string | null
+          frase_il?: string | null
+          frase_origine?: string | null
+          nuova_dal?: string | null
+          passo?: number | null
+          scheda?: Json
+          strada?: string | null
+          tipo_vendita?: string | null
           ancora?: string | null
           avatar_id?: string | null
           bonus?: string[]

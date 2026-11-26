@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Printer, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/features/auth";
-import { codiceOfferta, ETICHETTA_POSIZIONAMENTO, StrutturaOfferta, useOfferta, useOfferte } from "@/features/offerta";
+import { asNuova, codiceOfferta, ETICHETTA_POSIZIONAMENTO, FraseOfferta, SchedaOffertaNuova, schedaIniziata, StrutturaOfferta, useOfferta, useOfferte } from "@/features/offerta";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
 import { Button } from "@/shared/components/ui/button";
 import { ErroreCaricamento, SkeletonBlocco, StatoVuoto } from "@/shared/components/layout/StatoCaricamento";
@@ -74,7 +74,7 @@ export default function OffertaStampaPage() {
           </div>
           <div className="grid gap-2">
             <p className="eyebrow">{o.stato === "completo" ? "Offerta completa" : "Offerta in costruzione"}</p>
-            <h1 className="text-[32px] leading-[1.05] break-words sm:text-[40px]">{o.nome ?? "Offerta in costruzione"}</h1>
+            <h1 className="text-[32px] leading-[1.05] break-words sm:text-[40px]">{o.nome ?? o.brand ?? "La tua offerta"}</h1>
             {o.trasformazione ? <p className="font-display text-[22px] leading-snug text-foreground/85">«{o.trasformazione}»</p> : null}
           </div>
           <dl className="grid gap-4 sm:grid-cols-4">
@@ -93,7 +93,15 @@ export default function OffertaStampaPage() {
           ) : null}
         </header>
 
-        <StrutturaOfferta offerta={o} larga />
+        {/* Dal 26/11/2026: con la scheda nuova il PDF mostra la frase e le sette fasi; senza, la struttura di prima. */}
+        {schedaIniziata(asNuova(o)) ? (
+          <div className="grid gap-6">
+            <FraseOfferta o={asNuova(o)} />
+            <SchedaOffertaNuova o={asNuova(o)} larga />
+          </div>
+        ) : (
+          <StrutturaOfferta offerta={o} larga />
+        )}
 
         <footer className="border-t pt-4 text-[12px] text-muted-foreground">
           Costruita con Aura · Upscale, il percorso di Wesley Caicedo. Le voci in "Da confermare" sono proposte ancora da validare in call.

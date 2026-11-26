@@ -38,7 +38,6 @@ const OffertePage = lazy(() => import("@/features/contratti/pages/OffertePage"))
 const ContrattoPubblicoPage = lazy(() => import("@/features/contratti/pages/ContrattoPubblicoPage"));
 const InformativaPrivacyPage = lazy(() => import("@/features/contratti/pages/InformativaPrivacyPage"));
 const OffertaPage = lazy(() => import("@/features/area/pages/OffertaPage"));
-const OffertaDettaglioPage = lazy(() => import("@/features/area/pages/OffertaDettaglioPage"));
 const OffertaStampaPage = lazy(() => import("@/features/area/pages/OffertaStampaPage"));
 const ConcorrentiPage = lazy(() => import("@/features/area/pages/ConcorrentiPage"));
 const ClientiAreaPage = lazy(() => import("@/features/area/pages/ClientiAreaPage"));
@@ -215,7 +214,8 @@ export function AppRoutes() {
           {/* Dal 25/11/2026 la fase Avatar è una pagina sola (mappa + schede): i link ai singoli avatar di prima tornano lì. */}
           <Route path="/area/cervello/avatar/:id" element={<Navigate to="/area/cervello/avatar" replace />} />
           <Route path="/area/cervello/offerta" element={<OffertaPage />} />
-          <Route path="/area/cervello/offerta/:id" element={<OffertaDettaglioPage />} />
+          {/* Dal 26/11/2026 la fase Offerta è una pagina sola: i link alle singole offerte di prima tornano lì. */}
+          <Route path="/area/cervello/offerta/:id" element={<Navigate to="/area/cervello/offerta" replace />} />
           <Route path="/area/cervello/concorrenti" element={<ConcorrentiPage />} />
           <Route path="/area/cervello/clienti" element={<Navigate to="/area/cervello/concorrenti" replace />} />
           <Route path="/area/cervello/kit-brand" element={<KitBrandPage />} />
