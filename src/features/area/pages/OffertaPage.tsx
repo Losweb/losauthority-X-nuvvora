@@ -13,12 +13,14 @@ import {
   OffertaDiPrima,
   PassiOfferta,
   RicominciaOfferta,
+  SchedaGradino,
   SchedaOffertaNuova,
   useIniziaOfferta,
   useFermaOfferta,
   useInviaOffertaCliente,
   useMessaggiOfferta,
   useOffertaCliente,
+  VetrinaOfferte,
   type MessaggioOfferta,
 } from "@/features/offerta";
 import { primoNome } from "@/features/scheda";
@@ -26,6 +28,7 @@ import { AuraSfera } from "@/shared/components/brand/AuraSfera";
 import { Button, buttonVariants } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
+import { scorriInCima } from "@/shared/utils/scroll";
 import { cn } from "@/lib/utils";
 import { BottoneChat, InizioChatNuova } from "../components/BottoneChat";
 
@@ -48,6 +51,8 @@ export default function OffertaPage() {
   const [sceltaChat, setSceltaChat] = useState<boolean | null>(null);
   /** Quanti messaggi vecchi piegare quando la chat si riapre a lavoro finito (0 = mostrali tutti). */
   const [piegati, setPiegati] = useState(0);
+  /** Vetrina: l'offerta aperta (indice nei gradini), null = tutte le offerte. */
+  const [offertaAperta, setOffertaAperta] = useState<number | null>(null);
 
   const inizia = useIniziaOfferta();
   const invia = useInviaOffertaCliente();
@@ -140,6 +145,31 @@ export default function OffertaPage() {
   const fatta = o.strada === "completa" ? !!o.completa_fatta_il : !!o.breve_fatta_il;
   const chat = auraScrive || (sceltaChat ?? !fatta);
   const vista: VistaMobile = chat ? (sceltaVista ?? "chat") : "carta";
+  // A lavoro finito, con più gradini, prima la vetrina delle offerte; al clic la singola offerta.
+  const gradini = o.scheda?.gradini ?? [];
+  const conVetrina = fatta && gradini.length >= 2;
+  const iCuore = gradini.findIndex((g) => g.livello === "cuore");
+  const scelto = conVetrina && offertaAperta !== null ? gradini[offertaAperta] : undefined;
+  const apri = (i: number | null) => {
+    setOffertaAperta(i);
+    scorriInCima();
+  };
+  const scheda = !conVetrina ? (
+    <SchedaOffertaNuova o={o} larga={!chat} />
+  ) : !scelto || offertaAperta === null ? (
+    <VetrinaOfferte o={o} onApri={apri} />
+  ) : (
+    <div className="grid gap-3">
+      <Button variant="ghost" size="sm" className="-ml-2 justify-self-start" onClick={() => apri(null)}>
+        <ArrowLeft aria-hidden /> Tutte le offerte
+      </Button>
+      {scelto.livello === "cuore" ? (
+        <SchedaOffertaNuova o={o} gradino={offertaAperta} larga={!chat} />
+      ) : (
+        <SchedaGradino g={scelto} principale={gradini[iCuore]} onApriPrincipale={iCuore >= 0 ? () => apri(iCuore) : undefined} />
+      )}
+    </div>
+  );
   return (
     <div className="grid gap-5">
       {intestazione}
@@ -181,7 +211,7 @@ export default function OffertaPage() {
           <AvvisiOfferta o={o} avatarAggiornatoIl={avatar.data?.mappa.updated_at ?? null} />
           <FermoOfferta fermo={o.fermo} />
           <FraseOfferta o={o} />
-          <SchedaOffertaNuova o={o} larga={!chat} />
+          {scheda}
           <OffertaDiPrima o={o} />
         </aside>
       </div>

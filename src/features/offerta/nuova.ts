@@ -49,3 +49,13 @@ export const haOffertaDiPrima = (o: Offerta) => !!(o.nome || o.trasformazione ||
 
 /** La scheda nuova ha qualcosa da mostrare? */
 export const schedaIniziata = (o: OffertaNuova) => !!o.frase || Object.keys(o.scheda ?? {}).length > 0;
+
+export type GradinoOfferta = NonNullable<OffertaNuova["scheda"]["gradini"]>[number];
+
+export const ETICHETTA_VETRINA: Record<GradinoOfferta["livello"], string> = { entrata: "Per iniziare", cuore: "Offerta principale", premium: "Premium" };
+
+/** «580 € (da confermare)» → prezzo «580 €» e nota «da confermare». */
+export function dividiPrezzo(prezzo: string): { cifra: string; nota: string | null } {
+  const m = prezzo.match(/^(.*?)\s*\((.+)\)\s*$/);
+  return m ? { cifra: m[1], nota: m[2] } : { cifra: prezzo, nota: null };
+}

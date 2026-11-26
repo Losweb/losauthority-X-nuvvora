@@ -1,12 +1,14 @@
 import { Dettaglio } from "@/shared/components/layout/Dettaglio";
 import { cn } from "@/lib/utils";
 import {
+  dividiPrezzo,
   ETICHETTA_CRITERIO,
   ETICHETTA_GRADINO,
   ETICHETTA_LEVA,
   ETICHETTA_POSTO,
   ETICHETTA_TEST,
   ETICHETTA_VALORE,
+  ETICHETTA_VETRINA,
   SIMBOLO_ESITO,
   type OffertaNuova,
 } from "../../nuova";
@@ -20,16 +22,17 @@ const ETICHETTA_PROMESSA = { sicura: "Sicura", tagliente: "Tagliente", colpo_di_
  * se ti dicono, da confermare, come ci siamo arrivati). `aperta` (tab del team e PDF) le apre
  * tutte; `larga` = due colonne nel ragionamento.
  */
-export function SchedaOffertaNuova({ o, larga = false, aperta = false }: { o: OffertaNuova; larga?: boolean; aperta?: boolean }) {
+export function SchedaOffertaNuova({ o, larga = false, aperta = false, gradino }: { o: OffertaNuova; larga?: boolean; aperta?: boolean; /** Dalla vetrina: mostra solo questa offerta (indice nei gradini). */ gradino?: number }) {
   const s = o.scheda ?? {};
   const pr = s.promessa;
   const pres = s.presentazione;
-  const cuore = s.gradini?.find((g) => g.livello === "cuore");
+  const scelto = gradino !== undefined ? s.gradini?.[gradino] : undefined;
+  const cuore = scelto ?? s.gradini?.find((g) => g.livello === "cuore");
   const nome = cuore?.nome || pres?.nomi?.[0] || null;
   const promessa = pr?.scelta ? pr[pr.scelta] : (pr?.tagliente ?? pr?.sicura ?? null);
   const frasi = pres ? (["bio", "video", "chat"] as const).filter((k) => pres[k]) : [];
 
-  const gradini = s.gradini ?? [];
+  const gradini = scelto ? [scelto] : (s.gradini ?? []);
   const bonus = s.bonus ?? [];
   const obiezioni = pres?.obiezioni ?? [];
   const confermare = s.da_confermare ?? [];
@@ -38,7 +41,7 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false }: { o: Of
   // Le righe che si aprono al clic: titolo, riassunto corto, dettagli.
   const righe = [
     gradini.some((g) => g.contiene) ? (
-      <Dettaglio key="contiene" titolo="Cosa c'è dentro" riassunto={gradini.length === 1 ? "1 prezzo" : `${gradini.length} prezzi`} aperto={aperta}>
+      <Dettaglio key="contiene" titolo="Cosa c'è dentro" riassunto={scelto ? undefined : gradini.length === 1 ? "1 prezzo" : `${gradini.length} prezzi`} aperto={aperta}>
         {gradini.map((g, i) => (
           <div key={i} className="grid gap-0.5">
             <p className="flex items-start gap-2 text-[15px] font-semibold">
@@ -200,10 +203,16 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false }: { o: Of
       {haQuadro ? (
         <header className="grid gap-4 p-5">
           <div className="grid gap-1.5">
+            {scelto ? <span className="w-fit rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-medium text-primary-foreground">{ETICHETTA_VETRINA[scelto.livello]}</span> : null}
             {nome ? <h3 className="text-[22px] leading-tight font-bold">{nome}</h3> : null}
             {promessa ? <p className="text-[17px] leading-snug font-medium">{promessa}</p> : null}
           </div>
-          {gradini.length ? (
+          {scelto ? (
+            <p className="flex items-baseline gap-2">
+              <span className="figure text-[22px] font-bold">{dividiPrezzo(scelto.prezzo).cifra}</span>
+              {dividiPrezzo(scelto.prezzo).nota ? <span className="text-[13px] text-status-expiring">{dividiPrezzo(scelto.prezzo).nota}</span> : null}
+            </p>
+          ) : gradini.length ? (
             <ul className={cn("grid gap-2", gradini.length > 1 && "sm:grid-cols-2", gradini.length > 2 && "lg:grid-cols-3")}>
               {gradini.map((g, i) => (
                 <li key={i} className="grid gap-0.5 rounded-md bg-surface px-3 py-2.5">
