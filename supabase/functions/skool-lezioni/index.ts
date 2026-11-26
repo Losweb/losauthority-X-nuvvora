@@ -9,10 +9,33 @@ import { errore, gestisciErrore, json, preflight } from "../_shared/http.ts";
 import { adminClient, richiediCronOTeam } from "../_shared/supabase.ts";
 import { aggiornaSync, logError } from "../_shared/log.ts";
 import { notifyTelegram } from "../_shared/telegram.ts";
+import { azione, HAS_SKOOL_API } from "../_shared/skool-api.ts";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { fetchSkoolLessons } from "./catalogo.ts";
 
 const MSG_COOKIE =
   "🔑 Accesso Skool scaduto\n\nNon riesco più a leggere la classroom di Los Creators: i cookie non sono più validi.\nRinnovali quando puoi (Cookie-Editor → Export JSON → segreto SKOOL_COOKIES) e rilancia la sincronizzazione dal gestionale.";
+
+/** Il codice del corso nell'url di una lezione (skool.com/loscreators/classroom/42fc6c1a?md=…). */
+const corsoDaUrl = (url: string | null): string | null => url?.match(/\/classroom\/([0-9a-f]{6,12})(?:[/?#]|$)/i)?.[1] ?? null;
+
+/**
+ * I corsi in bozza (nascosti ai membri), per codice. L'attore del catalogo entra
+ * come amministratore e li vede: senza questo filtro il coach proporrebbe lezioni
+ * che i clienti non possono aprire (26/11/2026: Cap.1 unito in un solo corso, i due
+ * corsi vecchi messi in bozza). Se Skool non risponde si va avanti senza filtro.
+ */
+async function corsiInBozza(admin: SupabaseClient): Promise<Set<string>> {
+  if (!HAS_SKOOL_API) return new Set();
+  const r = await azione(admin, "classroom:listCourses", {}).catch(() => null);
+  if (!r?.ok) return new Set();
+  const bozze = new Set<string>();
+  for (const x of r.items) {
+    const u = (x.course && typeof x.course === "object" ? x.course : x) as Record<string, unknown>;
+    if (typeof u.name === "string" && typeof u.state === "number" && u.state !== 2) bozze.add(u.name);
+  }
+  return bozze;
+}
 
 Deno.serve(async (req: Request) => {
   const pre = preflight(req);
@@ -38,13 +61,15 @@ Deno.serve(async (req: Request) => {
     }
 
     const admin = adminClient();
+    const bozze = await corsiInBozza(admin);
+    const lezioni = r.lezioni.filter((l) => !bozze.has(corsoDaUrl(l.url) ?? ""));
     const { data: esistenti, error: eSel } = await admin.from("lezioni").select("key");
     if (eSel) throw eSel;
     const note = new Set(((esistenti ?? []) as Array<{ key: string }>).map((x) => x.key));
-    const nuove = r.lezioni.filter((l) => !note.has(l.key)).length;
+    const nuove = lezioni.filter((l) => !note.has(l.key)).length;
 
     const inizio = new Date().toISOString();
-    const righe = r.lezioni.map((l) => ({
+    const righe = lezioni.map((l) => ({
       key: l.key,
       corso: l.corso,
       titolo: l.titolo,
@@ -68,13 +93,13 @@ Deno.serve(async (req: Request) => {
     const { error: eOff } = await admin.from("lezioni").update({ attiva: false }).lt("updated_at", inizio);
     if (eOff) await logError("skool-sync:disattiva", eOff, {}, { silent: true });
 
-    await aggiornaSync("skool", { esito: "ok", totale: r.lezioni.length, nuove });
+    await aggiornaSync("skool", { esito: "ok", dettaglio: bozze.size ? `${bozze.size} corsi in bozza esclusi` : "", totale: lezioni.length, nuove });
     if (nuove > 0 && daCron) {
       await notifyTelegram(
-        `📚 Skool: ${nuove} ${nuove === 1 ? "nuova lezione" : "nuove lezioni"}\n\nCatalogo aggiornato: ${r.lezioni.length} lezioni totali. Aura può già collegarle ai compiti.`,
+        `📚 Skool: ${nuove} ${nuove === 1 ? "nuova lezione" : "nuove lezioni"}\n\nCatalogo aggiornato: ${lezioni.length} lezioni totali. Aura può già collegarle ai compiti.`,
       );
     }
-    return json({ ok: true, lezioni: r.lezioni.length, nuove });
+    return json({ ok: true, lezioni: lezioni.length, nuove, bozze_escluse: bozze.size });
   } catch (err) {
     return gestisciErrore(err);
   }
