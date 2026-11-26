@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash2 } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import {
   AlertDialog,
@@ -33,12 +33,22 @@ interface ContenutoFormProps {
   onChiudi: () => void;
 }
 
-/** Il form del contenuto: campi, salva/annulla sempre in vista in fondo, elimina con conferma, popup delle tipologie. */
+type StatoSalvataggio = "salvato" | "in_corso" | "da_correggere" | "errore";
+
+const ATTESA_MS = 800;
+
+/**
+ * Il form del contenuto. Dal 26/11/2026 (Wesley: «quando esco voglio che tutte le modifiche si salvino
+ * in automatico, se mi si chiude per sbaglio non perdo le info») si salva da solo: poco dopo ogni
+ * modifica e comunque quando la scheda si chiude (anche per sbaglio, con Esc o cliccando fuori).
+ * Niente più Salva/Annulla. Una nuova idea nasce al primo salvataggio con il titolo scritto.
+ */
 export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, onChiudi }: ContenutoFormProps) {
   const salva = useSalvaContenuto(clienteId);
   const elimina = useEliminaContenuto(clienteId);
   const [confermaElimina, setConfermaElimina] = useState(false);
   const [gestisciTipologie, setGestisciTipologie] = useState(false);
+  const [statoSalvataggio, setStatoSalvataggio] = useState<StatoSalvataggio>("salvato");
 
   const form = useForm<ContenutoFormValues>({
     resolver: zodResolver(contenutoSchema),
@@ -46,21 +56,90 @@ export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, on
   });
   const statoScelto = form.watch("stato");
 
-  function onSubmit(values: ContenutoFormValues) {
-    salva.mutate({ id: contenuto?.id, dati: formToContenuto(values) }, { onSuccess: onChiudi });
+  // L'id (nasce al primo salvataggio di una nuova idea), l'ultimo dato salvato e la coda: un
+  // salvataggio alla volta, così una nuova idea non viene creata due volte.
+  const idRef = useRef(contenuto?.id);
+  const [idSalvato, setIdSalvato] = useState(contenuto?.id);
+  const ultimoSalvato = useRef(JSON.stringify(formToContenuto(contenutoToForm(contenuto, predefiniti))));
+  const coda = useRef<Promise<void>>(Promise.resolve());
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const salvaRef = useRef(salva.mutateAsync);
+  salvaRef.current = salva.mutateAsync;
+
+  const salvaOraRef = useRef(() => {});
+  const eliminato = useRef(false);
+  salvaOraRef.current = () => {
+    coda.current = coda.current.then(async () => {
+      if (eliminato.current) return;
+      const esito = contenutoSchema.safeParse(form.getValues());
+      if (!esito.success) {
+        // Una nuova idea senza titolo non si crea; per il resto si mostrano i campi da correggere.
+        if (idRef.current || form.getValues("titolo").trim()) {
+          setStatoSalvataggio("da_correggere");
+          void form.trigger();
+        }
+        return;
+      }
+      const dati = formToContenuto(esito.data);
+      const firma = JSON.stringify(dati);
+      if (firma === ultimoSalvato.current) {
+        setStatoSalvataggio("salvato");
+        return;
+      }
+      setStatoSalvataggio("in_corso");
+      try {
+        const id = await salvaRef.current({ id: idRef.current, dati, silenzioso: true });
+        idRef.current = id;
+        setIdSalvato(id);
+        ultimoSalvato.current = firma;
+        setStatoSalvataggio("salvato");
+      } catch {
+        setStatoSalvataggio("errore");
+      }
+    });
+  };
+
+  useEffect(() => {
+    const sub = form.watch(() => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => salvaOraRef.current(), ATTESA_MS);
+    });
+    return () => {
+      sub.unsubscribe();
+      // La scheda si chiude (anche per sbaglio): si salva subito quello che manca.
+      if (timer.current) clearTimeout(timer.current);
+      salvaOraRef.current();
+    };
+  }, [form]);
+
+  function onSubmit() {
+    if (timer.current) clearTimeout(timer.current);
+    salvaOraRef.current();
   }
 
   function handleElimina() {
-    if (!contenuto) return;
-    elimina.mutate(contenuto.id, {
+    const id = idRef.current;
+    if (!id) return;
+    if (timer.current) clearTimeout(timer.current);
+    eliminato.current = true;
+    elimina.mutate(id, {
       onSuccess: () => {
         setConfermaElimina(false);
         onChiudi();
       },
+      onError: () => {
+        eliminato.current = false;
+      },
     });
   }
 
-  const occupato = salva.isPending || elimina.isPending;
+  const occupato = elimina.isPending;
+  const TESTO_STATO: Record<StatoSalvataggio, string> = {
+    salvato: idSalvato ? "Salvato" : "Si salva da solo appena scrivi l'idea",
+    in_corso: "Salvo…",
+    da_correggere: "Non salvato: correggi i campi in rosso",
+    errore: "Non salvato: controlla la connessione",
+  };
 
   return (
     <Form {...form}>
@@ -76,7 +155,7 @@ export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, on
 
         {/* Il pannello è alto: i bottoni restano fissi in fondo mentre il form scorre. */}
         <div className="sticky bottom-0 -mx-6 mt-1 flex flex-row items-center justify-between gap-2 border-t border-line bg-popover px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          {contenuto ? (
+          {idSalvato ? (
             <Button
               type="button"
               variant="ghost"
@@ -90,12 +169,16 @@ export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, on
           ) : (
             <span />
           )}
-          <div className="flex gap-2 sm:justify-end">
+          <div className="flex items-center gap-3 sm:justify-end">
+            <span
+              role="status"
+              className={`inline-flex items-center gap-1.5 text-[13px] ${statoSalvataggio === "da_correggere" || statoSalvataggio === "errore" ? "text-destructive" : "text-muted-foreground"}`}
+            >
+              {statoSalvataggio === "salvato" && idSalvato ? <Check className="size-3.5" aria-hidden /> : null}
+              {TESTO_STATO[statoSalvataggio]}
+            </span>
             <Button type="button" variant="outline" onClick={onChiudi} disabled={occupato}>
-              Annulla
-            </Button>
-            <Button type="submit" disabled={occupato}>
-              {salva.isPending ? "Salvo…" : "Salva"}
+              Chiudi
             </Button>
           </div>
         </div>
@@ -107,7 +190,7 @@ export function ContenutoForm({ clienteId, contenuto, predefiniti, tipologie, on
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminare il contenuto?</AlertDialogTitle>
-            <AlertDialogDescription>"{contenuto?.titolo}" sparirà dal workflow. L'operazione non si può annullare.</AlertDialogDescription>
+            <AlertDialogDescription>"{form.getValues("titolo")}" sparirà dal workflow. L'operazione non si può annullare.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={elimina.isPending}>Annulla</AlertDialogCancel>

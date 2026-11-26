@@ -32,7 +32,7 @@ function intestazione(contenuto: Contenuto | null, predefiniti?: ContenutoPredef
 /**
  * Popup centrato per creare/modificare/eliminare un'idea di video (richiesta dell'utente,
  * 20/11/2026: al centro dello schermo, non più pannello a destra). Largo fino a 820px,
- * scorre dentro con il pie' Salva/Annulla sempre visibile; sul telefono sale dal fondo.
+ * scorre dentro con il pie' (stato del salvataggio automatico e Chiudi) sempre visibile; sul telefono sale dal fondo.
  */
 export function ContenutoDialog({ clienteId, open, onOpenChange, contenuto, predefiniti, tipologie }: ContenutoDialogProps) {
   const { titolo, testo } = intestazione(contenuto, predefiniti);

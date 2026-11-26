@@ -12,10 +12,18 @@ import { PuntoTipologia } from "./EtichettaTipologia";
 
 const STATO_ITEMS: Record<string, string> = { ...ETICHETTA_STATO_CONTENUTO };
 
+/**
+ * Le ore della giornata alla europea, da 00:00 a 23:30 ogni mezz'ora (26/11/2026, Wesley: «non AM/PM ma da
+ * 0:00 a 23:00»). Il campo nativo `type="time"` segue la lingua del computer e su un Mac in inglese
+ * mostrava 07:00 PM al posto di 19:00.
+ */
+const ORE_GIORNO = Array.from({ length: 48 }, (_, i) => `${String(Math.floor(i / 2)).padStart(2, "0")}:${i % 2 ? "30" : "00"}`);
+
 interface CampoProps {
   control: Control<ContenutoFormValues>;
 }
 
+/** Il titolo è la cosa più importante della scheda: grande e in grassetto (26/11/2026). */
 export function CampoTitolo({ control }: CampoProps) {
   return (
     <FormField
@@ -25,7 +33,7 @@ export function CampoTitolo({ control }: CampoProps) {
         <FormItem>
           <FormLabel>Idea del video *</FormLabel>
           <FormControl>
-            <Input placeholder="Es. 3 errori che fai quando pubblichi un reel" autoFocus {...field} />
+            <Input placeholder="Es. 3 errori che fai quando pubblichi un reel" autoFocus className="h-12 text-[19px] font-bold md:text-[19px]" {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -140,21 +148,32 @@ export function CampiDate({ control, statoScelto }: CampoProps & { statoScelto: 
         <FormField
           control={control}
           name="ora_prevista"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Alle ore</FormLabel>
-              <FormControl>
-                <Input
-                  type="time"
-                  step={60}
-                  disabled={!giorno}
-                  title={giorno ? undefined : "Scegli prima il giorno"}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            // Un'ora salvata fuori dalle mezz'ore (es. 19:15) resta scelta e compare nella lista.
+            const ore = field.value && !ORE_GIORNO.includes(field.value) ? [...ORE_GIORNO, field.value].sort() : ORE_GIORNO;
+            const items: Record<string, string> = { "": "—", ...Object.fromEntries(ore.map((o) => [o, o])) };
+            return (
+              <FormItem>
+                <FormLabel>Alle ore</FormLabel>
+                <Select value={field.value} items={items} disabled={!giorno} onValueChange={(v) => field.onChange(v ?? "")}>
+                  <FormControl>
+                    <SelectTrigger className="w-full tabular-nums" onBlur={field.onBlur} title={giorno ? undefined : "Scegli prima il giorno"}>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="">—</SelectItem>
+                    {ore.map((o) => (
+                      <SelectItem key={o} value={o} className="tabular-nums">
+                        {o}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
       </div>
       {statoScelto === "pubblicato" ? (
@@ -187,10 +206,11 @@ export function CampiTesti({ control }: CampoProps) {
           <FormItem>
             <FormLabel>Script</FormLabel>
             <FormControl>
+              {/* Stesso carattere della descrizione; quando ci scrivi si allarga a quasi tutto lo schermo (26/11/2026). */}
               <Textarea
                 rows={14}
                 placeholder="Il testo completo del video: hook, sviluppo, chiusura…"
-                className="field-sizing-fixed font-mono text-[13px] wrap-anywhere"
+                className="field-sizing-fixed h-80 wrap-anywhere transition-[height] duration-200 focus:h-[70vh]"
                 {...field}
               />
             </FormControl>

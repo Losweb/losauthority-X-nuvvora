@@ -40,30 +40,35 @@ function oggiIso(): string {
 interface SalvaContenutoInput {
   id?: string;
   dati: ContenutoDati;
+  /** Salvataggio automatico della scheda: niente avviso a ogni modifica (26/11/2026). */
+  silenzioso?: boolean;
 }
 
-/** Crea (senza id) o aggiorna (con id) un contenuto del cliente. */
+/** Crea (senza id) o aggiorna (con id) un contenuto del cliente. Restituisce l'id. */
 export function useSalvaContenuto(clienteId: string) {
   const queryClient = useQueryClient();
   const { utente } = useAuth();
   const chiave = chiaviContenuti.lista(clienteId);
 
   return useMutation({
-    mutationFn: async ({ id, dati }: SalvaContenutoInput) => {
+    mutationFn: async ({ id, dati }: SalvaContenutoInput): Promise<string> => {
       if (id) {
         const { error } = await supabase.from("contenuti").update(dati).eq("id", id);
         if (error) throw error;
-        return;
+        return id;
       }
       if (!utente) throw new Error("Utente non disponibile");
       const ordine = prossimoOrdine(queryClient.getQueryData<Contenuto[]>(chiave), dati.stato);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("contenuti")
-        .insert({ ...dati, cliente_id: clienteId, creato_da: utente.id, ordine });
+        .insert({ ...dati, cliente_id: clienteId, creato_da: utente.id, ordine })
+        .select("id")
+        .single();
       if (error) throw error;
+      return data.id;
     },
-    onSuccess: (_, { id }) => {
-      toast.success(id ? "Contenuto aggiornato" : "Idea aggiunta al workflow");
+    onSuccess: (_, { id, silenzioso }) => {
+      if (!silenzioso) toast.success(id ? "Contenuto aggiornato" : "Idea aggiunta al workflow");
       void queryClient.invalidateQueries({ queryKey: chiave });
     },
     onError: (error) => {
