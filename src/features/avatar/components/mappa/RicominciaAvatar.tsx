@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { RotateCcw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,18 +8,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { Button } from "@/shared/components/ui/button";
 import { useRicominciaMappa } from "../../hooks/useMappaAvatar";
 
 /** «Ricomincia da capo»: elimina mappa, schede e conversazione, dopo conferma. */
-export function RicominciaAvatar({ clienteId, mappaId, disabilitato }: { clienteId: string; mappaId: string; disabilitato?: boolean }) {
-  const [aperto, setAperto] = useState(false);
+export function RicominciaAvatar({ clienteId, mappaId, aperto, onOpenChange }: { clienteId: string; mappaId: string; aperto: boolean; onOpenChange: (aperto: boolean) => void }) {
   const ricomincia = useRicominciaMappa(clienteId);
+  const setAperto = onOpenChange;
   return (
     <>
-      <Button variant="ghost" size="sm" className="text-muted-foreground" disabled={disabilitato} onClick={() => setAperto(true)}>
-        <RotateCcw aria-hidden /> Ricomincia
-      </Button>
       <AlertDialog open={aperto} onOpenChange={setAperto}>
         <AlertDialogContent>
           <AlertDialogHeader>

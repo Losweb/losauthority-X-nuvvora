@@ -5,12 +5,12 @@ import { Button } from "@/shared/components/ui/button";
 /** «Parla con Aura» / «Chiudi la chat»: a lavoro finito la conversazione si apre solo quando serve. */
 export function BottoneChat({ aperta, disabilitato, onCambia }: { aperta: boolean; disabilitato?: boolean; onCambia: (aperta: boolean) => void }) {
   return aperta ? (
-    <Button variant="ghost" size="sm" disabled={disabilitato} onClick={() => onCambia(false)}>
+    <Button variant="ghost" disabled={disabilitato} onClick={() => onCambia(false)}>
       <X aria-hidden /> Chiudi la chat
     </Button>
   ) : (
     <Button
-      size="sm"
+      variant="default"
       onClick={() => {
         onCambia(true);
         // Porta in vista tutta la chat, con il campo per scrivere, appena compare.

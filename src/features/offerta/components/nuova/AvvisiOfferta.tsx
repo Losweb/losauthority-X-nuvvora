@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, ChevronDown, RefreshCw, RotateCcw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,18 +26,6 @@ export function AvvisiOfferta({ o, avatarAggiornatoIl }: { o: OffertaNuova; avat
           <RefreshCw className="mt-0.5 size-4 shrink-0" aria-hidden />
           <p>Il tuo avatar è cambiato dopo l'ultima volta che ne abbiamo parlato qui. Scrivi ad Aura «rivediamo il per chi» e sistema la frase con la partenza principale.</p>
         </div>
-      ) : null}
-      {o.completa_fatta_il ? (
-        <Link to="/area/crea-idee" className="flex items-center justify-between gap-3 rounded-lg border border-foreground/25 bg-card p-3 text-[14px] font-medium transition-colors hover:bg-surface-hover">
-          <span>La tua offerta è pronta. Il prossimo passo sono i primi video: chiedi le idee ad Aura.</span>
-          <ArrowRight className="size-4 shrink-0" aria-hidden />
-        </Link>
-      ) : null}
-      {o.strada === "breve" && o.breve_fatta_il ? (
-        <Link to="/area/cervello/avatar" className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3 text-[14px] transition-colors hover:bg-surface-hover">
-          <span>La frase è pronta. Il prossimo passo è la fase Avatar: da lì si apre la scheda completa.</span>
-          <ArrowRight className="size-4 shrink-0" aria-hidden />
-        </Link>
       ) : null}
     </>
   );
@@ -68,14 +55,11 @@ export function OffertaDiPrima({ o: nuova }: { o: OffertaNuova }) {
 }
 
 /** «Ricomincia»: elimina l'offerta e la conversazione, dopo conferma. */
-export function RicominciaOfferta({ offertaId, disabilitato }: { offertaId: string; disabilitato?: boolean }) {
-  const [aperto, setAperto] = useState(false);
+export function RicominciaOfferta({ offertaId, aperto, onOpenChange }: { offertaId: string; aperto: boolean; onOpenChange: (aperto: boolean) => void }) {
   const ricomincia = useRicominciaOfferta();
+  const setAperto = onOpenChange;
   return (
     <>
-      <Button variant="ghost" size="sm" className="text-muted-foreground" disabled={disabilitato} onClick={() => setAperto(true)}>
-        <RotateCcw aria-hidden /> Ricomincia
-      </Button>
       <AlertDialog open={aperto} onOpenChange={setAperto}>
         <AlertDialogContent>
           <AlertDialogHeader>

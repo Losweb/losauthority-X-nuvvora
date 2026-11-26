@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AlertOctagon, Check } from "lucide-react";
+import { AlertOctagon } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/shared/utils/formatDate";
@@ -34,27 +34,30 @@ export function Sezione({ titolo, children, className }: { titolo: string; child
   );
 }
 
-/** Strada (versione breve / scheda completa) e la barra dei passi o delle fasi. */
+/**
+ * La barra delle fasi (26/11/2026, Wesley: «bastano le barre»): solo i trattini, niente scritte.
+ * Il nome della fase si legge passando sopra (title) e dal lettore di schermo. A lavoro finito la pagina non la mostra.
+ */
 export function PassiOfferta({ o }: { o: OffertaNuova }) {
   const completa = o.strada === "completa";
   const passi = completa ? FASI_COMPLETA : PASSI_BREVE;
   const finita = completa ? !!o.completa_fatta_il : !!o.breve_fatta_il;
   // breve: passo 1-6 → indice 0-5; completa: fase 0-7 → indice 0-7
   const corrente = finita ? passi.length : completa ? (o.passo ?? 0) : Math.max((o.passo ?? 1) - 1, 0);
+  return <BarraPassi passi={passi} corrente={corrente} />;
+}
+
+/** I trattini di avanzamento, condivisi da Avatar e Offerta. */
+export function BarraPassi({ passi, corrente }: { passi: readonly string[]; corrente: number }) {
   return (
-    <nav aria-label="A che punto sei" className="grid gap-2">
-      <p className="text-[13px] text-muted-foreground">
-        {completa ? "Scheda completa" : "Versione breve"}
-        {finita ? " · fatta" : <span className="sm:hidden"> · {completa ? `fase ${corrente} di 7` : `passo ${corrente + 1} di 6`}: {passi[corrente]}</span>}
-      </p>
-      {/* Sul telefono solo la barra sottile; i nomi delle fasi da sm in su. */}
-      <ol className={cn("grid gap-1.5", completa ? "grid-cols-8" : "grid-cols-6")}>
+    <nav aria-label="A che punto sei">
+      <ol className="flex gap-1.5">
         {passi.map((p, i) => (
-          <li key={p} aria-current={i === corrente ? "step" : undefined} className="grid gap-1">
-            <span className={cn("h-1.5 rounded-full", i < corrente ? "bg-primary" : i === corrente ? "bg-primary/45" : "bg-secondary")} />
-            <span className={cn("hidden items-center gap-1 text-[12px] leading-tight sm:flex", i === corrente ? "font-semibold text-foreground" : "text-muted-foreground")}>
-              {i < corrente ? <Check className="size-3 shrink-0" aria-hidden /> : null}
-              {completa ? i : i + 1}. {p}
+          <li key={p} aria-current={i === corrente ? "step" : undefined} title={p} className="flex-1">
+            <span className={cn("block h-1.5 rounded-full", i < corrente ? "bg-primary" : i === corrente ? "bg-primary/45" : "bg-secondary")} />
+            <span className="sr-only">
+              {p}
+              {i < corrente ? ": fatto" : i === corrente ? ": adesso" : ""}
             </span>
           </li>
         ))}

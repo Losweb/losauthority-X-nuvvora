@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, PlayCircle, RotateCcw, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/features/auth";
@@ -20,18 +20,21 @@ import {
   useMappaAvatar,
   useMessaggiMappa,
   useModificaRiga,
+  VetrinaAvatar,
   type MessaggioMappa,
   type VistaMobile,
 } from "@/features/avatar";
 import { ComposerAura } from "@/features/idee";
 import { primoNome } from "@/features/scheda";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button, buttonVariants } from "@/shared/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { scorriInCima } from "@/shared/utils/scroll";
 import { cn } from "@/lib/utils";
+import { AltreAzioni } from "../components/AltreAzioni";
 import { BottoneChat, InizioChatNuova } from "../components/BottoneChat";
+import { Dettaglio } from "@/shared/components/layout/Dettaglio";
 import { PassoDopo } from "../components/percorso/PassoDopo";
 
 /**
@@ -54,6 +57,7 @@ export default function AvatarPage() {
   const [sceltaChat, setSceltaChat] = useState<boolean | null>(null);
   /** Quanti messaggi vecchi piegare quando la chat si riapre a lavoro finito (0 = mostrali tutti). */
   const [piegati, setPiegati] = useState(0);
+  const [ricomincia, setRicomincia] = useState(false);
 
   const inizia = useIniziaMappa(clienteId);
   const invia = useInviaMappa(clienteId);
@@ -98,32 +102,23 @@ export default function AvatarPage() {
     scorriInCima();
   }
 
-  const intestazione = (
+  // Intestazione (26/11/2026, pulizia UX): «← Il tuo percorso», il titolo e a destra le azioni.
+  // La frase sotto il titolo serve finché si lavora; a lavoro finito si toglie.
+  const intestazione = (azioni?: ReactNode, conSottotitolo = true) => (
     <>
       <Link to="/area/dashboard" className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground pointer-coarse:-my-2 pointer-coarse:min-h-9 pointer-coarse:py-2">
         <ArrowLeft className="size-3.5" aria-hidden /> Il tuo percorso
       </Link>
-      <PageHeader
-        occhiello={`Fondamenta${nome ? ` · ${nome}` : ""}`}
-        titolo="Avatar"
-        sottotitolo="A chi parlano i tuoi contenuti. Aura legge quello che sa già di te, fa l'analisi e ti propone la mappa: tu correggi."
-        azioni={
-          LINK_LEZIONE_AVATAR ? (
-            <a href={LINK_LEZIONE_AVATAR} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline" })}>
-              <PlayCircle aria-hidden /> Lezione «A chi parli?»
-            </a>
-          ) : null
-        }
-      />
+      <PageHeader titolo="Avatar" sottotitolo={conSottotitolo ? "A chi parlano i tuoi contenuti. Aura legge quello che sa già di te e ti propone la mappa: tu correggi." : undefined} azioni={azioni} />
     </>
   );
 
-  if (dati.isLoading) return <div className="grid gap-7">{intestazione}<SkeletonBlocco altezza="h-96" /></div>;
-  if (dati.isError) return <div className="grid gap-7">{intestazione}<ErroreCaricamento /></div>;
+  if (dati.isLoading) return <div className="grid gap-7">{intestazione()}<SkeletonBlocco altezza="h-96" /></div>;
+  if (dati.isError) return <div className="grid gap-7">{intestazione()}<ErroreCaricamento /></div>;
   if (!dati.data) {
     return (
       <div className="grid gap-7">
-        {intestazione}
+        {intestazione()}
         <InizioAvatar nome={nome} occupato={inizia.isPending} onInizia={(d) => inizia.mutate(d)} />
       </div>
     );
@@ -136,34 +131,37 @@ export default function AvatarPage() {
   const scheda = schedaAperta !== null ? schede.find((s) => s.ordine === schedaAperta) : undefined;
   const onModifica = (m: Parameters<typeof modifica.mutate>[0]) => modifica.mutate(m);
 
+  const azioni = (
+    <>
+      {fatto ? (
+        // Sul telefono lo stato sta su una riga sua, così «Parla con Aura» e «⋯» restano insieme.
+        <span className="basis-full sm:basis-auto">
+          <Badge variant={mappa.stato === "rivista" ? "active" : "neutral"} dot>
+            {mappa.stato === "rivista" ? "Rivista da Wesley" : "Da rivedere con Wesley"}
+          </Badge>
+        </span>
+      ) : null}
+      {fatto && !scheda ? <BottoneChat aperta={chat} disabilitato={auraScrive} onCambia={(v) => { setSceltaChat(v); setSceltaVista(null); setPiegati(v ? lista.length : 0); }} /> : null}
+      <AltreAzioni
+        voci={[
+          ...(LINK_LEZIONE_AVATAR ? [{ etichetta: "Lezione «A chi parli?»", icona: PlayCircle, onClick: () => window.open(LINK_LEZIONE_AVATAR ?? "", "_blank", "noopener") }] : []),
+          { etichetta: "Ricomincia da capo", icona: RotateCcw, onClick: () => setRicomincia(true), distruttiva: true, disabilitata: auraScrive },
+        ]}
+      />
+    </>
+  );
+
   return (
     <div className="grid gap-5">
-      {intestazione}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0 flex-1 basis-[420px]">
-          <PassiAvatar passo={mappa.passo} />
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant={mappa.stato === "rivista" ? "active" : "neutral"} dot>
-            {mappa.stato === "rivista" ? "Rivista da Wesley" : "Bozza"}
-          </Badge>
-          <RicominciaAvatar clienteId={clienteId} mappaId={mappa.id} disabilitato={auraScrive} />
-          {fatto && !scheda ? <BottoneChat aperta={chat} disabilitato={auraScrive} onCambia={(v) => { setSceltaChat(v); setSceltaVista(null); setPiegati(v ? lista.length : 0); }} /> : null}
-        </div>
-      </div>
-
-      {fatto && !scheda ? <PassoDopo testo="Il tuo avatar è pronto. Il prossimo passo è la tua offerta completa: mercato, promessa, prezzo." href="/area/cervello/offerta" /> : null}
+      {intestazione(azioni, !fatto)}
+      <RicominciaAvatar clienteId={clienteId} mappaId={mappa.id} aperto={ricomincia} onOpenChange={setRicomincia} />
+      {!fatto ? <PassiAvatar passo={mappa.passo} /> : null}
 
       {scheda ? (
-        <div className="grid gap-4">
-          <div className="flex items-center justify-between gap-3">
-            <Button variant="ghost" size="sm" onClick={() => apriScheda(null)}>
-              <ArrowLeft aria-hidden /> Torna alla mappa
-            </Button>
-            <Button variant="ghost" size="icon-sm" aria-label="Chiudi la scheda" onClick={() => apriScheda(null)}>
-              <X aria-hidden />
-            </Button>
-          </div>
+        <div className={cn("grid gap-3", "max-w-[860px]")}>
+          <Button variant="ghost" size="sm" className="-ml-2 justify-self-start" onClick={() => apriScheda(null)}>
+            <ArrowLeft aria-hidden /> {fatto ? "Tutti gli avatar" : "Torna alla mappa"}
+          </Button>
           <SchedaDocumento scheda={scheda} stato={mappa.stato} onModifica={onModifica} occupato={modifica.isPending} ampia />
         </div>
       ) : null}
@@ -204,9 +202,23 @@ export default function AvatarPage() {
           </div>
         </section>
 
-        <aside className={cn("order-1 grid min-w-0 content-start gap-5 lg:order-2", !chat || vista === "carta" ? "grid" : "hidden md:grid")}>
-          <MappaPonte mappa={mappa} schede={schede} onModifica={onModifica} occupato={modifica.isPending} />
-          <ElencoSchede schede={schede} onApri={apriScheda} />
+        <aside className={cn("order-1 grid min-w-0 grid-cols-1 content-start gap-5 lg:order-2", !chat || vista === "carta" ? "grid" : "hidden md:grid", !chat && "w-full max-w-[860px]")}>
+          {fatto ? (
+            <>
+              {/* A lavoro finito: prima gli avatar, la mappa che li ha prodotti piegata sotto. */}
+              <VetrinaAvatar schede={schede} onApri={apriScheda} />
+              <div className="rounded-lg border bg-card px-5">
+                <Dettaglio titolo="La mappa" riassunto="da dove partono, cosa vendi, l'arrivo">
+                  <MappaPonte mappa={mappa} schede={schede} onModifica={onModifica} occupato={modifica.isPending} />
+                </Dettaglio>
+              </div>
+            </>
+          ) : (
+            <>
+              <MappaPonte mappa={mappa} schede={schede} onModifica={onModifica} occupato={modifica.isPending} />
+              <ElencoSchede schede={schede} onApri={apriScheda} />
+            </>
+          )}
           {mappa.convertita ? (
             <p className="flex items-start gap-2 text-[13px] text-muted-foreground">
               <RotateCcw className="mt-0.5 size-3.5 shrink-0" aria-hidden /> Questa mappa è nata dagli avatar che avevi già scritto con Aura: le righe «lettura» sono da confermare.
@@ -214,6 +226,11 @@ export default function AvatarPage() {
           ) : null}
         </aside>
       </div>
+      {fatto && !scheda ? (
+        <div className={cn(!chat && "max-w-[860px]")}>
+          <PassoDopo testo="Prossimo passo: la tua offerta" href="/area/cervello/offerta" />
+        </div>
+      ) : null}
     </div>
   );
 }

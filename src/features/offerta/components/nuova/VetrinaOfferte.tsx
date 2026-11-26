@@ -15,7 +15,7 @@ export function VetrinaOfferte({ o, onApri }: { o: OffertaNuova; onApri: (indice
       <h2 id="titolo-vetrina" className="text-[18px] font-bold">
         Le tue offerte
       </h2>
-      <ul className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+      <ul className="grid gap-4 sm:grid-cols-2">
         {gradini.map((g, i) => {
           const principale = g.livello === "cuore";
           const { cifra, nota } = dividiPrezzo(g.prezzo);

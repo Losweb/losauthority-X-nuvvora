@@ -10,6 +10,7 @@ export type { Avatar, DiagnosiAvatar as Diagnosi } from "./types";
 
 // Fase Avatar dal 25/11/2026: una mappa per cliente + da una a tre schede.
 export { ElencoSchede } from "./components/mappa/ElencoSchede";
+export { VetrinaAvatar } from "./components/mappa/VetrinaAvatar";
 export { InizioAvatar } from "./components/mappa/InizioAvatar";
 export { MappaPonte } from "./components/mappa/MappaPonte";
 export { DubbiAvatar, PassiAvatar } from "./components/mappa/PassiAvatar";

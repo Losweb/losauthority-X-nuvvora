@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { ArrowLeft, FileDown, X } from "lucide-react";
+import { useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, FileDown, RotateCcw, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/features/auth";
 import { FlussoAvatar, SceltaVista, useMappaAvatar, type VistaMobile } from "@/features/avatar";
@@ -26,12 +26,14 @@ import {
 } from "@/features/offerta";
 import { primoNome } from "@/features/scheda";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
-import { Button, buttonVariants } from "@/shared/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { scorriInCima } from "@/shared/utils/scroll";
 import { cn } from "@/lib/utils";
+import { AltreAzioni } from "../components/AltreAzioni";
 import { BottoneChat, InizioChatNuova } from "../components/BottoneChat";
+import { PassoDopo } from "../components/percorso/PassoDopo";
 
 /**
  * /area/cervello/offerta → la fase Offerta (dal 26/11/2026): UNA offerta per
@@ -52,6 +54,7 @@ export default function OffertaPage() {
   const [sceltaChat, setSceltaChat] = useState<boolean | null>(null);
   /** Quanti messaggi vecchi piegare quando la chat si riapre a lavoro finito (0 = mostrali tutti). */
   const [piegati, setPiegati] = useState(0);
+  const [ricomincia, setRicomincia] = useState(false);
   /** Vetrina: l'offerta aperta (indice nei gradini), null = tutte le offerte. */
   const [offertaAperta, setOffertaAperta] = useState<number | null>(null);
 
@@ -93,40 +96,31 @@ export default function OffertaPage() {
     invia.mutate({ riprovaId: m.id, signal: nuovoStop() }, { onSuccess: (r) => setPendente({ testo: "", auraId: r.messaggio_id }), onError: () => setPendente(null) });
   }
 
-  const intestazione = (
+  // Intestazione (26/11/2026, pulizia UX): «← Il tuo percorso», il titolo e a destra le azioni.
+  // La frase sotto il titolo serve finché si lavora; a lavoro finito si toglie.
+  const intestazione = (azioni?: ReactNode, conSottotitolo = true) => (
     <>
       <Link to="/area/dashboard" className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground pointer-coarse:-my-2 pointer-coarse:min-h-9 pointer-coarse:py-2">
         <ArrowLeft className="size-3.5" aria-hidden /> Il tuo percorso
       </Link>
-      <PageHeader
-        occhiello={`Fondamenta${nome ? ` · ${nome}` : ""}`}
-        titolo="Offerta"
-        sottotitolo="Cosa vendi, a chi, dove lo porti e perché proprio tu. Aura legge quello che sa già di te e propone; tu correggi."
-        azioni={
-          offerta.data ? (
-            <a href={linkPdfOfferta(offerta.data.id)} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline" })}>
-              <FileDown aria-hidden /> Scarica PDF
-            </a>
-          ) : null
-        }
-      />
+      <PageHeader titolo="Offerta" sottotitolo={conSottotitolo ? "Cosa vendi, a chi e a quanto. Aura legge quello che sa già di te e propone: tu correggi." : undefined} azioni={azioni} />
     </>
   );
 
-  if (offerta.isLoading) return <div className="grid gap-7">{intestazione}<SkeletonBlocco altezza="h-96" /></div>;
-  if (offerta.isError) return <div className="grid gap-7">{intestazione}<ErroreCaricamento /></div>;
+  if (offerta.isLoading) return <div className="grid gap-7">{intestazione()}<SkeletonBlocco altezza="h-96" /></div>;
+  if (offerta.isError) return <div className="grid gap-7">{intestazione()}<ErroreCaricamento /></div>;
   const o = offerta.data;
   if (!o) {
     return (
       <div className="grid gap-7">
-        {intestazione}
+        {intestazione()}
         <section className="mx-auto grid w-full max-w-[680px] gap-5 rounded-2xl border bg-card/70 p-6 md:p-8">
           <div className="flex items-start gap-4">
             <AuraSfera dimensione={56} conNome={false} />
             <div className="grid gap-2">
               <h2 className="text-[22px] leading-tight font-bold">{nome ? `${nome}, cosa vendi?` : "Cosa vendi?"}</h2>
               <p className="text-[15px] leading-relaxed text-muted-foreground">
-                Se il tuo avatar non è ancora pronto partiamo dalla versione breve: in due o tre scambi scriviamo la tua offerta in una frase. Quando l'avatar è pronto, la frase diventa una scheda completa: mercato, promessa, freni, prezzo e come la presenti.
+                Se il tuo avatar non è ancora pronto, scriviamo la tua offerta in una frase. Con l'avatar pronto facciamo la scheda completa: promessa, prezzo e come la presenti.
               </p>
             </div>
           </div>
@@ -173,16 +167,29 @@ export default function OffertaPage() {
       )}
     </div>
   );
+  const azioni = (
+    <>
+      {fatta ? <BottoneChat aperta={chat} disabilitato={auraScrive} onCambia={(v) => { setSceltaChat(v); setSceltaVista(null); setPiegati(v ? lista.length : 0); }} /> : null}
+      <AltreAzioni
+        voci={[
+          { etichetta: "Scarica PDF", icona: FileDown, onClick: () => window.open(linkPdfOfferta(o.id), "_blank", "noopener") },
+          { etichetta: "Ricomincia da capo", icona: RotateCcw, onClick: () => setRicomincia(true), distruttiva: true, disabilitata: auraScrive },
+        ]}
+      />
+    </>
+  );
+  // Il passo dopo, in fondo alla pagina: dove si va quando questa fase è finita.
+  const passoDopo = o.completa_fatta_il ? (
+    <PassoDopo testo="Prossimo passo: le idee per i primi video" href="/area/crea-idee" />
+  ) : o.strada === "breve" && o.breve_fatta_il ? (
+    <PassoDopo testo="Prossimo passo: il tuo avatar" href="/area/cervello/avatar" />
+  ) : null;
+
   return (
     <div className="grid gap-5">
-      {intestazione}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0 flex-1 basis-[420px]">{o.strada ? <PassiOfferta o={o} /> : null}</div>
-        <div className="flex items-center gap-2">
-          <RicominciaOfferta offertaId={o.id} disabilitato={auraScrive} />
-          {fatta ? <BottoneChat aperta={chat} disabilitato={auraScrive} onCambia={(v) => { setSceltaChat(v); setSceltaVista(null); setPiegati(v ? lista.length : 0); }} /> : null}
-        </div>
-      </div>
+      {intestazione(azioni, !fatta)}
+      <RicominciaOfferta offertaId={o.id} aperto={ricomincia} onOpenChange={setRicomincia} />
+      {o.strada && !fatta ? <PassiOfferta o={o} /> : null}
       {chat ? <SceltaVista vista={vista} onCambia={setSceltaVista} seconda="Scheda" /> : null}
 
       <div className={cn("grid min-w-0 grid-cols-1 gap-6 lg:items-start", chat && "lg:grid-cols-[minmax(0,1fr)_minmax(440px,600px)]")}>
@@ -210,7 +217,7 @@ export default function OffertaPage() {
           </div>
         </section>
 
-        <aside className={cn("order-1 grid min-w-0 content-start gap-5 lg:order-2", !chat || vista === "carta" ? "grid" : "hidden md:grid", !chat && "mx-auto w-full max-w-[860px]")}>
+        <aside className={cn("order-1 grid min-w-0 grid-cols-1 content-start gap-5 lg:order-2", !chat || vista === "carta" ? "grid" : "hidden md:grid", !chat && "w-full max-w-[860px]")}>
           <AvvisiOfferta o={o} avatarAggiornatoIl={avatar.data?.mappa.updated_at ?? null} />
           <FermoOfferta fermo={o.fermo} />
           <FraseOfferta o={o} />
@@ -218,6 +225,7 @@ export default function OffertaPage() {
           <OffertaDiPrima o={o} />
         </aside>
       </div>
+      {!scelto && passoDopo ? <div className={cn(!chat && "max-w-[860px]")}>{passoDopo}</div> : null}
     </div>
   );
 }
