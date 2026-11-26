@@ -48,6 +48,16 @@ export function useInviaOffertaCliente() {
   });
 }
 
+/** Il cliente corregge da solo una riga dell'offerta (nome, prezzo, cosa c'è dentro, promessa, bonus…). */
+export function useModificaOfferta() {
+  const invalida = useInvalida();
+  return useMutation({
+    mutationFn: async (m: { percorso: string; valore?: string | Record<string, string> | null }) => invocaEdge<Record<string, never>>("aura-offerta", { azione: "modifica", ...m }),
+    onSettled: invalida,
+    onError: erroreMutation("Modifica non salvata"),
+  });
+}
+
 /** Tasto stop: chiude la richiesta nel browser e dice alla funzione di scartare la risposta in corso. */
 export function useFermaOfferta() {
   const invalida = useInvalida();

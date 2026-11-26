@@ -10,6 +10,7 @@
  *   { messaggio }                     → turno di conversazione. { ok, messaggio_id, risposta }
  *   { riprova_messaggio_id }          → rifà una risposta finita in errore.
  *   { azione: "ferma" }               → tasto stop: le risposte in corso diventano «Fermata» e quando arrivano si scartano. { ok }
+ *   { azione: "modifica", percorso, valore } → il cliente corregge da solo una riga dell'offerta (modifica.ts). { ok }
  * Nel prompt entrano solo i messaggi da `nuova_dal` in poi (quelli del metodo di prima no).
  * Un «Fermo» avvisa il team su Telegram (dati.ts). Rate limit: aura_help_allowed(user, 40, 3600, 'offerta').
  */
@@ -23,9 +24,10 @@ import { leggiLettura, renderLettura } from "../_shared/onboarding/lettura.ts";
 import { bloccoKitBrand } from "../_shared/kit-brand.ts";
 import { APERTURA, APERTURA_CON_MESSAGGIO, costruisciPrompt, SYSTEM, type Storico } from "./prompt.ts";
 import { avatarDi, renderAvatar } from "./avatar.ts";
+import { modificaOfferta } from "./modifica.ts";
 import { applicaDati, estraiDati, renderOffertaAttuale, renderStato, type RigaOfferta } from "./dati.ts";
 
-type Body = { azione?: unknown; messaggio?: unknown; riprova_messaggio_id?: unknown };
+type Body = { azione?: unknown; messaggio?: unknown; riprova_messaggio_id?: unknown; percorso?: unknown; valore?: unknown };
 
 const MAX_MESSAGGIO = 4000;
 const MAX_STORICO = 12;
@@ -130,6 +132,13 @@ Deno.serve(async (req: Request) => {
     if (body.azione === "ferma") {
       const o = await offertaDi(admin, c.id);
       if (o) await admin.from("offerta_messaggi").update({ stato: "errore", errore: "Fermata" }).eq("offerta_id", o.id).eq("ruolo", "aura").eq("stato", "in_corso");
+      return json({ ok: true });
+    }
+
+    if (body.azione === "modifica") {
+      const o = await offertaDi(admin, c.id);
+      if (!o) throw new HttpError(404, "Offerta non trovata.");
+      await modificaOfferta(admin, o, body);
       return json({ ok: true });
     }
 

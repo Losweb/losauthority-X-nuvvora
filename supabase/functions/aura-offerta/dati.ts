@@ -107,7 +107,12 @@ export async function applicaDati(admin: SupabaseClient, o: RigaOfferta, d: Dati
     update.frase_il = new Date().toISOString();
   }
   if (Object.keys(d.scheda).length > 0) update.scheda = { ...(o.scheda ?? {}), ...d.scheda };
-  if (d.fine) update[o.strada === "completa" ? "completa_fatta_il" : "breve_fatta_il"] = new Date().toISOString();
+  // L'offerta si chiude solo senza cose da confermare (26/11/2026, Wesley: «prima di creare l'offerta
+  // devono essere confermate»): se Aura prova a chiudere con la lista piena, resta aperta.
+  const daConfermare = ((update.scheda as SchedaOfferta | undefined) ?? o.scheda ?? {}).da_confermare ?? [];
+  if (d.fine && daConfermare.length > 0) {
+    await logError("aura-offerta:fine_con_da_confermare", new Error("fine rifiutato"), { offerta: o.id, n: daConfermare.length }, { silent: true });
+  } else if (d.fine) update[o.strada === "completa" ? "completa_fatta_il" : "breve_fatta_il"] = new Date().toISOString();
   if (d.fermo !== undefined) {
     update.fermo = d.fermo;
     update.fermo_il = d.fermo ? new Date().toISOString() : null;

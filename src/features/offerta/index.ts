@@ -10,7 +10,7 @@ export { AvvisiOfferta, OffertaDiPrima, RicominciaOfferta } from "./components/n
 export { BadgeOrigine, FermoOfferta, FraseOfferta, PassiOfferta } from "./components/nuova/PezziBase";
 export { SchedaOffertaNuova } from "./components/nuova/SchedaOffertaNuova";
 export { SchedaGradino, VetrinaOfferte } from "./components/nuova/VetrinaOfferte";
-export { chiaveOffertaCliente, useFermaOfferta, useIniziaOfferta, useInviaOffertaCliente, useOffertaCliente, useRicominciaOfferta } from "./hooks/useOffertaCliente";
+export { chiaveOffertaCliente, useFermaOfferta, useIniziaOfferta, useInviaOffertaCliente, useModificaOfferta, useOffertaCliente, useRicominciaOfferta } from "./hooks/useOffertaCliente";
 export { asNuova, FASI_AURA_OFFERTA, haOffertaDiPrima, schedaIniziata } from "./nuova";
 export type { OffertaNuova } from "./nuova";
 

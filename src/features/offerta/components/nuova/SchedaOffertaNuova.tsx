@@ -1,3 +1,4 @@
+import { RigaAvatar, type Correzione } from "@/features/avatar";
 import { Dettaglio } from "@/shared/components/layout/Dettaglio";
 import { cn } from "@/lib/utils";
 import {
@@ -22,17 +23,35 @@ const ETICHETTA_PROMESSA = { sicura: "Sicura", tagliente: "Tagliente", colpo_di_
  * se ti dicono, da confermare, come ci siamo arrivati). `aperta` (tab del team e PDF) le apre
  * tutte; `larga` = due colonne nel ragionamento.
  */
-export function SchedaOffertaNuova({ o, larga = false, aperta = false, gradino }: { o: OffertaNuova; larga?: boolean; aperta?: boolean; /** Dalla vetrina: mostra solo questa offerta (indice nei gradini). */ gradino?: number }) {
+export function SchedaOffertaNuova({
+  o,
+  larga = false,
+  aperta = false,
+  gradino,
+  onModifica,
+  occupato,
+}: {
+  o: OffertaNuova;
+  larga?: boolean;
+  aperta?: boolean;
+  /** Dalla vetrina: mostra solo questa offerta (indice nei gradini). */
+  gradino?: number;
+} & Correzione) {
+  // Il cliente corregge da solo nome, prezzo, cosa c'è dentro, promessa, bonus, garanzia, frasi, obiezioni.
+  const c: Correzione = { onModifica, occupato };
   const s = o.scheda ?? {};
   const pr = s.promessa;
   const pres = s.presentazione;
   const scelto = gradino !== undefined ? s.gradini?.[gradino] : undefined;
   const cuore = scelto ?? s.gradini?.find((g) => g.livello === "cuore");
   const nome = cuore?.nome || pres?.nomi?.[0] || null;
-  const promessa = pr?.scelta ? pr[pr.scelta] : (pr?.tagliente ?? pr?.sicura ?? null);
+  const chiavePromessa = pr?.scelta ?? (pr?.tagliente ? "tagliente" : pr?.sicura ? "sicura" : null);
+  const promessa = chiavePromessa ? (pr?.[chiavePromessa] ?? null) : null;
   const frasi = pres ? (["bio", "video", "chat"] as const).filter((k) => pres[k]) : [];
 
   const gradini = scelto ? [scelto] : (s.gradini ?? []);
+  /** L'indice vero nei gradini (nella vista di una sola offerta la lista ne ha uno). */
+  const indice = (i: number) => (scelto && gradino !== undefined ? gradino : i);
   const bonus = s.bonus ?? [];
   const obiezioni = pres?.obiezioni ?? [];
   const confermare = s.da_confermare ?? [];
@@ -43,25 +62,33 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false, gradino }
     gradini.some((g) => g.contiene) ? (
       <Dettaglio key="contiene" titolo="Cosa c'è dentro" riassunto={scelto ? undefined : gradini.length === 1 ? "1 prezzo" : `${gradini.length} prezzi`} aperto={aperta}>
         {gradini.map((g, i) => (
-          <div key={i} className="grid gap-0.5">
-            <p className="flex items-start gap-2 text-[15px] font-semibold">
-              <BadgeOrigine o={g.o} />
-              {g.nome || ETICHETTA_GRADINO[g.livello]} · <span className="figure">{g.prezzo}</span>
-            </p>
-            {g.contiene ? <p className="text-[15px] leading-relaxed text-muted-foreground">{g.contiene}</p> : null}
-          </div>
+          <RigaAvatar key={i} percorso={`gradini.${indice(i)}`} valori={[g.contiene]} chiavi={["contiene"]} etichette={["Cosa c'è dentro"]} semplice {...c}>
+            <div className="grid gap-0.5">
+              {scelto ? null : (
+                <p className="flex items-start gap-2 text-[15px] font-semibold">
+                  <BadgeOrigine o={g.o} />
+                  {g.nome || ETICHETTA_GRADINO[g.livello]} · <span className="figure">{g.prezzo}</span>
+                </p>
+              )}
+              {g.contiene ? <p className={cn("text-[15px] leading-relaxed", !scelto && "text-muted-foreground")}>{g.contiene}</p> : null}
+            </div>
+          </RigaAvatar>
         ))}
       </Dettaglio>
     ) : null,
     bonus.length || s.garanzia ? (
       <Dettaglio key="bonus" titolo="Bonus e garanzia" riassunto={[bonus.length ? `${bonus.length} bonus` : null, s.garanzia ? "garanzia" : null].filter(Boolean).join(" e ")} aperto={aperta}>
         {bonus.map((b, i) => (
-          <RigaVoce key={i} v={{ t: b.bonus, o: b.o }} />
+          <RigaAvatar key={i} percorso={`bonus.${i}`} valori={[b.bonus]} chiavi={["bonus"]} etichette={["Bonus"]} {...c}>
+            <RigaVoce v={{ t: b.bonus, o: b.o }} />
+          </RigaAvatar>
         ))}
         {s.garanzia ? (
           <div className="grid gap-0.5">
             <p className="text-[13px] text-muted-foreground">Garanzia</p>
-            <RigaVoce v={s.garanzia} />
+            <RigaAvatar percorso="garanzia" valori={[s.garanzia.t]} {...c}>
+              <RigaVoce v={s.garanzia} />
+            </RigaAvatar>
           </div>
         ) : null}
       </Dettaglio>
@@ -71,7 +98,9 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false, gradino }
         {frasi.map((k) => (
           <div key={k} className="grid gap-0.5">
             <p className="text-[13px] text-muted-foreground">{k === "bio" ? "Nella bio" : k === "video" ? "All'inizio di un video" : "In chat"}</p>
-            <p className="text-[15px] leading-relaxed">{pres?.[k]}</p>
+            <RigaAvatar percorso={`presentazione.${k}`} valori={[pres?.[k] ?? ""]} semplice {...c}>
+              <p className="text-[15px] leading-relaxed">{pres?.[k]}</p>
+            </RigaAvatar>
           </div>
         ))}
       </Dettaglio>
@@ -79,21 +108,30 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false, gradino }
     obiezioni.length ? (
       <Dettaglio key="obiezioni" titolo="Se ti dicono" riassunto={obiezioni.length === 1 ? "1 obiezione" : `${obiezioni.length} obiezioni`} aperto={aperta}>
         {obiezioni.map((x, i) => (
-          <div key={i} className="flex items-start gap-2">
-            <BadgeOrigine o={x.o} />
-            <div className="min-w-0 flex-1">
-              <p className="text-[15px] leading-relaxed">«{x.a}»</p>
-              <p className="text-[15px] leading-relaxed text-muted-foreground">→ {x.b}</p>
+          <RigaAvatar key={i} percorso={`presentazione.obiezioni.${i}`} valori={[x.a, x.b]} chiavi={["a", "b"]} etichette={["Se ti dicono", "Rispondi"]} {...c}>
+            <div className="flex items-start gap-2">
+              <BadgeOrigine o={x.o} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[15px] leading-relaxed">«{x.a}»</p>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">→ {x.b}</p>
+              </div>
             </div>
-          </div>
+          </RigaAvatar>
         ))}
       </Dettaglio>
     ) : null,
     confermare.length ? (
       <Dettaglio key="confermare" titolo="Da confermare" riassunto={<span className="text-status-expiring">{confermare.length === 1 ? "1 cosa" : `${confermare.length} cose`}</span>} aperto={aperta}>
-        <ul className="grid list-disc gap-1 pl-4 text-[15px] leading-relaxed marker:text-status-expiring">
-          {confermare.map((d) => (
-            <li key={d}>{d}</li>
+        <ul className="grid gap-1 text-[15px] leading-relaxed">
+          {confermare.map((d, i) => (
+            <li key={d}>
+              <RigaAvatar percorso={`da_confermare.${i}`} valori={[d]} {...c}>
+                <p className="flex items-start gap-2">
+                  <span className="relative mt-[9px] inline-block size-1.5 shrink-0 rounded-full bg-status-expiring" aria-hidden />
+                  {d}
+                </p>
+              </RigaAvatar>
+            </li>
           ))}
         </ul>
       </Dettaglio>
@@ -204,15 +242,24 @@ export function SchedaOffertaNuova({ o, larga = false, aperta = false, gradino }
         <header className="grid gap-4 p-5">
           <div className="grid gap-1.5">
             {scelto ? <span className="w-fit rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-medium text-primary-foreground">{ETICHETTA_VETRINA[scelto.livello]}</span> : null}
-            {nome ? <h3 className="text-[22px] leading-tight font-bold">{nome}</h3> : null}
-            {promessa ? <p className="text-[17px] leading-snug font-medium">{promessa}</p> : null}
+            {scelto && gradino !== undefined ? (
+              <RigaAvatar percorso={`gradini.${gradino}`} valori={[scelto.nome, scelto.prezzo]} chiavi={["nome", "prezzo"]} etichette={["Nome", "Prezzo"]} semplice {...c}>
+                <h3 className="text-[22px] leading-tight font-bold">{nome}</h3>
+                <p className="mt-1.5 flex items-baseline gap-2">
+                  <span className="figure text-[22px] font-bold">{dividiPrezzo(scelto.prezzo).cifra}</span>
+                  {dividiPrezzo(scelto.prezzo).nota ? <span className="text-[13px] text-status-expiring">{dividiPrezzo(scelto.prezzo).nota}</span> : null}
+                </p>
+              </RigaAvatar>
+            ) : nome ? (
+              <h3 className="text-[22px] leading-tight font-bold">{nome}</h3>
+            ) : null}
+            {promessa && chiavePromessa ? (
+              <RigaAvatar percorso={`promessa.${chiavePromessa}`} valori={[promessa]} etichette={["La promessa"]} semplice {...c}>
+                <p className="text-[17px] leading-snug font-medium">{promessa}</p>
+              </RigaAvatar>
+            ) : null}
           </div>
-          {scelto ? (
-            <p className="flex items-baseline gap-2">
-              <span className="figure text-[22px] font-bold">{dividiPrezzo(scelto.prezzo).cifra}</span>
-              {dividiPrezzo(scelto.prezzo).nota ? <span className="text-[13px] text-status-expiring">{dividiPrezzo(scelto.prezzo).nota}</span> : null}
-            </p>
-          ) : gradini.length ? (
+          {scelto ? null : gradini.length ? (
             <ul className={cn("grid gap-2", gradini.length > 1 && "sm:grid-cols-2", gradini.length > 2 && "lg:grid-cols-3")}>
               {gradini.map((g, i) => (
                 <li key={i} className="grid gap-0.5 rounded-md bg-surface px-3 py-2.5">

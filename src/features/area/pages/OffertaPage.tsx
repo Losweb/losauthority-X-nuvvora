@@ -18,6 +18,7 @@ import {
   useIniziaOfferta,
   useFermaOfferta,
   useInviaOffertaCliente,
+  useModificaOfferta,
   useMessaggiOfferta,
   useOffertaCliente,
   VetrinaOfferte,
@@ -57,6 +58,7 @@ export default function OffertaPage() {
   const inizia = useIniziaOfferta();
   const invia = useInviaOffertaCliente();
   const ferma = useFermaOfferta();
+  const modifica = useModificaOfferta();
   const offerta = useOffertaCliente(utente?.id, attivo || inizia.isPending);
   const avatar = useMappaAvatar(utente?.id);
   const messaggi = useMessaggiOfferta(offerta.data?.id);
@@ -154,8 +156,9 @@ export default function OffertaPage() {
     setOffertaAperta(i);
     scorriInCima();
   };
+  const correzione = { onModifica: (m: { percorso: string; valore?: string | Record<string, string> | null }) => modifica.mutate(m), occupato: modifica.isPending || auraScrive };
   const scheda = !conVetrina ? (
-    <SchedaOffertaNuova o={o} larga={!chat} />
+    <SchedaOffertaNuova o={o} larga={!chat} {...correzione} />
   ) : !scelto || offertaAperta === null ? (
     <VetrinaOfferte o={o} onApri={apri} />
   ) : (
@@ -164,9 +167,9 @@ export default function OffertaPage() {
         <ArrowLeft aria-hidden /> Tutte le offerte
       </Button>
       {scelto.livello === "cuore" ? (
-        <SchedaOffertaNuova o={o} gradino={offertaAperta} larga={!chat} />
+        <SchedaOffertaNuova o={o} gradino={offertaAperta} larga={!chat} {...correzione} />
       ) : (
-        <SchedaGradino g={scelto} principale={gradini[iCuore]} onApriPrincipale={iCuore >= 0 ? () => apri(iCuore) : undefined} />
+        <SchedaGradino g={scelto} indice={offertaAperta} principale={gradini[iCuore]} {...correzione} onApriPrincipale={iCuore >= 0 ? () => apri(iCuore) : undefined} />
       )}
     </div>
   );

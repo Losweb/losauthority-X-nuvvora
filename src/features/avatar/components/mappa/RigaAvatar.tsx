@@ -82,7 +82,7 @@ export function RigaAvatar({ percorso, origine, valori, chiavi, etichette, child
             />
           </label>
         ))}
-        <p className="text-[12px] text-muted-foreground">La tua correzione conta come frase vera.</p>
+        <p className="text-[12px] text-muted-foreground">La tua correzione conta come vera.</p>
         <div className="flex flex-wrap items-center gap-2">
           <Button type="submit" size="sm" disabled={occupato || bozza.some((t) => !t.trim())}>
             Salva

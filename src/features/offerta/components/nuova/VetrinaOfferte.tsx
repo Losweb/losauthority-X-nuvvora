@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { RigaAvatar, type Correzione } from "@/features/avatar";
 import { cn } from "@/lib/utils";
 import { dividiPrezzo, ETICHETTA_VETRINA, type GradinoOfferta as Gradino, type OffertaNuova } from "../../nuova";
 
@@ -54,23 +55,35 @@ export function VetrinaOfferte({ o, onApri }: { o: OffertaNuova; onApri: (indice
 }
 
 /** Una offerta che non è la principale (entrata, premium): cosa c'è dentro, perché quel prezzo, dove porta. */
-export function SchedaGradino({ g, principale, onApriPrincipale }: { g: Gradino; principale?: Gradino; onApriPrincipale?: () => void }) {
+export function SchedaGradino({
+  g,
+  indice,
+  principale,
+  onApriPrincipale,
+  onModifica,
+  occupato,
+}: { g: Gradino; /** La posizione nei gradini: serve per salvare le correzioni. */ indice: number; principale?: Gradino; onApriPrincipale?: () => void } & Correzione) {
+  const c: Correzione = { onModifica, occupato };
   const { cifra, nota } = dividiPrezzo(g.prezzo);
   return (
     <article aria-label={g.nome || ETICHETTA_VETRINA[g.livello]} className="overflow-hidden rounded-lg border bg-card">
       <header className="grid gap-2 p-5">
         <span className="w-fit rounded-full bg-surface px-2.5 py-0.5 text-[12px] font-medium text-muted-foreground">{ETICHETTA_VETRINA[g.livello]}</span>
-        <h3 className="text-[22px] leading-tight font-bold">{g.nome || ETICHETTA_VETRINA[g.livello]}</h3>
-        <p className="flex items-baseline gap-2">
-          <span className="figure text-[22px] font-bold">{cifra}</span>
-          {nota ? <span className="text-[13px] text-status-expiring">{nota}</span> : null}
-        </p>
+        <RigaAvatar percorso={`gradini.${indice}`} valori={[g.nome, g.prezzo]} chiavi={["nome", "prezzo"]} etichette={["Nome", "Prezzo"]} semplice {...c}>
+          <h3 className="text-[22px] leading-tight font-bold">{g.nome || ETICHETTA_VETRINA[g.livello]}</h3>
+          <p className="mt-2 flex items-baseline gap-2">
+            <span className="figure text-[22px] font-bold">{cifra}</span>
+            {nota ? <span className="text-[13px] text-status-expiring">{nota}</span> : null}
+          </p>
+        </RigaAvatar>
       </header>
       <div className="grid gap-5 border-t p-5">
         {g.contiene ? (
           <section className="grid gap-1">
             <h4 className="text-[13px] text-muted-foreground">Cosa c'è dentro</h4>
-            <p className="text-[15px] leading-relaxed">{g.contiene}</p>
+            <RigaAvatar percorso={`gradini.${indice}`} valori={[g.contiene]} chiavi={["contiene"]} etichette={["Cosa c'è dentro"]} semplice {...c}>
+              <p className="text-[15px] leading-relaxed">{g.contiene}</p>
+            </RigaAvatar>
           </section>
         ) : null}
         {g.ragionamento ? (
