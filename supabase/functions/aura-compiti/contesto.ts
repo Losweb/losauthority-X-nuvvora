@@ -8,6 +8,7 @@
  */
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { nomeCliente } from "../_shared/materiale.ts";
+import { eRicompensa } from "../_shared/lezioni.ts";
 
 export interface LezioneRef {
   titolo: string;
@@ -42,7 +43,8 @@ async function lezioniAttive(admin: SupabaseClient): Promise<LezioneRef[]> {
     .order("ordine", { ascending: true })
     .limit(200);
   if (error) throw error;
-  return (data ?? []) as LezioneRef[];
+  // Le ricompense di livello non sono lezioni da vedere (_shared/lezioni.ts).
+  return ((data ?? []) as LezioneRef[]).filter((l) => !eRicompensa(l.corso));
 }
 
 /** Nome (per Telegram) e catalogo lezioni; un catalogo non leggibile non blocca il piano. */

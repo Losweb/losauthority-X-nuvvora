@@ -16,6 +16,7 @@ import { ANTHROPIC_MODEL, HAS_ANTHROPIC, streamAnthropicText } from "../_shared/
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { bloccoPosizionamento } from "../_shared/posizionamento/blocco.ts";
+import { eRicompensa } from "../_shared/lezioni.ts";
 import { costruisciPrompt, eLive, estraiRisposta, lezioniPertinenti, SYSTEM, type Lezione, type Storico, type TestoCapitolo } from "./prompt.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
@@ -67,13 +68,16 @@ async function contesto(admin: SupabaseClient, clienteId: string, escludiAuraId:
     bloccoPosizionamento(admin, clienteId),
   ]);
   if (lezioni.error) throw lezioni.error;
+  // Le ricompense di livello non sono lezioni da guardare: il coach le conosce ma non le propone (_shared/lezioni.ts).
+  const catalogo = (lezioni.data ?? []) as Lezione[];
   const blocchi = ((conoscenza.data ?? []) as Array<{ titolo: string; contenuto: string }>).map((b) => `## ${b.titolo}\n${b.contenuto}`);
   return {
     nome,
     scheda: renderScheda(scheda),
     posizionamento,
     conoscenza: blocchi.join("\n\n"),
-    lezioni: (lezioni.data ?? []) as Lezione[],
+    lezioni: catalogo.filter((l) => !eRicompensa(l.corso)),
+    ricompense: catalogo.filter((l) => eRicompensa(l.corso)),
     storico: ((storico.data ?? []) as Storico[]).reverse(),
   };
 }

@@ -15,6 +15,10 @@
  * caratteri di descrizione; le parole chiave (frasi intere) non combaciavano mai.
  * Ora: le lezioni dei corsi vengono prima, ogni capitolo ha la sua durata, le
  * live sono segnate come live e le parole chiave si confrontano parola per parola.
+ * Stesso giorno, secondo giro («mi ha dato solo un link quando c'è un corso intero
+ * sull'editing con IA»): le parole rare pesano di più («editare» più di «ia») e i
+ * corsi con più lezioni sul tema arrivano in una sezione a parte, prima delle
+ * pertinenti. I corsi «Livello N|» sono ricompense, non lezioni: fuori dal catalogo.
  */
 import { type Blocco, blocchiPrompt } from "../_shared/anthropic.ts";
 import { type Capitolo, capitoloPer, estraiCapitoli, formattaTempo, introCapitoli } from "./capitoli.ts";
@@ -39,6 +43,7 @@ COME SCEGLI LA LEZIONE (il tempo del cliente vale: mandalo solo dove c'è davver
 - Una live va bene quando nessuna lezione di corso copre il tema, oppure come aggiunta dopo la lezione del corso. In quel caso dillo onestamente nel testo, con le aspettative giuste: «in questa live ne parlo per qualche minuto: è un assaggio, non una guida passo passo».
 - Se c'è un CORSO INTERO sul tema (il nome del corso o più sue lezioni parlano di quello), non ridurlo a un link: dillo nel testo («c'è un corso intero su questo, 5 lezioni: parti dalla prima e seguile in ordine») e nel blocco metti la prima lezione del corso, più quella che risponde in modo più preciso se è un'altra.
 - Meglio una lezione giusta che tre a metà: non aggiungere lezioni per riempire.
+- I «Livello 5/6/7» non sono lezioni: sono ricompense che si sbloccano salendo di livello (le trovi a parte, sotto RICOMPENSE DEI LIVELLI). Non mandare mai il cliente lì come se fosse una lezione.
 
 Come rispondi, SEMPRE in questo ordine:
 1. Testo breve (2-5 frasi), italiano, dai del tu, voce di Wesley: diretta, concreta, zero fuffa. Prima fai capire che hai colto il problema, poi dai UNA indicazione pratica (dalla descrizione o dal capitolo della lezione se c'è), poi di' che la lezione da vedere è quella che segue. Se scegli una live e la risposta sta in UNO dei suoi capitoli, dillo nel testo con il minuto, es. «guarda dal minuto 27:40, dove parla di come educare il cliente alla vendita». Se il messaggio è troppo vago per scegliere, fai UNA domanda e basta.
@@ -73,6 +78,8 @@ export interface DatiCoach {
   posizionamento: string | null;
   conoscenza: string;
   lezioni: Lezione[];
+  /** I corsi «Livello N| …»: ricompense da sbloccare, non lezioni (`_shared/lezioni.ts`). Mai nel blocco <lezioni>. */
+  ricompense?: Lezione[];
   pertinenti: Lezione[];
   /** Per le live pertinenti pubblicate dal gestionale: url della lezione → i capitoli con quello che si dice davvero. */
   testiCapitoli?: Map<string, TestoCapitolo[]>;
@@ -104,24 +111,28 @@ export function normalizza(t: string): string {
 /** Sigle corte che contano anche sotto le 3 lettere («editare con ia»). */
 const CORTE = new Set(["ia", "ai"]);
 
+/** Parole della domanda che dicono «voglio imparare», non il tema: non aiutano a scegliere. */
+const DOMANDA = new Set(["capire", "sapere", "imparare", "spiegami", "spiegare", "mostrami", "funziona", "funzionano", "iniziare", "migliorare"]);
+
 /** Token del messaggio utili alla ricerca (≥3 lettere o «ia»/«ai», niente stopword). */
 export function tokenRicerca(messaggio: string): string[] {
-  return [...new Set(normalizza(messaggio).split(" ").filter((p) => (p.length >= 3 || CORTE.has(p)) && !STOPWORD.has(p)))];
+  return [...new Set(normalizza(messaggio).split(" ").filter((p) => (p.length >= 3 || CORTE.has(p)) && !STOPWORD.has(p) && !DOMANDA.has(p)))];
 }
+
+/** Radice grezza per far combaciare "vendite"/"vendere"/"vendita": prime 5 lettere. */
+const radice = (p: string) => p.slice(0, 5);
 
 /**
  * Parole diverse per la stessa cosa (radici): chi scrive «editare» cerca anche le
  * lezioni sul «montaggio». Lista corta, si allunga quando il coach sbaglia.
+ * «edito» no: è anche «editoriale» (piano editoriale), un altro tema.
  */
 const SINONIMI: string[][] = [
-  ["edita", "editi", "edito", "monta", "montag"],
+  ["edita", "editi", "monta", "monto", "montag"],
   ["vende", "vendi", "vendit", "chiud", "conve"],
   ["intel", "ia", "ai"],
 ];
-const conSinonimi = (r: string): string[] => SINONIMI.find((g) => g.includes(r)) ?? [r];
-
-/** Radice grezza per far combaciare "vendite"/"vendere"/"vendita": prime 5 lettere. */
-const radice = (p: string) => p.slice(0, 5);
+const gruppo = (t: string): string[] => SINONIMI.find((g) => g.includes(CORTE.has(t) ? t : radice(t))) ?? [radice(t)];
 
 /** Una live (domande e risposte, a capitoli) invece di una lezione di corso. */
 export function eLive(l: Lezione): boolean {
@@ -129,29 +140,84 @@ export function eLive(l: Lezione): boolean {
 }
 
 /**
+ * Quanto una lezione parla di una parola del messaggio: 3 se è nel titolo o tra
+ * le keywords, 2 se ne condivide la radice, 1 se sta nella descrizione, 0 se no.
+ * «ia»/«ai» contano solo come parole intere (non dentro «aiuto»).
+ */
+function combacia(l: Lezione, t: string): number {
+  const g = gruppo(t);
+  const corta = CORTE.has(t);
+  const parole = tokenRicerca(`${l.titolo} ${l.keywords.join(" ")}`);
+  if (parole.includes(t) || (corta && parole.some((p) => g.includes(p)))) return 3;
+  if (!corta && parole.some((p) => g.includes(radice(p)))) return 2;
+  const descr = normalizza(l.descrizione ?? "").split(" ");
+  if (corta ? descr.some((p) => g.includes(p)) : descr.some((p) => p.length >= 3 && g.includes(radice(p)))) return 1;
+  return 0;
+}
+
+/**
+ * Il peso di ogni parola del messaggio: più è rara nel catalogo, più conta
+ * (26/11/2026: «ia» sta in decine di lezioni e pesava quanto «editare», così il
+ * corso fatto apposta sull'editing non entrava neanche tra le pertinenti).
+ */
+function pesi(lezioni: Lezione[], token: string[]): Map<string, number> {
+  const n = lezioni.length || 1;
+  return new Map(token.map((t) => {
+    const quante = lezioni.filter((l) => combacia(l, t) > 0).length;
+    return [t, quante ? Math.log(n / quante) : 0];
+  }));
+}
+
+/**
  * Le lezioni che combaciano per parole chiave con il messaggio, dalla più
- * pertinente. Le keywords sono frasi («claude editing video automatico»): si
- * confrontano parola per parola. Per ogni parola del messaggio: +3 se è nel
- * titolo o tra le keywords, +2 se ne condivide la radice, +1 se la radice è
- * nella descrizione. Max 8.
+ * pertinente: per ogni parola, quanto la lezione ne parla × quanto è rara. Max 8.
  */
 export function lezioniPertinenti(lezioni: Lezione[], messaggio: string): Lezione[] {
   const token = tokenRicerca(messaggio);
   if (token.length === 0) return [];
-  const punteggi = lezioni.map((l) => {
-    const parole = new Set(tokenRicerca(`${l.titolo} ${l.keywords.join(" ")}`));
-    const radiciLezione = new Set([...parole].map(radice));
-    const descr = normalizza(l.descrizione ?? "");
-    let p = 0;
-    for (const t of token) {
-      const radici = conSinonimi(radice(t));
-      if (parole.has(t)) p += 3;
-      else if (radici.some((r) => radiciLezione.has(r))) p += 2;
-      else if (!CORTE.has(t) && radici.some((r) => descr.includes(r))) p += 1;
-    }
-    return { l, p };
-  });
-  return punteggi.filter((x) => x.p > 0).sort((a, b) => b.p - a.p).slice(0, 8).map((x) => x.l);
+  const peso = pesi(lezioni, token);
+  return lezioni
+    .map((l) => ({ l, p: token.reduce((s, t) => s + combacia(l, t) * (peso.get(t) ?? 0), 0) }))
+    .filter((x) => x.p > 0)
+    .sort((a, b) => b.p - a.p)
+    .slice(0, 8)
+    .map((x) => x.l);
+}
+
+/** Un corso (non le live) che parla del tema in più lezioni: va proposto intero, non ridotto a un link. */
+export interface CorsoTema {
+  corso: string;
+  totale: number;
+  /** Le lezioni del corso che parlano del tema, nell'ordine del corso. */
+  sulTema: Lezione[];
+  /** La prima lezione del corso, da cui partire. */
+  prima: Lezione;
+}
+
+/**
+ * I corsi interi sul tema del messaggio (26/11/2026, Wesley: «mi ha dato solo un
+ * link quando c'è un capitolo intero su editing con IA dentro lo Skool»). Si guarda
+ * solo la parola più rara (il tema: «editare», non «ia»): un corso conta se almeno
+ * 2 lezioni e almeno 4 su 10 ne parlano. Le lezioni arrivano nell'ordine del corso.
+ */
+export function corsiSulTema(lezioni: Lezione[], messaggio: string): CorsoTema[] {
+  const token = tokenRicerca(messaggio);
+  if (token.length === 0) return [];
+  const peso = pesi(lezioni, token);
+  const massimo = Math.max(...peso.values());
+  if (massimo <= 0) return [];
+  const tema = token.filter((t) => (peso.get(t) ?? 0) >= massimo * 0.75);
+  const perCorso = new Map<string, Lezione[]>();
+  for (const l of lezioni) {
+    if (!l.corso || eLive(l)) continue;
+    perCorso.set(l.corso, [...(perCorso.get(l.corso) ?? []), l]);
+  }
+  const corsi: CorsoTema[] = [];
+  for (const [corso, ls] of perCorso) {
+    const sulTema = ls.filter((l) => tema.some((t) => combacia(l, t) > 0));
+    if (sulTema.length >= 2 && sulTema.length / ls.length >= 0.4) corsi.push({ corso, totale: ls.length, sulTema, prima: ls[0] });
+  }
+  return corsi.sort((a, b) => b.sulTema.length / b.totale - a.sulTema.length / a.totale).slice(0, 2);
 }
 
 /**
@@ -189,9 +255,22 @@ export function costruisciPrompt(d: DatiCoach): Blocco[] {
     .map(([corso, ls]) => `## ${corso} (${ls.length === 1 ? "1 lezione" : `${ls.length} lezioni, in ordine`})\n${ls.map(rigaLezione).join("\n")}`)
     .join("\n\n");
   fisso.push(`=== CATALOGO LEZIONI SKOOL (usa SOLO questi id) ===\n${catalogo}`);
+  if (d.ricompense?.length) {
+    const premi = [...new Set(d.ricompense.map((l) => l.corso ?? l.titolo))].map((c) => `- ${c}`).join("\n");
+    fisso.push(`=== RICOMPENSE DEI LIVELLI (NON sono lezioni) ===\nSi sbloccano salendo di livello nella community Skool: non si guardano, non hanno id da usare e non vanno MAI nel blocco <lezioni>. Puoi nominarle nel testo solo se c'entrano davvero con la domanda («quando arrivi al livello 6 la content series te la costruiamo insieme»), dopo aver dato la lezione da vedere adesso.\n${premi}`);
+  }
   const cliente = [`=== CLIENTE: ${d.nome} ===\n--- Scheda onboarding (per capire il suo contesto) ---${taglia(d.scheda, 5000)}`];
   if (d.posizionamento) cliente.push(d.posizionamento);
   const variabile: string[] = [];
+  const corsi = corsiSulTema(d.lezioni, d.messaggio);
+  if (corsi.length > 0) {
+    const righe = corsi.map((c) =>
+      `## ${c.corso}: ${c.sulTema.length} lezioni su ${c.totale} parlano di questo. Si parte da [${c.prima.id}] ${c.prima.titolo}.\n${c.sulTema.map((l) => `- [${l.id}] ${l.titolo}`).join("\n")}`
+    );
+    variabile.push(
+      `=== CORSI INTERI SUL TEMA DEL MESSAGGIO ===\nC'è un corso fatto apposta: è lui la risposta principale, prima di qualsiasi live. Dillo nel testo (quante lezioni, da quale partire) e metti nel blocco la prima lezione del corso, più quella che risponde in modo più preciso se è un'altra. Se il messaggio in realtà parla d'altro, ignora questa sezione.\n${righe.join("\n\n")}`,
+    );
+  }
   if (d.pertinenti.length > 0) {
     variabile.push(`=== LEZIONI PIÙ PERTINENTI PER PAROLE CHIAVE ===\n${d.pertinenti.map((l) => `${rigaLezione(l)} (corso: ${l.corso ?? "—"})`).join("\n")}`);
     const dentro = d.pertinenti.flatMap((l) => {
