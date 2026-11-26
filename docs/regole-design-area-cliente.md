@@ -23,7 +23,7 @@ Legenda: ✅ rispettata · ⚠️ a metà · ❌ no.
 | 6 | Togli i campi che si possono dedurre o chiedere dopo | NN/g, moduli | ✅ dopo il taglio del 26/11 |
 | 7 | Facoltativi: al massimo uno o due, e marcati | NN/g, moduli | ⚠️ sono marcati e piegati, ma sono 10 su un percorso |
 | 8 | Una colonna, etichetta sopra il campo | NN/g, moduli | ✅ |
-| 9 | Evita il testo d'esempio dentro il campo | NN/g, moduli | ❌ 4 campi dell'onboarding hanno l'esempio dentro il campo |
+| 9 | Evita il testo d'esempio dentro il campo | NN/g, moduli | ❌ una decina di campi dell'onboarding hanno l'esempio dentro il campo |
 | 10 | Errori: visibili, non solo col colore, e senza perdere quello che è scritto | NN/g, moduli | non verificato |
 
 ### Attese
