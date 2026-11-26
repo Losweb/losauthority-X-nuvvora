@@ -117,7 +117,7 @@ export function SchedaDocumento({ scheda, stato, onModifica, occupato, ampia = f
         <div className="flex gap-2.5 border-b border-status-expiring/30 bg-status-expiring-soft px-5 py-3 text-[14px] text-status-expiring">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
           <p>
-            Questa scheda è in gran parte costruita: {vere === 0 ? "non ci sono ancora frasi vere" : vere === 1 ? "c'è una sola frase vera" : `ci sono solo ${vere} frasi vere`}. Le righe «lettura» sono ipotesi di Aura: confermale o correggile.
+            Questa scheda è in gran parte costruita: {vere === 0 ? "non ci sono ancora frasi vere" : vere === 1 ? "c'è una sola frase vera" : `ci sono solo ${vere} frasi vere`}. Le righe «ipotesi» le ha proposte Aura: confermale o correggile.
           </p>
         </div>
       ) : null}

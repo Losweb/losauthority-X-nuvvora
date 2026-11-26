@@ -32,7 +32,7 @@ export const DUBBI = [
   "Quanti avatar devo fare?",
 ] as const;
 
-export const ETICHETTA_ORIGINE: Record<Origine, string> = { vera: "vera", riassunto: "riassunto", lettura: "lettura" };
+export const ETICHETTA_ORIGINE: Record<Origine, string> = { vera: "vera", riassunto: "riassunto", lettura: "ipotesi" };
 
 /** Frasi di stato mentre Aura scrive. */
 export const FASI_MAPPA = [

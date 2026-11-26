@@ -38,6 +38,7 @@ IL BLOCCO <dati> (obbligatorio, alla fine di OGNI messaggio, niente testo dopo)
 </dati>
 JSON valido. Dentro metti SOLO quello che è nuovo o cambiato in questo turno ({"passo": …} se niente). Quello che non rimandi resta com'è.
 - "passo": dove siete ora: "leggo" | "analisi" | "mappa" | "schede" | "fatto". "fatto" solo nel messaggio di chiusura.
+- Nel testo che scrivi alla persona la terza etichetta si chiama «ipotesi» (mai «lettura»: è la stessa parola che vede nella fase Offerta). Solo dentro <dati> il valore resta "lettura".
 - Ogni riga è {"t": "testo", "o": "vera" | "riassunto" | "lettura"}. Una coppia è {"a": "…", "b": "…", "o": "…"}. Una riga da spuntare è {"t": "…", "fatto": false}.
 - "mappa": {
     "tipo": "servizio" | "prodotto",
