@@ -23,7 +23,7 @@ export function CampoSelect({ domanda, valore, onChange, parole, opzioni, disabi
             aria-checked={selezionata}
             variant={selezionata ? "default" : "outline"}
             size="sm"
-            className="h-auto min-h-8 whitespace-normal py-1.5 text-left pointer-coarse:h-auto pointer-coarse:min-h-9"
+            className="h-auto min-h-8 max-w-full shrink whitespace-normal py-1.5 text-left pointer-coarse:h-auto pointer-coarse:min-h-9"
             disabled={disabilitato}
             onClick={() => onChange(opt.value)}
           >
@@ -63,7 +63,7 @@ export function CampoMultiselect({ domanda, valore, onChange, parole, opzioni, d
               aria-pressed={selezionata}
               variant={selezionata ? "default" : "outline"}
               size="sm"
-              className="h-auto min-h-8 whitespace-normal py-1.5 text-left pointer-coarse:h-auto pointer-coarse:min-h-9"
+              className="h-auto min-h-8 max-w-full shrink whitespace-normal py-1.5 text-left pointer-coarse:h-auto pointer-coarse:min-h-9"
               disabled={disabilitato}
               onClick={() => alterna(opt.value)}
             >

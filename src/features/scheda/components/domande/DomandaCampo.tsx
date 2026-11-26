@@ -74,7 +74,7 @@ export function DomandaCampo({ domanda, valore, risposte, parole, errore, onChan
       <div className="flex items-start justify-between gap-3">
         <label id={`${domanda.id}-label`} htmlFor={domanda.id} className="text-sm font-medium leading-snug">
           {conParole(domanda.testo, parole)}
-          {domanda.obbligatoria ? <span className="text-muted-foreground"> *</span> : null}
+          {/* Niente asterisco: le facoltative stanno piegate a parte, quindi tutto quello che si vede serve. */}
         </label>
         {inBozza && domanda.tipo !== "file-list" ? <AiutoAura domandaId={domanda.id} /> : null}
       </div>

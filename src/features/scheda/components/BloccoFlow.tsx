@@ -1,6 +1,6 @@
 import { domandeVisibili } from "@onboarding/definizione.ts";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
 import { conParole } from "../format";
 import type { ErroriDomande } from "../schema";
@@ -34,14 +34,11 @@ export function BloccoFlow(props: BloccoFlowProps) {
   return (
     <div className="grid gap-4">
       <div className="flex items-start gap-4 sm:gap-5">
-        <AuraSfera dimensione={56} />
+        <AuraSfera dimensione={44} />
         <div className="min-w-0 flex-1 pt-1">
-          <p className="eyebrow">
-            Passo {indice + 1} di {totale}
-          </p>
           <p
             aria-live="polite"
-            className="mt-3 font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-bold tracking-[-0.01em] text-foreground"
+            className="font-display text-[clamp(18px,2.4vw,23px)] leading-[1.4] font-bold tracking-[-0.01em] text-foreground"
           >
             {conParole(blocco.intro, parole)}
           </p>
@@ -50,12 +47,7 @@ export function BloccoFlow(props: BloccoFlowProps) {
 
       {/* Sul telefono il padding della card scende a 16px: più spazio alle domande. */}
       <Card className="max-sm:[--card-spacing:--spacing(4)]">
-        <CardHeader>
-          <CardTitle className="font-display text-2xl font-semibold">
-            {conParole(blocco.titolo, parole)}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-8">
+        <CardContent className="grid gap-8 pt-2">
           {obbligatorie.map((domanda) => (
             <DomandaCampo
               key={`${domanda.id}-${domanda.codice}`}

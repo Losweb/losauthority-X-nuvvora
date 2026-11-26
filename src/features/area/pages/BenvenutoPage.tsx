@@ -9,7 +9,7 @@ import { CorniceBenvenuto } from "../components/benvenuto/CorniceBenvenuto";
 import { FineBenvenuto } from "../components/benvenuto/FineBenvenuto";
 import { PassoInstagram } from "../components/benvenuto/PassoInstagram";
 import { PassoRequisiti } from "../components/benvenuto/PassoRequisiti";
-import { PassoVideo } from "../components/benvenuto/PassoVideo";
+import { PassoVideo, VIDEO_BENVENUTO } from "../components/benvenuto/PassoVideo";
 
 type Passo = "video" | "requisiti" | "instagram" | "fine";
 
@@ -44,7 +44,8 @@ export default function BenvenutoPage() {
   const [passi, setPassi] = useState<Passo[]>([]);
   if (!caricamento && !errore && passi.length === 0) {
     // Stato derivato dal primo caricamento (pattern «adjust state while rendering»).
-    const lista: Passo[] = ["video"];
+    // Il passo video si mostra solo quando il video vero esiste (VIDEO_BENVENUTO in PassoVideo): un player finto come primo schermo delude.
+    const lista: Passo[] = VIDEO_BENVENUTO ? ["video"] : [];
     // Dal 26/11/2026 i documenti della sezione Clienti si accettano al primo accesso a quella pagina, non qui.
     if (!instagram.data?.instagram) lista.push("instagram");
     lista.push("fine");

@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { domandeVisibili } from "@onboarding/definizione.ts";
 import { useAuth, type UtenteCorrente } from "@/features/auth";
 import { Progress } from "@/shared/components/ui/progress";
+import { PassiScheda } from "./PassiScheda";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { logDev, MESSAGGIO_ERRORE_GENERICO } from "@/shared/utils/errors";
 import { conParole, formattaValore, haRisposte, paroleDi, primoNome } from "../format";
@@ -235,13 +236,19 @@ function FlowCompilazione({ utente, iniziale, onInviata }: FlowCompilazioneProps
           <ArrowLeft className="size-4" aria-hidden /> La tua area
         </Link>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="text-xs text-muted-foreground">
-            {scheda.occhiello} · {scheda.titolo}
-          </span>
+          {schermata === "blocco" ? null : (
+            <span className="text-xs text-muted-foreground">
+              {scheda.occhiello} · {scheda.titolo}
+            </span>
+          )}
           {inCorso && schermata === "blocco" ? <IndicatoreSalvataggio stato={bozza.stato} ultimoSalvataggio={bozza.ultimoSalvataggio} /> : null}
         </div>
       </div>
-      <Progress value={progresso} aria-label="Avanzamento della scheda" />
+      {schermata === "benvenuto" ? null : schermata === "blocco" ? (
+        <PassiScheda indice={indice} totale={totale} onVai={vaiABlocco} />
+      ) : (
+        <Progress value={progresso} aria-label="Avanzamento della scheda" />
+      )}
 
       {schermata === "benvenuto" ? (
         <SchermataBenvenuto scheda={scheda} nome={primoNome(utente.nombre)} riprende={haRisposte(iniziale.risposte)} onInizia={() => vaiABlocco(0)} />

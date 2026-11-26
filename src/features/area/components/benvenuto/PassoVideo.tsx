@@ -1,6 +1,9 @@
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 
+/** L'indirizzo del video di benvenuto di Wesley. null = non c'è ancora: il passo si salta. */
+export const VIDEO_BENVENUTO: string | null = null;
+
 interface PassoVideoProps {
   nome: string;
   onAvanti: () => void;
