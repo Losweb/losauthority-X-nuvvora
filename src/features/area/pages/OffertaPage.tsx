@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, FileDown, RotateCcw, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileDown, RotateCcw, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/features/auth";
 import { FlussoAvatar, SceltaVista, useMappaAvatar, type VistaMobile } from "@/features/avatar";
@@ -26,7 +26,7 @@ import {
 } from "@/features/offerta";
 import { primoNome } from "@/features/scheda";
 import { AuraSfera } from "@/shared/components/brand/AuraSfera";
-import { Button } from "@/shared/components/ui/button";
+import { Button, buttonVariants } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { ErroreCaricamento, SkeletonBlocco } from "@/shared/components/layout/StatoCaricamento";
 import { scorriInCima } from "@/shared/utils/scroll";
@@ -38,7 +38,8 @@ import { PassoDopo } from "../components/percorso/PassoDopo";
 /**
  * /area/cervello/offerta → la fase Offerta (dal 26/11/2026): UNA offerta per
  * cliente, una conversazione con Aura (a sinistra) e a destra la frase, il
- * blocco «Fermo» se c'è e la scheda. La strada (versione breve o scheda
+ * blocco «Fermo» se c'è e la scheda. Dal 26/11/2026 senza avatar pronto la pagina manda all'avatar
+ * (la versione breve non si apre più). La strada (versione breve o scheda
  * completa) la decide il sito guardando se la mappa Avatar è chiusa.
  * A lavoro finito (26/11/2026) la conversazione sta chiusa e la scheda prende tutta la
  * larghezza; «Parla con Aura» la riapre accanto.
@@ -107,20 +108,47 @@ export default function OffertaPage() {
     </>
   );
 
-  if (offerta.isLoading) return <div className="grid gap-7">{intestazione()}<SkeletonBlocco altezza="h-96" /></div>;
+  // L'offerta si fa per una persona: senza avatar pronto la pagina manda all'avatar (26/11/2026, tolta la versione breve).
+  const avatarPronto = avatar.data?.mappa.passo === "fatto" && (avatar.data?.schede.length ?? 0) > 0;
+
+  if (offerta.isLoading || avatar.isLoading) return <div className="grid gap-7">{intestazione()}<SkeletonBlocco altezza="h-96" /></div>;
   if (offerta.isError) return <div className="grid gap-7">{intestazione()}<ErroreCaricamento /></div>;
   const o = offerta.data;
+  if (!avatarPronto && !o?.completa_fatta_il) {
+    const iniziato = !!avatar.data;
+    return (
+      <div className="grid gap-7">
+        {intestazione()}
+        <section className="grid w-full max-w-[680px] gap-5 rounded-2xl border bg-card/70 p-6 md:p-8">
+          <div className="flex items-start gap-4">
+            <AuraSfera dimensione={56} conNome={false} />
+            <div className="grid gap-2">
+              <h2 className="text-[22px] leading-tight font-bold">Prima il tuo avatar</h2>
+              <p className="text-[15px] leading-relaxed text-muted-foreground">
+                L'offerta si costruisce per una persona precisa: la promessa, il prezzo e le risposte alle obiezioni partono da lei. {iniziato ? "Finisci il tuo avatar" : "Fai prima il tuo avatar"}, poi torna qui.
+              </p>
+            </div>
+          </div>
+          <div className="border-t pt-5">
+            <Link to="/area/cervello/avatar" className={buttonVariants({ size: "lg" })}>
+              {iniziato ? "Continua l'avatar" : "Vai all'avatar"} <ArrowRight aria-hidden />
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
   if (!o) {
     return (
       <div className="grid gap-7">
         {intestazione()}
-        <section className="mx-auto grid w-full max-w-[680px] gap-5 rounded-2xl border bg-card/70 p-6 md:p-8">
+        <section className="grid w-full max-w-[680px] gap-5 rounded-2xl border bg-card/70 p-6 md:p-8">
           <div className="flex items-start gap-4">
             <AuraSfera dimensione={56} conNome={false} />
             <div className="grid gap-2">
               <h2 className="text-[22px] leading-tight font-bold">{nome ? `${nome}, cosa vendi?` : "Cosa vendi?"}</h2>
               <p className="text-[15px] leading-relaxed text-muted-foreground">
-                Se il tuo avatar non è ancora pronto, scriviamo la tua offerta in una frase. Con l'avatar pronto facciamo la scheda completa: promessa, prezzo e come la presenti.
+                Aura parte dal tuo avatar e costruisce con te l'offerta: promessa, prezzo e come la presenti.
               </p>
             </div>
           </div>

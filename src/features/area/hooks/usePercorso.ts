@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type StatoTappa = "fatta" | "ora" | "dopo";
 
 export interface Tappa {
-  chiave: "onboarding" | "frase" | "avatar" | "offerta" | "contenuti" | "numeri" | "clienti";
+  chiave: "onboarding" | "avatar" | "offerta" | "contenuti" | "numeri" | "clienti";
   titolo: string;
   /** Una riga: il risultato se è fatta, a che punto è se è in corso, cosa la apre se viene dopo. */
   riga: string;
@@ -46,9 +46,9 @@ function useConteggi(clienteId: string | undefined) {
 const CONTENUTI_PER_PARTIRE = 3;
 
 /**
- * Il percorso del cliente in sette tappe, nell'ordine del metodo: onboarding →
- * frase dell'offerta → avatar → offerta completa → primi contenuti → numeri →
- * clienti. Lo stato viene dai dati che ci sono già: «ora» è la prima non fatta.
+ * Il percorso del cliente in sei tappe, nell'ordine del metodo: onboarding →
+ * avatar → offerta → primi contenuti → numeri → clienti (26/11/2026: tolta la
+ * tappa «frase dell'offerta»; l'offerta si fa solo con l'avatar pronto). Lo stato viene dai dati che ci sono già: «ora» è la prima non fatta.
  */
 export function usePercorso(clienteId: string | undefined) {
   const offerta = useOffertaCliente(clienteId);
@@ -63,8 +63,6 @@ export function usePercorso(clienteId: string | undefined) {
   const cuore = o?.scheda?.gradini?.find((g) => g.livello === "cuore") ?? null;
 
   const avatarFatto = m?.mappa.passo === "fatto" && (m?.schede.length ?? 0) > 0;
-  // Chi ha già l'avatar pronto senza frase (clienti di prima) va dritto all'offerta completa: la frase non lo blocca.
-  const fraseFatta = !!o?.frase_il || avatarFatto;
   const offertaFatta = !!o?.completa_fatta_il;
   const contenutiFatti = (c?.contenuti ?? 0) >= CONTENUTI_PER_PARTIRE;
   const numeriFatti = !!c?.instagram;
@@ -72,15 +70,6 @@ export function usePercorso(clienteId: string | undefined) {
 
   const base: Array<Omit<Tappa, "stato"> & { fatta: boolean }> = [
     { chiave: "onboarding", titolo: "Onboarding", riga: "Hai raccontato il tuo lavoro", cosa: "", durata: "", href: "/area/onboarding", fatta: true },
-    {
-      chiave: "frase",
-      titolo: "La tua frase",
-      riga: fraseFatta ? (o?.frase ?? "La scrivi dentro l'offerta completa") : o ? "In corso con Aura" : "Cosa vendi, in una frase",
-      cosa: "In due o tre scambi con Aura scrivi cosa vendi, a chi e dove lo porti.",
-      durata: "circa 5 minuti",
-      href: "/area/cervello/offerta",
-      fatta: fraseFatta,
-    },
     {
       chiave: "avatar",
       titolo: "Il tuo avatar",
@@ -92,9 +81,9 @@ export function usePercorso(clienteId: string | undefined) {
     },
     {
       chiave: "offerta",
-      titolo: "La tua offerta completa",
+      titolo: "La tua offerta",
       riga: offertaFatta ? (cuore ? `${cuore.nome || "Offerta"} · ${cuore.prezzo}` : "Scheda pronta") : avatarFatto ? (o?.strada === "completa" ? "In corso con Aura" : "Mercato, promessa, prezzo") : "Si apre quando l'avatar è pronto",
-      cosa: "Sette fasi con Aura: mercato, promessa, freni, prezzo e come la presenti.",
+      cosa: "Con Aura, partendo dal tuo avatar: promessa, prezzo e come la presenti.",
       durata: "circa 30 minuti, anche in più volte",
       href: "/area/cervello/offerta",
       fatta: offertaFatta,

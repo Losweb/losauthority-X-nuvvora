@@ -4,6 +4,7 @@
  * `offerta`, così i lead del CRM restano collegati) e due strade decise dal sito:
  * versione breve (una frase) finché la mappa Avatar non è chiusa, scheda completa
  * (sette fasi) dopo. Il prompt è metodo.ts (testo di Wesley) + prompt.ts.
+ * Dal 26/11/2026 la versione breve non si apre più: senza mappa Avatar chiusa la funzione risponde 409.
  * Body:
  *   { azione: "crea", messaggio? }    → l'offerta del cliente (nuova se non c'è) + primo messaggio di Aura
  *                                       (con `messaggio`, parte da quello che la persona ha scritto). { ok, offerta_id }
@@ -66,7 +67,8 @@ async function turno(admin: SupabaseClient, clienteId: string, auraId: string, e
     avatarDi(admin, clienteId, (o.avatar_letto_il as string | null) ?? null),
   ]);
   // La strada la decide il sito: completa solo con la mappa Avatar chiusa.
-  const strada = avatar.approvata ? "completa" : "breve";
+  // Un'offerta già chiusa resta completa anche se poi l'avatar si rifà.
+  const strada = avatar.approvata || o.completa_fatta_il ? "completa" : "breve";
   const cambioStrada = o.strada !== strada;
   if (cambioStrada) {
     await admin.from("offerta").update({ strada, passo: strada === "completa" ? 0 : 1 }).eq("id", o.id);
@@ -146,6 +148,14 @@ Deno.serve(async (req: Request) => {
     if (errLimite) await logError("aura-offerta:rate_limit", errLimite, { user: c.id }, { silent: true });
     else if (permesso === false) throw new HttpError(429, "Hai scritto molto in poco tempo: riprova tra un'ora.");
     if (!HAS_ANTHROPIC) throw new HttpError(500, "ANTHROPIC_API_KEY non configurata.");
+
+    // L'offerta si costruisce per l'avatar (26/11/2026, Wesley: prima l'avatar, poi l'offerta; tolta la
+    // versione breve): senza mappa Avatar chiusa Aura non parte. Un'offerta già chiusa si può sempre rivedere.
+    const avatarPronto = (await avatarDi(admin, c.id)).approvata;
+    if (!avatarPronto) {
+      const gia = await offertaDi(admin, c.id);
+      if (!gia?.completa_fatta_il) throw new HttpError(409, "Prima fai il tuo avatar: l'offerta si costruisce per lui.");
+    }
 
     if (body.azione === "crea") {
       const esiste = await offertaDi(admin, c.id);

@@ -17,8 +17,8 @@ const GRUPPI: Array<{ titolo: string; voci: VoceNavBase[] }> = [
   {
     titolo: "Fondamenta",
     voci: [
-      { href: "/area/cervello/offerta", label: "Offerta", icon: Tag },
       { href: "/area/cervello/avatar", label: "Avatar", icon: UserRound },
+      { href: "/area/cervello/offerta", label: "Offerta", icon: Tag },
       { href: "/area/cervello/concorrenti", label: "Concorrenti", icon: Swords },
       { href: "/area/cervello/kit-brand", label: "Marca", icon: Palette },
     ],
