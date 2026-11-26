@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMappaAvatar } from "@/features/avatar";
 import { useOffertaCliente } from "@/features/offerta";
+import { usePosizionamento } from "@/features/posizionamento";
 import { supabase } from "@/integrations/supabase/client";
 
 export type StatoTappa = "fatta" | "ora" | "dopo";
 
 export interface Tappa {
-  chiave: "onboarding" | "avatar" | "offerta" | "contenuti" | "numeri" | "clienti";
+  chiave: "onboarding" | "avatar" | "offerta" | "posizionamento" | "contenuti" | "numeri" | "clienti";
   titolo: string;
   /** Una riga: il risultato se è fatta, a che punto è se è in corso, cosa la apre se viene dopo. */
   riga: string;
@@ -46,13 +47,14 @@ function useConteggi(clienteId: string | undefined) {
 const CONTENUTI_PER_PARTIRE = 3;
 
 /**
- * Il percorso del cliente in sei tappe, nell'ordine del metodo: onboarding →
- * avatar → offerta → primi contenuti → numeri → clienti (26/11/2026: tolta la
- * tappa «frase dell'offerta»; l'offerta si fa solo con l'avatar pronto). Lo stato viene dai dati che ci sono già: «ora» è la prima non fatta.
+ * Il percorso del cliente in sette tappe, nell'ordine del metodo: onboarding →
+ * avatar → offerta → posizionamento → primi contenuti → numeri → clienti
+ * (26/11/2026: tolta la tappa «frase dell'offerta», aggiunto il posizionamento). Lo stato viene dai dati che ci sono già: «ora» è la prima non fatta.
  */
 export function usePercorso(clienteId: string | undefined) {
   const offerta = useOffertaCliente(clienteId);
   const avatar = useMappaAvatar(clienteId);
+  const posizionamento = usePosizionamento(clienteId);
   const conteggi = useConteggi(clienteId);
 
   const o = offerta.data ?? null;
@@ -64,6 +66,7 @@ export function usePercorso(clienteId: string | undefined) {
 
   const avatarFatto = m?.mappa.passo === "fatto" && (m?.schede.length ?? 0) > 0;
   const offertaFatta = !!o?.completa_fatta_il;
+  const posizionamentoFatto = posizionamento.data?.stato === "pronto";
   const contenutiFatti = (c?.contenuti ?? 0) >= CONTENUTI_PER_PARTIRE;
   const numeriFatti = !!c?.instagram;
   const clientiFatti = (c?.lead ?? 0) > 0;
@@ -87,6 +90,15 @@ export function usePercorso(clienteId: string | undefined) {
       durata: "circa 30 minuti, anche in più volte",
       href: "/area/cervello/offerta",
       fatta: offertaFatta,
+    },
+    {
+      chiave: "posizionamento",
+      titolo: "Il tuo posizionamento",
+      riga: posizionamentoFatto ? (posizionamento.data?.contenuto.profilo?.utente ? `@${posizionamento.data.contenuto.profilo.utente}` : "Profilo pronto") : offertaFatta ? "Il tuo profilo Instagram e chi sei" : "Si apre quando l'offerta è pronta",
+      cosa: "Aura scrive come si vede il tuo profilo Instagram e chi sei nel tuo mercato. Tu correggi.",
+      durata: "circa 5 minuti",
+      href: "/area/cervello/posizionamento",
+      fatta: posizionamentoFatto,
     },
     {
       chiave: "contenuti",
@@ -121,7 +133,7 @@ export function usePercorso(clienteId: string | undefined) {
   const tappe: Tappa[] = base.map(({ fatta, ...t }, i) => ({ ...t, stato: fatta ? "fatta" : i === indiceOra ? "ora" : "dopo" }));
 
   return {
-    caricamento: offerta.isLoading || avatar.isLoading || conteggi.isLoading,
+    caricamento: offerta.isLoading || avatar.isLoading || posizionamento.isLoading || conteggi.isLoading,
     errore: offerta.isError || avatar.isError || conteggi.isError,
     tappe,
     ora: indiceOra === -1 ? null : tappe[indiceOra],

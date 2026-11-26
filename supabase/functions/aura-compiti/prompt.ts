@@ -82,7 +82,7 @@ export function promptSottoCompiti(ctx: ContestoCliente, call: CallLetta, tappe:
     "- «testo»: UNA azione che il cliente fa da solo, massimo 200 caratteri, inizia con un verbo, con il criterio di «fatto bene» o la scadenza se detti in call (es. «Scrivi 3 versioni della bio da 150 caratteri entro venerdì: chi sei / una prova / dove»). Niente spiegoni.\n" +
     "- «lezione»: il NUMERO della lezione del catalogo che insegna DAVVERO a fare quell'azione, altrimenti null (meglio nessuna che una a caso).\n" +
     "- «nota»: facoltativa, massimo 100 caratteri, cosa guardare di quella lezione (es. «Guarda solo la parte sulla bio»); null se non serve.\n" +
-    "- «pagina»: la CHIAVE della pagina dell'area cliente dove si fa quell'azione (es. costruire l'offerta → \"offerta\", salvare i competitor → \"concorrenti\", mettere un video in lavorazione → \"workflow\"), altrimenti null.\n\n" +
+    "- «pagina»: la CHIAVE della pagina dell'area cliente dove si fa quell'azione (es. costruire l'offerta → \"offerta\", sistemare la bio e il profilo → \"posizionamento\", mettere un video in lavorazione → \"workflow\"), altrimenti null.\n\n" +
     'Rispondi SOLO con questo JSON:\n{"compiti":[{"testo":"…","lezione":7,"nota":null,"pagina":null}]}';
   return blocchiPrompt([], tratti(ctx, call), [consegna]);
 }

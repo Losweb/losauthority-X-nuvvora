@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { BarChart3, CalendarDays, GraduationCap, Layers, Palette, Plug, Route, Swords, Tag, UserRound, Users, WandSparkles } from "lucide-react";
+import { BarChart3, CalendarDays, Compass, GraduationCap, Layers, Plug, Route, Tag, UserRound, Users, WandSparkles } from "lucide-react";
 import { TornaAlGestionale, useAuth } from "@/features/auth";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
@@ -19,8 +19,7 @@ const GRUPPI: Array<{ titolo: string; voci: VoceNavBase[] }> = [
     voci: [
       { href: "/area/cervello/avatar", label: "Avatar", icon: UserRound },
       { href: "/area/cervello/offerta", label: "Offerta", icon: Tag },
-      { href: "/area/cervello/concorrenti", label: "Concorrenti", icon: Swords },
-      { href: "/area/cervello/kit-brand", label: "Marca", icon: Palette },
+      { href: "/area/cervello/posizionamento", label: "Posizionamento", icon: Compass },
     ],
   },
   {

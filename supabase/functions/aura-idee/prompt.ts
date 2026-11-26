@@ -44,7 +44,7 @@ Come rispondi, SEMPRE in questo ordine:
 
 Se il cliente ti chiede di cambiare una proposta (più corta, altro hook, altra tipologia), rispondi con la versione nuova nel blocco <idee>, una sola idea.
 Se nel contesto c'è un blocco STILE SCELTO DAL CLIENTE, ogni idea che proponi segue QUELLO stile: stessa struttura, stesso tipo di hook, stesso ritmo e chiusura, applicati a quanto chiede il messaggio. Nel blocco hai le istruzioni dello stile E gli SCRIPT ORIGINALI da cui è nato: sono il tuo riferimento esatto. Rileggili prima di scrivere e imita lunghezza, divisione in paragrafi, formule che tornano, blocchi che non mancano mai e CTA finale; uno script tuo deve poter stare accanto a quelli senza stonare. Non dire MAI che non hai script o esempi di riferimento: li hai, sono nel blocco. Se il cliente dice che ti sei allontanato dallo stile o di «seguire gli script», riparti dagli script originali e riscrivi, non chiedergliene altri. Lo stile vince sulle abitudini generali e sulla lunghezza standard.
-Se nel contesto c'è il blocco KIT BRAND DEL CLIENTE, per colori, font, tono di voce e regole della marca usa SOLO quei dati: non inventare codici colore o font.
+Se nel contesto c'è il blocco POSIZIONAMENTO DEL CLIENTE, resta dentro quel posizionamento: parla come quella persona e non dire le cose che «dicono già tutti».
 Scrivi in testo semplice: NIENTE markdown, niente asterischi, niente titoli, niente elenchi nella risposta parlata.
 Non promettere risultati. Nessun consiglio legale, medico o finanziario. Niente testo dopo il blocco </idee>.`;
 
@@ -98,8 +98,8 @@ export interface DatiPrompt {
   nome: string;
   scheda: string;
   analisi: string | null;
-  /** Il blocco `=== KIT BRAND DEL CLIENTE ===` (`_shared/kit-brand.ts`), null se il kit è vuoto. */
-  kitBrand: string | null;
+  /** Il blocco `=== POSIZIONAMENTO DEL CLIENTE ===` (`_shared/posizionamento/blocco.ts`), null se non c'è ancora. */
+  posizionamento: string | null;
   conoscenza: string;
   stile: StileScelto | null;
   storico: Storico[];
@@ -115,7 +115,7 @@ export function costruisciPrompt(d: DatiPrompt): Blocco[] {
   if (d.stile) cliente.push(bloccoStile(d.stile));
   cliente.push(`=== CLIENTE: ${d.nome} ===\n--- Scheda onboarding ---${d.scheda}`);
   if (d.analisi) cliente.push(`--- Analisi strategica di Aura ---\n${taglia(d.analisi, 6000)}`);
-  if (d.kitBrand) cliente.push(d.kitBrand);
+  if (d.posizionamento) cliente.push(d.posizionamento);
   const variabile: string[] = [];
   if (d.ideeRecenti.length > 0) {
     variabile.push(`--- Idee già proposte o salvate (non ripeterle) ---\n${d.ideeRecenti.map((t) => `• ${t}`).join("\n")}`);

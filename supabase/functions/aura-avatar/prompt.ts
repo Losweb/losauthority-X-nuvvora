@@ -9,7 +9,7 @@ import { REGOLE_AGENTI } from "../_shared/onboarding/regole-agenti.ts";
 import { METODO_AVATAR } from "./metodo.ts";
 
 const PERCORSO = `IL PERCORSO SUL SITO (cinque o sei scambi). Il cliente vede una barra con QUATTRO passi: 1 Leggo, 2 Analisi, 3 Mappa, 4 Schede. Di' sempre a che punto siete con quei numeri («Siamo al passo 2 di 4: l'analisi»), mai con altri conteggi. Leggere i dati e chiedere i buchi sono entrambi il passo 1 (Leggo).
-1. Leggo. Prima di scrivere qualsiasi cosa leggi quello che il sito ha già del cliente: le risposte dell'onboarding, la fotografia, l'offerta se c'è, il kit brand e i file. Non chiedere cose già scritte lì.
+1. Leggo. Prima di scrivere qualsiasi cosa leggi quello che il sito ha già del cliente: le risposte dell'onboarding, la fotografia, l'offerta se c'è e i file. Non chiedere cose già scritte lì.
 2. Chiedo solo i buchi, in un messaggio solo: cosa vendi e come lo fai pagare; chi sono i clienti avuti finora e con chi è andata meglio; le frasi che ti hanno detto, uguali; se pubblichi già e chi ti conosce. Chiedi SOLO quelli che mancano davvero. Se un dato manca due volte, proponi tu un valore sensato, scrivi «da confermare» e vai avanti.
 3. Analisi. Fai vedere l'analisi: conta quante persone diverse ci sono nella descrizione; togli i mestieri (per ogni mestiere nominato la frase che direbbe quella persona e se è la stessa situazione) in una tabella; confronta le situazioni con i quattro criteri in una tabella.
 4. Mappa. Proponi la mappa a parole: il ponte, l'arrivo, una o più partenze, la principale, chi resta fuori, tre o quattro esempi per i video. Chiudi con «Dimmi cosa cambieresti», mai con «va bene?».
@@ -84,7 +84,6 @@ export interface DatiPrompt {
   nome: string;
   scheda: string;
   lettura: string;
-  kitBrand: string | null;
   offerte: string;
   /** Mappa + schede com'è ora, già in testo. */
   stato: string;
@@ -102,7 +101,6 @@ export function costruisciPrompt(d: DatiPrompt): Blocco[] {
     `=== FOTOGRAFIA DELL'ONBOARDING (lettura di Aura per Wesley) E NOTE PER TE ===\n${taglia(d.lettura, 4000)}`,
     `=== LE SUE OFFERTE (Cervello → Offerta) ===\n${d.offerte}`,
   ];
-  if (d.kitBrand) cliente.push(d.kitBrand);
   const variabile = [`=== MAPPA E SCHEDE FINORA (la tua memoria) ===\n${d.stato}`];
   if (d.storico.length > 0) {
     const righe = d.storico.map((m) => `${m.ruolo === "cliente" ? "CLIENTE" : "AURA"}: ${taglia(m.contenuto, 3000)}`);

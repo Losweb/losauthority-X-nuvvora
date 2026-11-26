@@ -19,7 +19,6 @@ import { ANTHROPIC_MODEL, HAS_ANTHROPIC, streamAnthropicText } from "../_shared/
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { leggiLettura, renderLettura } from "../_shared/onboarding/lettura.ts";
-import { bloccoKitBrand } from "../_shared/kit-brand.ts";
 import { APERTURA, APERTURA_CON_DUBBIO, costruisciPrompt, SYSTEM, type Storico } from "./prompt.ts";
 import { applicaDati, estraiDati, renderStato, type RigaMappa, type RigaScheda } from "./dati.ts";
 import { type BodyModifica, modifica } from "./modifica.ts";
@@ -47,7 +46,7 @@ async function richiediMappa(admin: SupabaseClient, clienteId: string) {
 
 /** Contesto del turno: si escludono la riga Aura in corso e il messaggio del cliente (entra a parte come NUOVO MESSAGGIO). */
 async function contesto(admin: SupabaseClient, clienteId: string, mappaId: string, escludi: string[]) {
-  const [scheda, storico, nome, lettura, kitBrand, offerte] = await Promise.all([
+  const [scheda, storico, nome, lettura, offerte] = await Promise.all([
     leggiMateriale(admin, clienteId).catch(() => null),
     admin
       .from("avatar_mappa_messaggi")
@@ -59,14 +58,12 @@ async function contesto(admin: SupabaseClient, clienteId: string, mappaId: strin
       .limit(MAX_STORICO),
     nomeCliente(admin, clienteId),
     leggiLettura(admin, clienteId).catch(() => null),
-    bloccoKitBrand(admin, clienteId),
     renderOfferte(admin, clienteId),
   ]);
   return {
     nome,
     scheda: renderScheda(scheda),
     lettura: lettura ? renderLettura(lettura, "avatar") : "(non disponibile)",
-    kitBrand,
     offerte,
     storico: ((storico.data ?? []) as Storico[]).reverse(),
   };

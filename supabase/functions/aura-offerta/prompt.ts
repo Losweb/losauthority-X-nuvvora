@@ -74,7 +74,6 @@ export interface DatiPrompt {
   strada: string;
   scheda: string;
   lettura: string;
-  kitBrand: string | null;
   avatar: string;
   frase: string;
   offertaAttuale: string;
@@ -94,7 +93,6 @@ export function costruisciPrompt(d: DatiPrompt): Blocco[] {
     `=== MAPPA E SCHEDE AVATAR ===\n${taglia(d.avatar, 14000)}`,
     `=== L'OFFERTA CHE PORTA (scritta prima sul sito o nell'onboarding) ===\n${taglia(d.offertaAttuale, 5000)}`,
   ];
-  if (d.kitBrand) cliente.push(d.kitBrand);
   const variabile = [`=== STRADA (decisa dal sito) ===\n${d.strada}`, `=== FRASE SALVATA ===\n${d.frase}`, `=== LA SCHEDA OFFERTA FINORA (la tua memoria) ===\n${d.stato}`];
   if (d.storico.length > 0) {
     const righe = d.storico.map((m) => `${m.ruolo === "cliente" ? "PERSONA" : "AURA"}: ${taglia(m.contenuto, 3000)}`);

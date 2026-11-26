@@ -31,7 +31,8 @@
       "@onboarding/*": ["./supabase/functions/_shared/onboarding/*"],
       "@area/*": ["./supabase/functions/_shared/area/*"],
       "@avatar-forma/*": ["./supabase/functions/_shared/avatar/*"],
-      "@offerta-forma/*": ["./supabase/functions/_shared/offerta/*"]
+      "@offerta-forma/*": ["./supabase/functions/_shared/offerta/*"],
+      "@posizionamento-forma/*": ["./supabase/functions/_shared/posizionamento/*"]
     }
   },
   "include": ["src"]

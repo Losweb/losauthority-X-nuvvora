@@ -15,8 +15,7 @@ export interface PaginaArea {
 export const PAGINE_AREA: readonly PaginaArea[] = [
   { chiave: "avatar", titolo: "Avatar", percorso: "/area/cervello/avatar", descrizione: "costruire o rivedere l'avatar (cliente ideale) parlando con Aura" },
   { chiave: "offerta", titolo: "Offerta", percorso: "/area/cervello/offerta", descrizione: "costruire o rivedere l'offerta (cosa vende, a chi, prezzo, garanzia) con Aura, con PDF scaricabile" },
-  { chiave: "concorrenti", titolo: "Competitors", percorso: "/area/cervello/concorrenti", descrizione: "salvare i competitor e i profili di riferimento con i loro video" },
-  { chiave: "kit_brand", titolo: "Kit Brand", percorso: "/area/cervello/kit-brand", descrizione: "salvare logo, colori (hex), font, tono di voce e documenti del brand: Aura li legge in ogni lavoro" },
+  { chiave: "posizionamento", titolo: "Posizionamento", percorso: "/area/cervello/posizionamento", descrizione: "il profilo Instagram (nome, bio, link, storie in evidenza, post fissati) e chi sei nel tuo mercato: lo scrive Aura da avatar e offerta" },
   { chiave: "crea_idee", titolo: "Crea idee", percorso: "/area/crea-idee", descrizione: "farsi proporre idee di video da Aura (hook e script)" },
   { chiave: "stili", titolo: "Stili", percorso: "/area/stili", descrizione: "salvare uno stile di video da replicare partendo da script di esempio" },
   { chiave: "workflow", titolo: "Workflow", percorso: "/area/workflow", descrizione: "la kanban dei video: idea → script → da registrare → da editare → pubblicato, con calendario" },

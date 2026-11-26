@@ -39,9 +39,8 @@ const ContrattoPubblicoPage = lazy(() => import("@/features/contratti/pages/Cont
 const InformativaPrivacyPage = lazy(() => import("@/features/contratti/pages/InformativaPrivacyPage"));
 const OffertaPage = lazy(() => import("@/features/area/pages/OffertaPage"));
 const OffertaStampaPage = lazy(() => import("@/features/area/pages/OffertaStampaPage"));
-const ConcorrentiPage = lazy(() => import("@/features/area/pages/ConcorrentiPage"));
+const PosizionamentoPage = lazy(() => import("@/features/area/pages/PosizionamentoPage"));
 const ClientiAreaPage = lazy(() => import("@/features/area/pages/ClientiAreaPage"));
-const KitBrandPage = lazy(() => import("@/features/area/pages/KitBrandPage"));
 const SkoolVideoPage = lazy(() => import("@/features/skool-video/pages/SkoolVideoPage"));
 const ConsensoPage = lazy(() => import("@/features/claude/pages/ConsensoPage"));
 const CollegaClaudePage = lazy(() => import("@/features/claude/pages/CollegaClaudePage"));
@@ -216,9 +215,11 @@ export function AppRoutes() {
           <Route path="/area/cervello/offerta" element={<OffertaPage />} />
           {/* Dal 26/11/2026 la fase Offerta è una pagina sola: i link alle singole offerte di prima tornano lì. */}
           <Route path="/area/cervello/offerta/:id" element={<Navigate to="/area/cervello/offerta" replace />} />
-          <Route path="/area/cervello/concorrenti" element={<ConcorrentiPage />} />
-          <Route path="/area/cervello/clienti" element={<Navigate to="/area/cervello/concorrenti" replace />} />
-          <Route path="/area/cervello/kit-brand" element={<KitBrandPage />} />
+          <Route path="/area/cervello/posizionamento" element={<PosizionamentoPage />} />
+          {/* Concorrenti e Marca tolti il 26/11/2026: i vecchi link portano al Posizionamento. */}
+          <Route path="/area/cervello/concorrenti" element={<Navigate to="/area/cervello/posizionamento" replace />} />
+          <Route path="/area/cervello/clienti" element={<Navigate to="/area/cervello/posizionamento" replace />} />
+          <Route path="/area/cervello/kit-brand" element={<Navigate to="/area/cervello/posizionamento" replace />} />
           <Route path="/area/avatar" element={<Navigate to="/area/cervello/avatar" replace />} />
           <Route path="/area/offerta" element={<Navigate to="/area/cervello/offerta" replace />} />
         </Route>

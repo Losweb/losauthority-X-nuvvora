@@ -208,7 +208,7 @@ export default function OffertaPage() {
   );
   // Il passo dopo, in fondo alla pagina: dove si va quando questa fase è finita.
   const passoDopo = o.completa_fatta_il ? (
-    <PassoDopo testo="Prossimo passo: le idee per i primi video" href="/area/crea-idee" />
+    <PassoDopo testo="Prossimo passo: il tuo posizionamento" href="/area/cervello/posizionamento" />
   ) : o.strada === "breve" && o.breve_fatta_il ? (
     <PassoDopo testo="Prossimo passo: il tuo avatar" href="/area/cervello/avatar" />
   ) : null;

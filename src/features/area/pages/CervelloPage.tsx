@@ -3,7 +3,7 @@ import { primoNome } from "@/features/scheda";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { MappaCervello } from "../components/cervello/MappaCervello";
 
-/** /area/cervello → "Cervello del tuo branding": la mappa con Avatar, Offerta, Concorrenti e Kit Brand. */
+/** /area/cervello → "Cervello del tuo branding": la mappa con Avatar, Offerta e Posizionamento. */
 export default function CervelloPage() {
   const { utente } = useAuth();
   const nome = primoNome(utente?.nombre);

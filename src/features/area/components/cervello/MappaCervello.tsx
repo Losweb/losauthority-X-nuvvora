@@ -1,4 +1,4 @@
-import { ArrowRight, Brain, Shapes, Sparkles, Swords, UserRound } from "lucide-react";
+import { ArrowRight, Brain, Compass, Sparkles, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface Nodo {
@@ -8,16 +8,15 @@ interface Nodo {
   icon: typeof Brain;
 }
 
-/** I quattro rami del cervello, da sinistra a destra. */
+/** I tre rami del cervello, da sinistra a destra. */
 const NODI: Nodo[] = [
   { href: "/area/cervello/avatar", titolo: "Avatar", testo: "Il tuo cliente ideale: chi è, cosa vuole, cosa lo blocca.", icon: UserRound },
   { href: "/area/cervello/offerta", titolo: "Offerta", testo: "Promessa, struttura e prezzo di quello che vendi.", icon: Sparkles },
-  { href: "/area/cervello/concorrenti", titolo: "Concorrenti", testo: "Chi vende la stessa cosa e chi ti ispira: cosa fanno, cosa dicono, dove sei diverso.", icon: Swords },
-  { href: "/area/cervello/kit-brand", titolo: "Marca", testo: "Logo, colori, font, tono di voce e documenti: quello che ti rende riconoscibile.", icon: Shapes },
+  { href: "/area/cervello/posizionamento", titolo: "Posizionamento", testo: "Chi sei nel tuo mercato e come si vede il tuo profilo Instagram.", icon: Compass },
 ];
 
-/** Punto d'arrivo delle linee nel viewBox 800×140: il centro di ciascuna delle quattro colonne. */
-const ARRIVI = [100, 300, 500, 700];
+/** Punto d'arrivo delle linee nel viewBox 800×140: il centro di ciascuna delle tre colonne. */
+const ARRIVI = [133, 400, 667];
 
 function NodoCervello({ nodo, indice }: { nodo: Nodo; indice: number }) {
   const Icon = nodo.icon;
@@ -25,7 +24,7 @@ function NodoCervello({ nodo, indice }: { nodo: Nodo; indice: number }) {
     <Link
       to={nodo.href}
       style={{ animationDelay: `${650 + indice * 110}ms` }}
-      // Sotto md: icona a sinistra e testo a destra (righe più basse, le quattro voci stanno quasi in uno schermo); da md la colonna di sempre.
+      // Sotto md: icona a sinistra e testo a destra (righe più basse, le tre voci stanno in uno schermo); da md la colonna di sempre.
       className="marmo-cervello-nodo group relative grid h-full grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-2xl border bg-card p-4 shadow-xs transition-[transform,box-shadow,border-color] duration-300 animate-in fade-in slide-in-from-top-2 fill-mode-both hover:-translate-y-0.5 hover:border-foreground/25 hover:shadow-md md:flex md:flex-col md:gap-4 md:p-5"
     >
       {/* Il punto dove atterra la linea (solo da md, dove le linee si vedono). */}
@@ -48,8 +47,8 @@ function NodoCervello({ nodo, indice }: { nodo: Nodo; indice: number }) {
 }
 
 /**
- * La mappa del "Cervello del tuo branding": il cervello in alto al centro, quattro
- * linee che scendono verso Avatar, Offerta, Concorrenti e Kit Brand. Le linee si
+ * La mappa del "Cervello del tuo branding": il cervello in alto al centro, tre
+ * linee che scendono verso Avatar, Offerta e Posizionamento (dal 26/11/2026). Le linee si
  * disegnano all'ingresso (SVG con pathLength=1), i nodi entrano uno dopo l'altro,
  * l'alone del cervello respira. Sotto md le linee lasciano il posto a una colonna.
  */
@@ -65,7 +64,7 @@ export function MappaCervello() {
         </div>
       </div>
 
-      {/* Le quattro linee: partono dal fondo del cervello e arrivano al centro di ogni colonna. */}
+      {/* Le tre linee: partono dal fondo del cervello e arrivano al centro di ogni colonna. */}
       <svg aria-hidden viewBox="0 0 800 140" preserveAspectRatio="none" className="hidden h-[140px] w-full text-muted-foreground/45 md:block">
         {ARRIVI.map((x, i) => (
           <path
@@ -83,7 +82,7 @@ export function MappaCervello() {
       </svg>
       <div aria-hidden className="mx-auto h-8 w-px bg-border md:hidden" />
 
-      <ul className="grid gap-4 md:grid-cols-4">
+      <ul className="grid gap-4 md:grid-cols-3">
         {NODI.map((n, i) => (
           <li key={n.href} className="min-w-0">
             <NodoCervello nodo={n} indice={i} />

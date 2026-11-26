@@ -22,7 +22,6 @@ import { ANTHROPIC_MODEL, HAS_ANTHROPIC, streamAnthropicText } from "../_shared/
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { leggiLettura, renderLettura } from "../_shared/onboarding/lettura.ts";
-import { bloccoKitBrand } from "../_shared/kit-brand.ts";
 import { APERTURA, APERTURA_CON_MESSAGGIO, costruisciPrompt, SYSTEM, type Storico } from "./prompt.ts";
 import { avatarDi, renderAvatar } from "./avatar.ts";
 import { modificaOfferta } from "./modifica.ts";
@@ -50,7 +49,7 @@ async function nuovaRigaAura(admin: SupabaseClient, offertaId: string): Promise<
 async function turno(admin: SupabaseClient, clienteId: string, auraId: string, escludi: string[], messaggio: string, signal?: AbortSignal) {
   const o = await offertaDi(admin, clienteId);
   if (!o) throw new HttpError(404, "Non hai ancora iniziato la fase Offerta.");
-  const [scheda, storico, nome, lettura, kitBrand, avatar] = await Promise.all([
+  const [scheda, storico, nome, lettura, avatar] = await Promise.all([
     leggiMateriale(admin, clienteId).catch(() => null),
     admin
       .from("offerta_messaggi")
@@ -63,7 +62,6 @@ async function turno(admin: SupabaseClient, clienteId: string, auraId: string, e
       .limit(MAX_STORICO),
     nomeCliente(admin, clienteId),
     leggiLettura(admin, clienteId).catch(() => null),
-    bloccoKitBrand(admin, clienteId),
     avatarDi(admin, clienteId, (o.avatar_letto_il as string | null) ?? null),
   ]);
   // La strada la decide il sito: completa solo con la mappa Avatar chiusa.
@@ -87,7 +85,6 @@ async function turno(admin: SupabaseClient, clienteId: string, auraId: string, e
       strada: testoStrada,
       scheda: renderScheda(scheda),
       lettura: lettura ? renderLettura(lettura, "offerta") : "(non disponibile)",
-      kitBrand,
       avatar: renderAvatar(avatar),
       frase: o.frase ? `${o.frase} (${o.frase_il ? `approvata il ${String(o.frase_il).slice(0, 10)}` : "non ancora approvata"})` : "(nessuna)",
       offertaAttuale: renderOffertaAttuale(o, offertaOnboarding),
