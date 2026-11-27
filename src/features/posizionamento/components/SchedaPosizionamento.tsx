@@ -4,6 +4,7 @@ import { RigaAvatar, type Correzione } from "@/features/avatar";
 import { Dettaglio } from "@/shared/components/layout/Dettaglio";
 import { cn } from "@/lib/utils";
 import { ProfiloInstagram } from "./ProfiloInstagram";
+import { ProposteBio } from "./ProposteBio";
 
 function Campo({ etichetta, nota, children }: { etichetta: string; nota?: ReactNode; children: ReactNode }) {
   return (
@@ -72,6 +73,7 @@ export function SchedaPosizionamento({ p, aperta = false, onModifica, occupato }
                 <RigaAvatar percorso="profilo.bio" valori={[pr.bio]} semplice {...c}>
                   <p className="text-[15px] leading-relaxed whitespace-pre-line">{pr.bio}</p>
                 </RigaAvatar>
+                {onModifica ? <ProposteBio occupato={occupato} onUsa={(testo) => onModifica({ percorso: "profilo.bio", valore: testo })} /> : null}
               </Campo>
               <Campo etichetta="Link in bio">
                 <RigaAvatar percorso="profilo.link" valori={[pr.link]} semplice {...c}>

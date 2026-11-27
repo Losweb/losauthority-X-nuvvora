@@ -77,3 +77,18 @@ export function useEliminaPosizionamento() {
     onError: erroreMutation("Non è stato possibile ricominciare"),
   });
 }
+
+/** Una proposta di bio scritta da Aura (non salvata finché il cliente non la sceglie). */
+export interface PropostaBio {
+  angolo: string;
+  testo: string;
+  perche: string;
+}
+
+/** Aura propone tre bio da angoli diversi (27/11/2026). Non tocca il posizionamento: si salva con «Usa questa». */
+export function useProponiBio() {
+  return useMutation({
+    mutationFn: async (richiesta: string) => (await invocaEdge<{ proposte: PropostaBio[] }>("aura-posizionamento", { azione: "bio", richiesta })).proposte,
+    onError: erroreMutation("Aura non è riuscita a proporre la bio"),
+  });
+}

@@ -7,7 +7,9 @@
  *   { azione: "crea" }                        → scrive il posizionamento (anche per rifarlo da capo). { ok }
  *   { azione: "cambia", richiesta }           → Aura lo riscrive con la richiesta del cliente. { ok }
  *   { azione: "modifica", percorso, valore }  → il cliente corregge una riga da solo. { ok }
- * Rate limit: aura_help_allowed(user, 20, 3600, 'posizionamento') per crea e cambia.
+ *   { azione: "bio", richiesta? }             → tre proposte di bio da angoli diversi (27/11/2026), NON salvate:
+ *                                               il cliente ne sceglie una e la salva con «modifica» su profilo.bio. { ok, proposte }
+ * Rate limit: aura_help_allowed(user, 20, 3600, 'posizionamento') per crea, cambia e bio.
  */
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { gestisciErrore, HttpError, json, leggiBody, preflight } from "../_shared/http.ts";
@@ -17,7 +19,8 @@ import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { LIMITI, pulisciPosizionamento, tagliaParola, type Posizionamento } from "../_shared/posizionamento/forma.ts";
 import { avatarDi, renderAvatar } from "../aura-offerta/avatar.ts";
-import { costruisciPrompt, SYSTEM } from "./prompt.ts";
+import { costruisciPrompt, costruisciPromptBio, SYSTEM } from "./prompt.ts";
+import { componiBio, estraiProposte, problemiBio, SYSTEM_BIO, type PropostaBio, type PropostaGrezza } from "./bio.ts";
 
 type Body = { azione?: unknown; richiesta?: unknown; percorso?: unknown; valore?: unknown };
 
@@ -60,7 +63,7 @@ async function accorcia(testo: string, max: number, cosa: string, clienteId: str
   if (testo.length <= max) return testo;
   const corto = await streamAnthropicText({
     system: "Accorci testi per profili Instagram in italiano. Rispondi SOLO con il testo accorciato, niente virgolette, niente spiegazioni.",
-    user: `Accorcia ${cosa} a massimo ${max} caratteri (adesso sono ${testo.length}), spazi, emoji e a capo compresi. Tieni il senso, le parole chiave e gli a capo.\n\n${testo}`,
+    user: `Accorcia ${cosa} a massimo ${max} caratteri (adesso sono ${testo.length}), spazi, emoji e a capo compresi. Tieni il senso, le parole chiave e gli a capo. Niente abbreviazioni («sett.», «/», «x», «+»): togli piuttosto una parola o un'emoji meno importante. Non aggiungere niente che non ci sia. Se l'ultima riga è una chiamata all'azione (es. «Scrivimi UPSCALE in DM»), lasciala intera e accorcia le altre.\n\n${testo}`,
     maxTokens: 400,
     tag: "aura-posizionamento-accorcia",
     utente: clienteId,
@@ -105,6 +108,60 @@ async function scrivi(admin: SupabaseClient, clienteId: string, richiesta?: stri
   }
   const { error } = await admin.from("posizionamento").update({ contenuto: p, stato: "pronto", errore: null }).eq("cliente_id", clienteId);
   if (error) throw error;
+}
+
+/** Tre proposte di bio (non salvate). Lancia HttpError se Aura non risponde. */
+async function proponiBio(admin: SupabaseClient, clienteId: string, attuale: Posizionamento, richiesta?: string): Promise<PropostaBio[]> {
+  const o = await offertaDi(admin, clienteId);
+  const [materiale, nome, avatar] = await Promise.all([leggiMateriale(admin, clienteId).catch(() => null), nomeCliente(admin, clienteId), avatarDi(admin, clienteId)]);
+  const pr = attuale.profilo;
+  const testo = await streamAnthropicText({
+    system: SYSTEM_BIO,
+    user: costruisciPromptBio({
+      nome,
+      onboarding: renderScheda(materiale),
+      avatar: renderAvatar(avatar),
+      offerta: o ? renderOfferta(o) : "(nessuna)",
+      // Solo quello che si vede sul profilo: i «fatti» del posizionamento li ha scritti Aura e possono
+      // avere dettagli inventati (es. «in 6 mesi»); i fatti veri si prendono da onboarding, avatar e offerta.
+      // Senza la bio di adesso: Aura ne ricopiava gli errori.
+      posizionamento: JSON.stringify({ nome: pr?.nome, categoria: pr?.categoria, link: pr?.link, chi_sei: attuale.chi_sei }),
+      richiesta,
+    }),
+    maxTokens: 2000,
+    tag: "aura-posizionamento-bio",
+    utente: clienteId,
+    timeoutMs: 90_000,
+  });
+  let proposte = testo ? estraiProposte(testo) : [];
+  if (!proposte.length) {
+    await logError("aura-posizionamento:bio", new Error(testo ? "risposta senza proposte" : "nessuna risposta"), { cliente: clienteId, inizio: testo?.slice(0, 200) ?? null }, { silent: true });
+    throw new HttpError(502, "Aura non è riuscita a scrivere le proposte. Riprova tra poco.");
+  }
+  // Un giro di correzione, solo se il codice trova errori: Aura riceve la lista precisa.
+  const errori = proposte.map((p) => problemiBio(p));
+  if (errori.some((e) => e.length)) {
+    const elenco = proposte.map((p, i) => `PROPOSTA ${i + 1} (${p.angolo})\n${componiBio(p.righe, p.chiamata)}\nDA CORREGGERE: ${errori[i].length ? errori[i].join("; ") : "niente, lasciala uguale"}`).join("\n\n");
+    const corretto = await streamAnthropicText({
+      system: SYSTEM_BIO,
+      user: `Hai scritto queste tre proposte di bio. Correggi solo gli errori indicati, tieni l'angolo e il senso di ognuna, non aggiungere fatti. Rispondi con il blocco <dati> completo, tutte e tre.\n\n${elenco}`,
+      maxTokens: 2000,
+      tag: "aura-posizionamento-bio-correggi",
+      utente: clienteId,
+      timeoutMs: 60_000,
+    });
+    const nuove = corretto ? estraiProposte(corretto) : [];
+    if (nuove.length === proposte.length) proposte = nuove.map((n, i) => ({ ...n, perche: n.perche || proposte[i].perche }));
+  }
+  return proposte.map(bioNelLimite);
+}
+
+/** Ultima rete: se è ancora oltre il limite si toglie una riga intera (mai spezzata a metà), la chiamata resta. */
+function bioNelLimite(p: PropostaGrezza): PropostaBio {
+  const spazio = LIMITI.bio - (p.chiamata ? p.chiamata.length + 1 : 0);
+  let righe = p.righe;
+  while (righe.join("\n").length > spazio && righe.length > 1) righe = righe.length > 2 ? righe.toSpliced(1, 1) : righe.slice(0, 1);
+  return { angolo: p.angolo, perche: p.perche, testo: componiBio([tagliaParola(righe.join("\n"), spazio)], p.chiamata) };
 }
 
 const pulito = (v: unknown): string => {
@@ -165,7 +222,7 @@ Deno.serve(async (req: Request) => {
       return json({ ok: true });
     }
 
-    if (body.azione !== "crea" && body.azione !== "cambia") throw new HttpError(400, "Azione non valida.");
+    if (body.azione !== "crea" && body.azione !== "cambia" && body.azione !== "bio") throw new HttpError(400, "Azione non valida.");
     const o = await offertaDi(admin, c.id);
     if (!o?.completa_fatta_il) throw new HttpError(409, "Prima chiudi la tua offerta: il posizionamento parte da lì.");
 
@@ -182,6 +239,14 @@ Deno.serve(async (req: Request) => {
     }
 
     const richiesta = typeof body.richiesta === "string" ? body.richiesta.trim().slice(0, MAX_RICHIESTA) : "";
+
+    if (body.azione === "bio") {
+      const { data } = await admin.from("posizionamento").select("contenuto").eq("cliente_id", c.id).maybeSingle();
+      if (!data) throw new HttpError(404, "Prima crea il posizionamento.");
+      const proposte = await proponiBio(admin, c.id, pulisciPosizionamento((data as { contenuto: unknown }).contenuto), richiesta || undefined);
+      return json({ ok: true, proposte });
+    }
+
     if (richiesta.length < 3) throw new HttpError(400, "Scrivi cosa vuoi cambiare.");
     const { data } = await admin.from("posizionamento").select("contenuto").eq("cliente_id", c.id).maybeSingle();
     if (!data) throw new HttpError(404, "Prima crea il posizionamento.");
