@@ -148,9 +148,13 @@ Deno.serve(async (req: Request) => {
     const dati = await contesto(admin, c.id, auraId);
     const pertinenti = lezioniPertinenti(dati.lezioni, messaggio);
     const argomenti = await leggiArgomenti(admin).catch(() => []);
+    // La mappa si usa solo quando copre almeno il 90% delle lezioni: a metà passata il coach
+    // non troverebbe le lezioni non ancora lette.
+    const { count: lette } = await admin.from("lezioni_indice").select("lezione_id", { count: "exact", head: true }).eq("stato", "fatto");
+    const mappaPronta = argomenti.length >= MIN_ARGOMENTI_MAPPA && (lette ?? 0) >= dati.lezioni.length * 0.9;
     let daMappa: string | null = null;
     let testi = new Map<string, TestoCapitolo[]>();
-    if (argomenti.length >= MIN_ARGOMENTI_MAPPA) {
+    if (mappaPronta) {
       // 1. Il modello piccolo sceglie gli argomenti dall'elenco (poche centinaia di token).
       const scelta = await streamAnthropicText({ system: SYSTEM_SCEGLI, user: promptScegli(argomenti, dati.storico, messaggio), maxTokens: 60, model: MODELLO_SCEGLI, tag: "aura-coach-argomenti", utente: c.id, timeoutMs: 20_000 }).catch(() => null);
       const scelti = estraiScelti(scelta, argomenti);

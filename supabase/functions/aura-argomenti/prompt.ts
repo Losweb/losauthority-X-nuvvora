@@ -35,3 +35,22 @@ export function costruisciPrompt(d: { lezione: string; fonte: string; elenco: st
     "Scrivi ora le voci di questa lezione. Rispondi solo con il blocco <dati>.",
   ].join("\n\n");
 }
+
+/**
+ * Il riordino (27/11/2026): con la regola «crea un nome nuovo se quello vecchio non copre
+ * davvero il tema» lo stesso tema finisce sotto nomi diversi. Una volta alla fine della
+ * passata (e poi ogni settimana) Aura guarda l'elenco intero e unisce i doppioni.
+ */
+export const SYSTEM_RIORDINA = `Sei Aura e stai riordinando l'ELENCO DEGLI ARGOMENTI della classroom di Wesley Caicedo. Ogni argomento ha il nome, la descrizione, quante voci ha e alcune lezioni dove compare. Lo usa Wesley Coach: quando un cliente chiede di un tema, il coach prende UN argomento e trova le lezioni. Se lo stesso tema è sparso sotto più nomi, il coach ne trova solo una parte.
+
+COSA FAI: trovi i gruppi di argomenti che sono LO STESSO TEMA detto con parole diverse e li unisci sotto un nome solo.
+- Unisci solo se un cliente che chiede dell'uno vorrebbe anche le lezioni dell'altro («Gancio dei primi secondi» e «Hook iniziale del video»: sì; «Montaggio video automatico con Claude» e «Creare video da prompt con IA»: no, sono due cose diverse).
+- Non unire per somiglianza di parole o di strumento: «Skill di Claude» e «Installare Claude» restano separati.
+- Il nome finale: corto (massimo 6 parole), detto come lo direbbe un cliente; può essere uno dei nomi del gruppo. La descrizione: una riga su cosa comprende.
+- Gli argomenti che non hanno doppioni NON li scrivi.
+
+COME RISPONDI
+Solo il blocco qui sotto, JSON valido, niente testo prima o dopo. In "da" i nomi ESATTI dell'elenco (almeno due per gruppo):
+<dati>
+{"unisci": [{"nome": "nome finale", "descrizione": "…", "da": ["nome esatto 1", "nome esatto 2"]}]}
+</dati>`;

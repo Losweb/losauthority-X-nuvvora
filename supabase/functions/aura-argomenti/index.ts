@@ -9,6 +9,8 @@
  * le altre live la descrizione con i capitoli. Si rilegge solo se quel testo cambia
  * (`lezioni_indice.fonte_hash`): `lezioni.updated_at` cambia a ogni sync settimanale.
  *
+ * { azione: "riordina" } unisce gli argomenti doppioni; lo fa anche da solo quando non c'è niente
+ * da leggere, al massimo una volta a settimana (`sync_stati` chiave aura_argomenti_riordino).
  * Chiamata: cron ogni 15 minuti (migrazione 080) o team. Body: { max? } lezioni per giro
  * (default 6; non se ne comincia una nuova dopo 45 s). Risposta: { ok, fatte, errori, restano }.
  * Le voci scritte dal team (origine «team») non si toccano.
@@ -21,7 +23,7 @@ import { logError } from "../_shared/log.ts";
 import { eRicompensa } from "../_shared/lezioni.ts";
 import { type Argomento, elencoArgomenti, leggiArgomenti, type Profondita } from "../_shared/argomenti.ts";
 import { formattaTempo, secondiDa } from "../aura-coach/capitoli.ts";
-import { costruisciPrompt, SYSTEM } from "./prompt.ts";
+import { costruisciPrompt, SYSTEM, SYSTEM_RIORDINA } from "./prompt.ts";
 
 interface Lezione {
   id: string;
@@ -138,15 +140,73 @@ async function indicizza(admin: SupabaseClient, l: Lezione, fonte: string, argom
   if (eIns) throw eIns;
 }
 
+/**
+ * Unisce gli argomenti doppioni (stesso tema, nomi diversi): le voci passano sotto un
+ * argomento solo, gli altri si cancellano. Restituisce quanti gruppi ha unito.
+ */
+async function riordina(admin: SupabaseClient): Promise<{ gruppi: number; tolti: number }> {
+  const argomenti = await leggiArgomenti(admin);
+  if (argomenti.length < 2) return { gruppi: 0, tolti: 0 };
+  const { data: voci, error } = await admin.from("lezioni_argomenti").select("argomento_id, lezioni(titolo)").limit(5000);
+  if (error) throw error;
+  const esempi = new Map<string, string[]>();
+  for (const v of (voci ?? []) as unknown as Array<{ argomento_id: string; lezioni: { titolo: string } | null }>) {
+    esempi.set(v.argomento_id, [...(esempi.get(v.argomento_id) ?? []), v.lezioni?.titolo ?? ""]);
+  }
+  const elenco = argomenti
+    .map((a) => {
+      const ls = esempi.get(a.id) ?? [];
+      return `- ${a.nome}${a.descrizione ? ` — ${a.descrizione}` : ""} (${ls.length} voci; es. ${[...new Set(ls)].slice(0, 3).join(" | ")})`;
+    })
+    .join("\n");
+  const testo = await streamAnthropicText({
+    system: SYSTEM_RIORDINA,
+    user: `=== ELENCO DEGLI ARGOMENTI ===\n${elenco}\n\nTrova i doppioni e rispondi solo con il blocco <dati>.`,
+    maxTokens: 6000,
+    tag: "aura-argomenti-riordina",
+    timeoutMs: 120_000,
+  });
+  const m = testo?.match(/<dati>\s*([\s\S]*?)\s*<\/dati>/);
+  if (!m) throw new Error(testo ? "riordino senza dati" : "nessuna risposta");
+  const gruppi = (JSON.parse(m[1]) as { unisci?: Array<{ nome?: unknown; descrizione?: unknown; da?: unknown }> }).unisci ?? [];
+  const perNome = new Map(argomenti.map((a) => [a.nome.toLowerCase(), a]));
+  let uniti = 0;
+  let tolti = 0;
+  for (const g of gruppi) {
+    const nome = str(g.nome, 60);
+    const membri = (Array.isArray(g.da) ? g.da : []).map((n) => perNome.get(str(n, 60).toLowerCase())).filter((a): a is Argomento => !!a);
+    const unici = [...new Map(membri.map((a) => [a.id, a])).values()];
+    if (nome.length < 2 || unici.length < 2) continue;
+    // Si tiene quello che ha già il nome finale, se c'è; altrimenti il primo, rinominato.
+    const tieni = unici.find((a) => a.nome.toLowerCase() === nome.toLowerCase()) ?? unici[0];
+    const altri = unici.filter((a) => a.id !== tieni.id);
+    const { error: eUpd } = await admin.from("lezioni_argomenti").update({ argomento_id: tieni.id }).in("argomento_id", altri.map((a) => a.id));
+    if (eUpd) throw eUpd;
+    const { error: eDel } = await admin.from("argomenti").delete().in("id", altri.map((a) => a.id));
+    if (eDel) throw eDel;
+    for (const a of altri) perNome.delete(a.nome.toLowerCase());
+    const occupato = perNome.get(nome.toLowerCase());
+    if (!occupato || occupato.id === tieni.id) {
+      await admin.from("argomenti").update({ nome, descrizione: str(g.descrizione, 300) || tieni.descrizione }).eq("id", tieni.id);
+      perNome.delete(tieni.nome.toLowerCase());
+      perNome.set(nome.toLowerCase(), { ...tieni, nome });
+    }
+    uniti++;
+    tolti += altri.length;
+  }
+  return { gruppi: uniti, tolti };
+}
+
 Deno.serve(async (req: Request) => {
   const pre = preflight(req);
   if (pre) return pre;
   try {
     await richiediCronOTeam(req);
     if (!HAS_ANTHROPIC) return json({ ok: false, error: "ANTHROPIC_API_KEY non configurata." }, 500);
-    const body = await leggiBody<{ max?: unknown }>(req).catch(() => ({}) as { max?: unknown });
+    const body = await leggiBody<{ max?: unknown; azione?: unknown }>(req).catch(() => ({}) as { max?: unknown; azione?: unknown });
     const max = typeof body.max === "number" ? Math.min(20, Math.max(1, Math.round(body.max))) : 6;
     const admin = adminClient();
+    if (body.azione === "riordina") return json({ ok: true, ...(await riordina(admin)) });
     const inizio = Date.now();
 
     const [{ data: lez, error }, { data: indice }] = await Promise.all([
@@ -168,6 +228,17 @@ Deno.serve(async (req: Request) => {
       if (!g || g.fonte_hash !== hash || (g.stato === "errore" && Date.parse(g.indicizzata_il) < ieri)) daFare.push({ l, hash });
     }
 
+    // Niente da leggere: è il momento del riordino, al massimo una volta a settimana
+    // (subito dopo una passata grande, e poi quando entrano lezioni nuove). Stato in sync_stati.
+    if (daFare.length === 0) {
+      const { data: st } = await admin.from("sync_stati").select("synced_at").eq("chiave", "aura_argomenti_riordino").maybeSingle();
+      const ultimo = st ? Date.parse((st as { synced_at: string }).synced_at) : 0;
+      if (Date.now() - ultimo < 7 * 24 * 3600 * 1000) return json({ ok: true, fatte: 0, errori: 0, restano: 0 });
+      const r = await riordina(admin);
+      await admin.from("sync_stati").upsert({ chiave: "aura_argomenti_riordino", synced_at: new Date().toISOString(), esito: "ok", dettaglio: `${r.gruppi} gruppi uniti, ${r.tolti} argomenti tolti`, totale: r.gruppi, nuove: 0 });
+      return json({ ok: true, fatte: 0, errori: 0, restano: 0, riordino: r });
+    }
+
     const argomenti = await leggiArgomenti(admin);
     let fatte = 0;
     let errori = 0;
@@ -178,8 +249,14 @@ Deno.serve(async (req: Request) => {
         await admin.from("lezioni_indice").upsert({ lezione_id: l.id, fonte_hash: hash, stato: "fatto", errore: null, indicizzata_il: new Date().toISOString() });
         fatte++;
       } catch (e) {
-        errori++;
         const msg = e instanceof Error ? e.message : String(e);
+        // Aura non risponde (credito finito, API giù): ci si ferma qui senza segnare la lezione,
+        // così al prossimo giro riparte da dove era (27/11/2026: 54 lezioni segnate errore per il credito finito).
+        if (msg === "nessuna risposta") {
+          await logError("aura-argomenti:anthropic", e, { lezione: l.id }, { silent: true });
+          return json({ ok: false, fatte, errori, restano: daFare.length - fatte - errori, motivo: "Aura non risponde" });
+        }
+        errori++;
         await admin.from("lezioni_indice").upsert({ lezione_id: l.id, fonte_hash: hash, stato: "errore", errore: msg.slice(0, 500), indicizzata_il: new Date().toISOString() });
         await logError("aura-argomenti:lezione", e, { lezione: l.id, titolo: l.titolo }, { silent: true });
       }
