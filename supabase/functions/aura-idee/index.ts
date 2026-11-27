@@ -22,6 +22,7 @@ import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.
 import { bloccoPosizionamento } from "../_shared/posizionamento/blocco.ts";
 import { costruisciPrompt, estraiProposte, SYSTEM, type StileScelto, type Storico, type TopPubblicazione } from "./prompt.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { controllaCrediti } from "../_shared/crediti.ts";
 
 type Body = {
   messaggio?: unknown;
@@ -153,6 +154,8 @@ Deno.serve(async (req: Request) => {
     const body = await leggiBody<Body>(req);
     const admin = adminClient();
 
+    // Crediti del mese (_shared/crediti.ts): a credito finito Aura si ferma, prima di ogni altra cosa.
+    await controllaCrediti(admin, c, "aura-idee");
     const { data: permesso, error: errLimite } = await admin.rpc("aura_help_allowed", { p_user: c.id, p_max: 30, p_window_secs: 3600 });
     if (errLimite) await logError("aura-idee:rate_limit", errLimite, { user: c.id }, { silent: true });
     else if (permesso === false) throw new HttpError(429, "Hai chiesto molte idee in poco tempo: riprova tra un'ora.");

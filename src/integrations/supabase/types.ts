@@ -3785,6 +3785,20 @@ export type Database = {
       }
     }
     Functions: {
+      aura_crediti_aggiungi: {
+        Args: { p_crediti: number; p_nota?: string; p_user: string }
+        Returns: undefined
+      }
+      aura_crediti_stato: {
+        Args: { p_user?: string }
+        Returns: {
+          illimitato: boolean
+          limite: number
+          residui: number
+          ricarica: string
+          usati: number
+        }[]
+      }
       aura_help_allowed:
         | {
             Args: { p_max: number; p_user: string; p_window_secs: number }

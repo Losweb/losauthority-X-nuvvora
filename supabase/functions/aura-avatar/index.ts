@@ -23,6 +23,7 @@ import { APERTURA, APERTURA_CON_DUBBIO, costruisciPrompt, SYSTEM, type Storico }
 import { applicaDati, estraiDati, renderStato, type RigaMappa, type RigaScheda } from "./dati.ts";
 import { type BodyModifica, modifica } from "./modifica.ts";
 import { renderOfferte } from "./offerte.ts";
+import { controllaCrediti } from "../_shared/crediti.ts";
 
 type Body = BodyModifica & { azione?: unknown; messaggio?: unknown; riprova_messaggio_id?: unknown };
 
@@ -134,6 +135,8 @@ Deno.serve(async (req: Request) => {
     }
 
     // Rate limit nel proprio ambito, prima di qualsiasi chiamata ad Aura.
+    // Crediti del mese (_shared/crediti.ts): a credito finito Aura si ferma, prima di ogni altra cosa.
+    await controllaCrediti(admin, c, "aura-avatar");
     const { data: permesso, error: errLimite } = await admin.rpc("aura_help_allowed", { p_user: c.id, p_max: 40, p_window_secs: 3600, p_scope: "avatar" });
     if (errLimite) await logError("aura-avatar:rate_limit", errLimite, { user: c.id }, { silent: true });
     else if (permesso === false) throw new HttpError(429, "Hai scritto molto in poco tempo: riprova tra un'ora.");

@@ -21,6 +21,7 @@ import { costruisciPrompt, eLive, estraiRisposta, lezioniPertinenti, SYSTEM, typ
 import { leggiArgomenti, vociPerArgomenti } from "../_shared/argomenti.ts";
 import { bloccoMappa, candidate, estraiScelti, MODELLO_SCEGLI, promptScegli, SYSTEM_SCEGLI } from "./mappa.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { controllaCrediti } from "../_shared/crediti.ts";
 
 type Body = { messaggio?: unknown; riprova_messaggio_id?: unknown };
 
@@ -123,6 +124,8 @@ Deno.serve(async (req: Request) => {
     const body = await leggiBody<Body>(req);
     const admin = adminClient();
 
+    // Crediti del mese (_shared/crediti.ts): a credito finito Aura si ferma, prima di ogni altra cosa.
+    await controllaCrediti(admin, c, "aura-coach");
     const { data: permesso, error: errLimite } = await admin.rpc("aura_help_allowed", { p_user: c.id, p_max: 30, p_window_secs: 3600 });
     if (errLimite) await logError("aura-coach:rate_limit", errLimite, { user: c.id }, { silent: true });
     else if (permesso === false) throw new HttpError(429, "Hai fatto molte domande in poco tempo: riprova tra un'ora.");

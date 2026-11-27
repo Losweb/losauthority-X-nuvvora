@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { CalendarDays, Compass, GraduationCap, Layers, Plug, Route, Tag, UserRound, Users, WandSparkles } from "lucide-react";
 import { TornaAlGestionale, useAuth } from "@/features/auth";
+import { CreditiAura } from "@/features/crediti";
 import { Button } from "@/shared/components/ui/button";
 import { MarmoLogo } from "@/shared/components/brand/MarmoLogo";
 import { BottoneTemaCompatto } from "@/shared/components/layout/InterruttoreTema";
@@ -91,7 +92,11 @@ function NavPercorso() {
         </div>
       ))}
       <div className="mt-6 flex flex-1 flex-col">
-        <TastoCoach />
+        {/* Crediti e coach insieme in fondo: il blocco ha mt-auto, dentro il coach resta attaccato ai crediti. */}
+        <div className="mt-auto grid">
+          <CreditiAura />
+          <TastoCoach />
+        </div>
       </div>
     </nav>
   );

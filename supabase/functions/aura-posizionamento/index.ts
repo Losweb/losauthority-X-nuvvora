@@ -21,6 +21,7 @@ import { LIMITI, pulisciPosizionamento, tagliaParola, type Posizionamento } from
 import { avatarDi, renderAvatar } from "../aura-offerta/avatar.ts";
 import { costruisciPrompt, costruisciPromptBio, SYSTEM } from "./prompt.ts";
 import { componiBio, estraiProposte, problemiBio, SYSTEM_BIO, type PropostaBio, type PropostaGrezza } from "./bio.ts";
+import { controllaCrediti } from "../_shared/crediti.ts";
 
 type Body = { azione?: unknown; richiesta?: unknown; percorso?: unknown; valore?: unknown; bio_attuale?: unknown; criterio?: unknown; fatto_suo?: unknown };
 
@@ -238,6 +239,8 @@ Deno.serve(async (req: Request) => {
     const o = await offertaDi(admin, c.id);
     if (!o?.completa_fatta_il) throw new HttpError(409, "Prima chiudi la tua offerta: il posizionamento parte da lì.");
 
+    // Crediti del mese (_shared/crediti.ts): a credito finito Aura si ferma, prima di ogni altra cosa.
+    await controllaCrediti(admin, c, "aura-posizionamento");
     const { data: permesso, error: errLimite } = await admin.rpc("aura_help_allowed", { p_user: c.id, p_max: 20, p_window_secs: 3600, p_scope: "posizionamento" });
     if (errLimite) await logError("aura-posizionamento:rate_limit", errLimite, { user: c.id }, { silent: true });
     else if (permesso === false) throw new HttpError(429, "Hai chiesto molte modifiche in poco tempo: riprova tra un'ora.");

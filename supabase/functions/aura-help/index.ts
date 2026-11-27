@@ -10,6 +10,7 @@ import { streamAnthropicText } from "../_shared/anthropic.ts";
 import { logError } from "../_shared/log.ts";
 import { DOMANDE, testoDomanda, TITOLO_SCHEDA } from "../_shared/domande.ts";
 import { leggiRisposteAncheBozza } from "../_shared/materiale.ts";
+import { controllaCrediti } from "../_shared/crediti.ts";
 
 type Body = {
   domanda?: unknown;
@@ -65,6 +66,8 @@ Deno.serve(async (req: Request) => {
 
     // Rate limit per utente: wrapper public.aura_help_allowed (EXECUTE solo service_role).
     const admin = adminClient();
+    // Crediti del mese (_shared/crediti.ts): a credito finito Aura si ferma, prima di ogni altra cosa.
+    await controllaCrediti(admin, c, "aura-help");
     const { data: permesso, error: errLimite } = await admin
       .rpc("aura_help_allowed", { p_user: c.id, p_max: 20, p_window_secs: 3600 });
     if (errLimite) {
