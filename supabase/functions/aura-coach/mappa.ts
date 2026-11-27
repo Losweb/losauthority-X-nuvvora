@@ -12,7 +12,7 @@ import { formattaTempo } from "./capitoli.ts";
 import { eLive, type Lezione, type Storico } from "./prompt.ts";
 
 /** Il modello piccolo per scegliere gli argomenti: la scelta è facile, non serve il modello grande. */
-export const MODELLO_SCEGLI = "claude-haiku-4-5-20251001";
+export const MODELLO_SCEGLI = "claude-haiku-5-5";
 
 export const SYSTEM_SCEGLI = `Scegli gli argomenti di una domanda. Ricevi l'ELENCO DEGLI ARGOMENTI della classroom di Wesley Caicedo (social, contenuti, vendita, IA per professionisti) e il messaggio di un cliente (con le ultime battute della conversazione, se ci sono).
 Rispondi SOLO con il blocco qui sotto, i NUMERI degli argomenti dall'elenco, il più pertinente per primo, da 0 a 3:
