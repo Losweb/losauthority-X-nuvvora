@@ -4,10 +4,11 @@ import { LIMITI } from "@posizionamento-forma/forma";
 import { PensieroAura } from "@/features/idee";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useProponiBio } from "../hooks/usePosizionamento";
 
-const ANGOLI: Record<string, string> = { chiara: "La più chiara", nemico: "Parte dal nemico", prova: "Parte dalla prova" };
+const ANGOLI: Record<string, string> = { storia: "Parte da chi sei", nemico: "Parte dal nemico", idea: "Parte dalla tua idea", chiara: "La più chiara", prova: "Parte dalla prova" };
 const FASI = ["Rileggo avatar e offerta", "Scrivo tre bio da angoli diversi", "Conto i caratteri"] as const;
 
 /**
@@ -18,10 +19,12 @@ export function ProposteBio({ onUsa, occupato }: { onUsa: (testo: string) => voi
   const proponi = useProponiBio();
   const [aperto, setAperto] = useState(false);
   const [richiesta, setRichiesta] = useState("");
+  const [bioAttuale, setBioAttuale] = useState("");
+  const [fattoSuo, setFattoSuo] = useState("");
 
   function invia(e: FormEvent) {
     e.preventDefault();
-    proponi.mutate(richiesta.trim());
+    proponi.mutate({ richiesta: richiesta.trim(), bioAttuale: bioAttuale.trim(), fattoSuo: fattoSuo.trim() });
   }
 
   function chiudi() {
@@ -47,7 +50,15 @@ export function ProposteBio({ onUsa, occupato }: { onUsa: (testo: string) => voi
         <PensieroAura fasi={FASI} stima="Ci vogliono circa 20 secondi." intervalloMs={7000} />
       ) : (
         <form onSubmit={invia} className="grid gap-2 pr-8">
-          <label htmlFor="richiesta-bio" className="text-[14px] font-semibold">
+          <label htmlFor="bio-attuale" className="text-[14px] font-semibold">
+            La tua bio di adesso <span className="font-normal text-muted-foreground">(facoltativo: Aura tiene quello che funziona)</span>
+          </label>
+          <Textarea id="bio-attuale" rows={3} maxLength={400} value={bioAttuale} onChange={(e) => setBioAttuale(e.target.value)} placeholder="Incolla qui la bio che hai oggi su Instagram" />
+          <label htmlFor="fatto-suo" className="pt-1 text-[14px] font-semibold">
+            Un fatto tuo che nessuno può copiare <span className="font-normal text-muted-foreground">(facoltativo: da dove vieni, cosa facevi prima)</span>
+          </label>
+          <Input id="fatto-suo" maxLength={300} value={fattoSuo} onChange={(e) => setFattoSuo(e.target.value)} placeholder="Es. 10 anni da infermiera in ospedale prima di aprire lo studio" />
+          <label htmlFor="richiesta-bio" className="pt-1 text-[14px] font-semibold">
             Vuoi qualcosa in particolare? <span className="font-normal text-muted-foreground">(facoltativo)</span>
           </label>
           <div className="flex flex-wrap gap-2">

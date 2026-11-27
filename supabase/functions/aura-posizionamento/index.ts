@@ -7,7 +7,7 @@
  *   { azione: "crea" }                        → scrive il posizionamento (anche per rifarlo da capo). { ok }
  *   { azione: "cambia", richiesta }           → Aura lo riscrive con la richiesta del cliente. { ok }
  *   { azione: "modifica", percorso, valore }  → il cliente corregge una riga da solo. { ok }
- *   { azione: "bio", richiesta? }             → tre proposte di bio da angoli diversi (27/11/2026), NON salvate:
+ *   { azione: "bio", richiesta?, bio_attuale?, fatto_suo? } → tre proposte di bio (27/11/2026), NON salvate:
  *                                               il cliente ne sceglie una e la salva con «modifica» su profilo.bio. { ok, proposte }
  * Rate limit: aura_help_allowed(user, 20, 3600, 'posizionamento') per crea, cambia e bio.
  */
@@ -22,7 +22,7 @@ import { avatarDi, renderAvatar } from "../aura-offerta/avatar.ts";
 import { costruisciPrompt, costruisciPromptBio, SYSTEM } from "./prompt.ts";
 import { componiBio, estraiProposte, problemiBio, SYSTEM_BIO, type PropostaBio, type PropostaGrezza } from "./bio.ts";
 
-type Body = { azione?: unknown; richiesta?: unknown; percorso?: unknown; valore?: unknown };
+type Body = { azione?: unknown; richiesta?: unknown; percorso?: unknown; valore?: unknown; bio_attuale?: unknown; fatto_suo?: unknown };
 
 const MAX_RICHIESTA = 1500;
 const MAX_TESTO = 400;
@@ -111,7 +111,11 @@ async function scrivi(admin: SupabaseClient, clienteId: string, richiesta?: stri
 }
 
 /** Tre proposte di bio (non salvate). Lancia HttpError se Aura non risponde. */
-async function proponiBio(admin: SupabaseClient, clienteId: string, attuale: Posizionamento, richiesta?: string): Promise<PropostaBio[]> {
+async function proponiBio(admin: SupabaseClient, clienteId: string, attuale: Posizionamento, extra: { richiesta?: string; bioAttuale?: string; fattoSuo?: string }): Promise<PropostaBio[]> {
+  const { richiesta, bioAttuale, fattoSuo } = extra;
+  // La chiamata della bio di oggi, se regge, si tiene uguale (decisione nel codice: Aura la riscriveva).
+  const ultima = bioAttuale?.split("\n").map((r) => r.trim()).filter(Boolean).at(-1);
+  const chiamataFissa = ultima && (bioAttuale?.split("\n").filter((r) => r.trim()).length ?? 0) > 1 && !problemiBio({ angolo: "", perche: "", righe: ["x"], chiamata: ultima }).length ? ultima : undefined;
   const o = await offertaDi(admin, clienteId);
   const [materiale, nome, avatar] = await Promise.all([leggiMateriale(admin, clienteId).catch(() => null), nomeCliente(admin, clienteId), avatarDi(admin, clienteId)]);
   const pr = attuale.profilo;
@@ -125,15 +129,19 @@ async function proponiBio(admin: SupabaseClient, clienteId: string, attuale: Pos
       // Solo quello che si vede sul profilo: i «fatti» del posizionamento li ha scritti Aura e possono
       // avere dettagli inventati (es. «in 6 mesi»); i fatti veri si prendono da onboarding, avatar e offerta.
       // Senza la bio di adesso: Aura ne ricopiava gli errori.
-      posizionamento: JSON.stringify({ nome: pr?.nome, categoria: pr?.categoria, link: pr?.link, chi_sei: attuale.chi_sei }),
+      posizionamento: JSON.stringify({ nome: pr?.nome, categoria: pr?.categoria, link: pr?.link, chi_sei: attuale.chi_sei, cosa_dicono_tutti: attuale.cosa_dicono_tutti }),
       richiesta,
+      bioAttuale,
+      fattoSuo,
+      chiamataFissa,
     }),
     maxTokens: 2000,
     tag: "aura-posizionamento-bio",
     utente: clienteId,
     timeoutMs: 90_000,
   });
-  let proposte = testo ? estraiProposte(testo) : [];
+  const fissa = (ps: PropostaGrezza[]) => (chiamataFissa ? ps.map((p) => ({ ...p, chiamata: chiamataFissa })) : ps);
+  let proposte = fissa(testo ? estraiProposte(testo) : []);
   if (!proposte.length) {
     await logError("aura-posizionamento:bio", new Error(testo ? "risposta senza proposte" : "nessuna risposta"), { cliente: clienteId, inizio: testo?.slice(0, 200) ?? null }, { silent: true });
     throw new HttpError(502, "Aura non è riuscita a scrivere le proposte. Riprova tra poco.");
@@ -144,14 +152,15 @@ async function proponiBio(admin: SupabaseClient, clienteId: string, attuale: Pos
     const elenco = proposte.map((p, i) => `PROPOSTA ${i + 1} (${p.angolo})\n${componiBio(p.righe, p.chiamata)}\nDA CORREGGERE: ${errori[i].length ? errori[i].join("; ") : "niente, lasciala uguale"}`).join("\n\n");
     const corretto = await streamAnthropicText({
       system: SYSTEM_BIO,
-      user: `Hai scritto queste tre proposte di bio. Correggi solo gli errori indicati, tieni l'angolo e il senso di ognuna, non aggiungere fatti. Rispondi con il blocco <dati> completo, tutte e tre.\n\n${elenco}`,
+      user: `Hai scritto queste tre proposte di bio. Correggi solo gli errori indicati, tieni l'angolo e il senso di ognuna, non aggiungere fatti. La chiamata non si tocca se non è tra gli errori. Ogni riga resta una frase che si capisce da sola. Rispondi con il blocco <dati> completo, tutte e tre; in "perche" rimetti il perché di prima, non spiegare la correzione.\n\n${elenco}`,
       maxTokens: 2000,
       tag: "aura-posizionamento-bio-correggi",
       utente: clienteId,
       timeoutMs: 60_000,
     });
     const nuove = corretto ? estraiProposte(corretto) : [];
-    if (nuove.length === proposte.length) proposte = nuove.map((n, i) => ({ ...n, perche: n.perche || proposte[i].perche }));
+    // Il "perche" resta sempre quello del primo giro: nella correzione Aura spiegava cosa aveva cambiato.
+    if (nuove.length === proposte.length) proposte = fissa(nuove.map((n, i) => ({ ...n, perche: proposte[i].perche })));
   }
   return proposte.map(bioNelLimite);
 }
@@ -243,7 +252,13 @@ Deno.serve(async (req: Request) => {
     if (body.azione === "bio") {
       const { data } = await admin.from("posizionamento").select("contenuto").eq("cliente_id", c.id).maybeSingle();
       if (!data) throw new HttpError(404, "Prima crea il posizionamento.");
-      const proposte = await proponiBio(admin, c.id, pulisciPosizionamento((data as { contenuto: unknown }).contenuto), richiesta || undefined);
+      const bioAttuale = typeof body.bio_attuale === "string" ? body.bio_attuale.trim().slice(0, 400) : "";
+      const fattoSuo = typeof body.fatto_suo === "string" ? body.fatto_suo.trim().slice(0, 300) : "";
+      const proposte = await proponiBio(admin, c.id, pulisciPosizionamento((data as { contenuto: unknown }).contenuto), {
+        richiesta: richiesta || undefined,
+        bioAttuale: bioAttuale || undefined,
+        fattoSuo: fattoSuo || undefined,
+      });
       return json({ ok: true, proposte });
     }
 
