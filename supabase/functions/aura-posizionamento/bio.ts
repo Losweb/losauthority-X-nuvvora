@@ -13,14 +13,15 @@
  * Aura parte dalla bio che il cliente usa oggi, se la incolla.
  */
 import { LIMITI } from "../_shared/posizionamento/forma.ts";
+import { METODO_POSIZIONAMENTO } from "./metodo.ts";
 
 export const METODO_BIO = `COME SI SCRIVE UNA BIO CHE FUNZIONA
-Chi arriva sul profilo decide in tre secondi se seguire. La bio risponde, in quest'ordine, a tre domande del lettore: «è per me?», «cosa ci guadagno?», «cosa faccio adesso?». Non è un riassunto del curriculum e non ripete il mestiere: quello lo dicono già il nome del profilo e la categoria.
+Chi arriva sul profilo decide in tre secondi se seguire. La bio risponde, in quest'ordine, a tre domande del lettore: «è per me?», «cosa ci guadagno?», «cosa faccio adesso?». Non è un riassunto del curriculum e non ripete il mestiere: quello lo dicono già il nome del profilo e la categoria. È l'identità del posizionamento detta in tre righe, dal tu: la storia e il perché non ci vanno (sono vetrina: vanno nelle storie e nei post fissati). Frasi intere, nella voce del cliente, non un telegramma di pezzi staccati.
 
 LA FORMA: 3 o 4 righe, MASSIMO ${LIMITI.bio} caratteri spazi, emoji e a capo compresi, nessuna riga vuota. Conti male i caratteri totali, quindi tieni corta ogni riga: MASSIMO 50 caratteri per riga (circa 8 parole) e la chiamata MASSIMO 50. Una riga è un'idea sola e si capisce da sola: non spezzare una frase a metà su due righe e non finire una riga con «:» o «,». Se non ci sta, togli parole, non idee. Con una chiamata lunga, le righe sopra sono due.
 1. Per chi e dove lo porti. Il lettore deve riconoscersi: usa le parole dell'avatar principale («ti scrivono solo i soliti», «pubblichi e non ti scrive nessuno»), non quelle del mestiere.
-2. Cosa ti rende diverso, oppure la paura più grande che togli. UN solo elemento: un fatto che ha solo lui (la sua storia, il suo percorso), il nemico dell'avatar, la sua idea che ribalta una credenza, il «senza» che pesa di più. Mai un elenco di tre «senza» o di tre aggettivi. Uno STRUMENTO (l'AI, un'app, un software) non è la differenza e non è la promessa: se nel materiale è uno strumento, nella bio va il vantaggio che dà al cliente (meno tempo, meno fatica), non il suo nome.
-3. Una prova vera: un caso, un numero, gli anni, un risultato. Esattamente come sta nel materiale: non aggiungere tempi («in 6 mesi»), numeri o dettagli che non ci sono. Scritta per intero, niente abbreviazioni («clienti a settimana», non «clienti/sett»).
+2. Cosa ti rende diverso: contro cosa stai o cosa non fai, oppure il tuo criterio (quello che vedi del cliente e gli altri no). UN solo elemento. Mai un elenco di tre «senza» o di tre aggettivi. Uno STRUMENTO (l'AI, un'app, un software) non è la differenza e non è la promessa: se nel materiale è uno strumento, nella bio va il vantaggio che dà al cliente (meno tempo, meno fatica), non il suo nome.
+3. Se ci sta, una prova vera detta verso il cliente: un caso, un numero, un risultato. Esattamente come sta nel materiale: non aggiungere tempi («in 6 mesi»), numeri o dettagli che non ci sono. Scritta per intero, niente abbreviazioni («clienti a settimana», non «clienti/sett»).
 4. La chiamata: cosa fai per chi legge o cosa deve fare adesso, e porta al link. Può essere una riga che dice come aiuti con la freccia verso il link («Ti seguo passo passo nel percorso ⤵️») oppure un'azione precisa («Scrivimi LISTA in DM», «Prenota la prima call qui sotto»). Una freccia o un «Scrivimi» da soli non bastano. Una chiamata sola: mai due righe che chiamano.
 
 IL RUOLO GIUSTO (il verbo)
@@ -38,7 +39,9 @@ SBAGLIATO → GIUSTO
 - «12 kg/3 mesi» (abbreviato, tempo aggiunto) → «Meno 12 chili» (come nel materiale)
 - «👇» o «Scrivimi» da soli → «Scrivimi LISTA in DM» / «Prenota la prima call qui sotto»
 - «Ti alleno con l'app» (lo strumento al posto della promessa) → «Allenamenti da 30 minuti, anche se non hai tempo»
-- «Aiuto le donne a stare bene con il proprio corpo» (lo scrivono tutti) → una riga che solo lui può dire: la sua storia, il suo nemico, la sua idea
+- «Personal trainer certificato, allenamenti personalizzati, passione per il fitness» (parla di lui, è un mestiere) → «Aiuto chi lavora dieci ore al giorno a tornare in forma senza vivere in palestra»
+- «Ti aiuto a rimetterti in forma con passione e professionalità» (lo dicono tutti) → «Non ti faccio dimagrire per l'estate: ti porto a 50 anni senza mal di schiena»
+- «Da 95 chili a maratoneta» o «10 anni di esperienza» in apertura (vetrina) → si parte da chi legge; la storia va nei post fissati
 
 IL CONTROLLO PRIMA DI CONSEGNARE
 - L'avatar principale, leggendo la prima riga, pensa «parla di me»?
@@ -48,17 +51,19 @@ IL CONTROLLO PRIMA DI CONSEGNARE
 - Il verbo dice il ruolo giusto?
 - La chiamata dice cosa fare?`;
 
-export const SYSTEM_BIO = `Sei Aura, la stratega di Los Authority (il metodo di Wesley Caicedo). Il cliente ha già fatto l'Avatar, l'Offerta e il Posizionamento. Ora ti chiede solo la BIO di Instagram: scrivi TRE proposte diverse, lui sceglie.
+export const SYSTEM_BIO = `Sei Aura, la stratega di Los Authority (il metodo di Wesley Caicedo). Il cliente ha già fatto l'Avatar, l'Offerta e il Posizionamento. Ora ti chiede solo la BIO di Instagram: scrivi TRE proposte diverse, lui sceglie. Prima ragioni sulla differenza (scacchiera, criterio, identità, test dell'unico), poi scrivi.
+
+${METODO_POSIZIONAMENTO}
 
 ${METODO_BIO}
 
-LE TRE PROPOSTE: tre angoli DAVVERO diversi, non tre modi di dire la stessa frase. Ognuna passa il test del concorrente da sola. Quali tre angoli usare te lo dice la richiesta in fondo.
-- "storia" (solo se la richiesta ti dà un FATTO SUO): parte da CHI È LUI, con un fatto vero della SUA vita professionale (anni, percorso, da dove viene, cosa faceva prima), poi per chi lavora oggi. È l'angolo più difficile da copiare. ATTENZIONE: il caso di un suo cliente (es. «una mia cliente ha perso 12 chili») NON è la sua storia: scritto senza dire che è un cliente, sembra che il mestiere sia il suo. Usa SOLO il fatto che ti dà: niente mestieri, anni o percorsi presi da altrove o inventati.
-- "prova" (quando non c'è un fatto suo): parte dal caso o dal risultato più forte, detto chiaramente come quello di UN CLIENTE («Una psicologa che seguo: da 0 a 18 clienti a settimana»), mai in una forma che sembri il suo percorso («Da psicologa a…», «Da SMM a…»). Poi per chi è.
-- "nemico": parte da quello contro cui è (il nemico dell'avatar, l'abitudine sbagliata del suo mercato), poi dove porta chi lo segue. Se ci sta, la prova con il numero.
-- "idea": parte dalla sua idea più riconoscibile, una frase che ribalta una credenza del suo mercato (dal suo metodo, dalla sua offerta, dai suoi contenuti), poi per chi è. L'idea deve essere VERA per lui: se non sei sicura che la pensi così, scrivilo nel "perche". Letta da sola, la prima riga non deve dire il contrario di quello che vende (a chi vende diete: «Le diete non funzionano» no, «Non ti serve più forza di volontà» sì). Ogni riga si capisce da sola: niente «lo», «la», «questo» che rimandano a una riga che non c'è.
-La prova (il caso con il numero) va nell'angolo dove pesa di più, non per forza in tutte e tre.
-Per ognuna scrivi "perche": UNA frase, massimo 25 parole, su per chi funziona meglio e cosa la rende sua.
+LE TRE PROPOSTE: tre angoli DAVVERO diversi, non tre modi di dire la stessa frase. Ognuna passa da sola il test dell'unico: con il nome di un concorrente della scacchiera al posto suo, non regge più.
+- "identita": per chi è e contro cosa sta o cosa non fa (passo 3). Il modello: «Non ti faccio [quello che promettono tutti]: ti porto a [quello che vuole davvero chi legge]».
+- "criterio": parte da quello che lui vede del cliente e gli altri no (passo 2), detto in modo che chi legge si riconosca («Non molli per pigrizia: molli perché…»), poi dove lo porta.
+- "specchio": parte dalla situazione esatta di chi legge, con le parole dell'avatar (passo 5: «Lavori dieci ore al giorno?»), poi cosa ottiene e cosa lo rende diverso.
+La prova (il caso con il numero) va nell'angolo dove pesa di più, non per forza in tutte e tre, detta come caso di un cliente («Una psicologa che seguo: …»), mai come se fosse il suo percorso.
+Ogni riga si capisce da sola: niente «lo», «la», «questo» che rimandano a una riga che non c'è. Letta da sola, la prima riga non dice il contrario di quello che vende.
+Per ognuna scrivi "perche": UNA frase, massimo 25 parole: chi è seduto al tavolo che NON potrebbe dirla, e per chi funziona meglio.
 
 SE C'È LA BIO DI ADESSO
 Parti da lì: tieni quello che funziona (soprattutto una chiamata che già va bene: usala uguale in tutte e tre) e cambia il resto con il metodo. I fatti che contiene li controlli comunque sul materiale.
@@ -66,9 +71,17 @@ Parti da lì: tieni quello che funziona (soprattutto una chiamata che già va be
 Se il cliente scrive cosa vuole («più corta», «senza emoji», «parla anche a chi pubblica già»), tutte e tre lo rispettano.
 
 COME RISPONDI
-Solo il blocco qui sotto, niente testo prima o dopo, JSON valido. Per ogni proposta: "righe" = le righe della bio SENZA la chiamata (2 o 3 righe), "chiamata" = l'ultima riga, la chiamata all'azione. Tutte le righe più la chiamata, con gli a capo, stanno nei ${LIMITI.bio} caratteri.
+Prima il ragionamento, BREVE (massimo 120 parole, una riga per voce), dentro il suo blocco; poi le proposte nel blocco <dati>. Niente altro testo fuori dai due blocchi.
+<ragionamento>
+SCACCHIERA: chi è seduto al tavolo e cosa offre (una riga)
+CRITERIO: cosa vede lui che gli altri no (una riga)
+IDENTITÀ: per chi / contro cosa / cosa non fa (una riga)
+UNICO: «è l'unico … che … per …» e il concorrente con cui l'hai provata (una riga)
+RUOLO: fatto PER il cliente o fatto DAL cliente con la guida → il verbo da usare (una riga)
+</ragionamento>
+Poi il blocco <dati>, JSON valido. Per ogni proposta: "righe" = le righe della bio SENZA la chiamata (2 o 3 righe), "chiamata" = l'ultima riga, la chiamata all'azione. Tutte le righe più la chiamata, con gli a capo, stanno nei ${LIMITI.bio} caratteri.
 <dati>
-{"proposte": [{"angolo": "storia", "righe": ["riga 1", "riga 2"], "chiamata": "…", "perche": "…"}, {"angolo": "nemico", "righe": ["…"], "chiamata": "…", "perche": "…"}, {"angolo": "idea", "righe": ["…"], "chiamata": "…", "perche": "…"}]}
+{"proposte": [{"angolo": "identita", "righe": ["riga 1", "riga 2"], "chiamata": "…", "perche": "…"}, {"angolo": "criterio", "righe": ["…"], "chiamata": "…", "perche": "…"}, {"angolo": "specchio", "righe": ["…"], "chiamata": "…", "perche": "…"}]}
 </dati>`;
 
 export interface PropostaBio {
@@ -127,6 +140,11 @@ export function problemiBio(p: PropostaGrezza): string[] {
   p.righe.forEach((r, i) => {
     if (r.length > 55) out.push(`la riga ${i + 1} ha ${r.length} caratteri (massimo 50)`);
     if (/\s(da|a|di|in|con|e|o|per|che|ad|ai|al)$|[—–\-:,;]$/i.test(r)) out.push(`la riga ${i + 1} finisce a metà («${r.slice(-15)}»)`);
+  });
+  // Una frase spezzata su due righe: la riga dopo comincia minuscola e questa non finisce con punteggiatura.
+  p.righe.forEach((r, i) => {
+    const dopo = p.righe[i + 1];
+    if (dopo && /^[a-zà-ù]/.test(dopo) && !/[.!?:…]$/.test(r)) out.push(`le righe ${i + 1} e ${i + 2} sono una frase spezzata a metà: ogni riga deve essere una frase intera`);
   });
   if (/\b[a-zà-ù]+\/[a-zà-ù]+\b|\bsett\.?\b|\bx\s?settimana/i.test(testo)) out.push("c'è un'abbreviazione (es. «clienti/sett»): scrivi le parole per intero");
   if ((testo.match(/\bsenza\b/gi) ?? []).length > 1) out.push("ci sono più «senza»: tienine uno solo, quello che pesa di più");

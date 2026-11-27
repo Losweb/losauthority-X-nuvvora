@@ -8,7 +8,7 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useProponiBio } from "../hooks/usePosizionamento";
 
-const ANGOLI: Record<string, string> = { storia: "Parte da chi sei", nemico: "Parte dal nemico", idea: "Parte dalla tua idea", chiara: "La più chiara", prova: "Parte dalla prova" };
+const ANGOLI: Record<string, string> = { identita: "Per chi sei e contro cosa", criterio: "Quello che vedi solo tu", specchio: "Chi legge si riconosce" };
 const FASI = ["Rileggo avatar e offerta", "Scrivo tre bio da angoli diversi", "Conto i caratteri"] as const;
 
 /**
@@ -20,11 +20,11 @@ export function ProposteBio({ onUsa, occupato }: { onUsa: (testo: string) => voi
   const [aperto, setAperto] = useState(false);
   const [richiesta, setRichiesta] = useState("");
   const [bioAttuale, setBioAttuale] = useState("");
-  const [fattoSuo, setFattoSuo] = useState("");
+  const [criterio, setCriterio] = useState("");
 
   function invia(e: FormEvent) {
     e.preventDefault();
-    proponi.mutate({ richiesta: richiesta.trim(), bioAttuale: bioAttuale.trim(), fattoSuo: fattoSuo.trim() });
+    proponi.mutate({ richiesta: richiesta.trim(), bioAttuale: bioAttuale.trim(), criterio: criterio.trim() });
   }
 
   function chiudi() {
@@ -54,10 +54,16 @@ export function ProposteBio({ onUsa, occupato }: { onUsa: (testo: string) => voi
             La tua bio di adesso <span className="font-normal text-muted-foreground">(facoltativo: Aura tiene quello che funziona)</span>
           </label>
           <Textarea id="bio-attuale" rows={3} maxLength={400} value={bioAttuale} onChange={(e) => setBioAttuale(e.target.value)} placeholder="Incolla qui la bio che hai oggi su Instagram" />
-          <label htmlFor="fatto-suo" className="pt-1 text-[14px] font-semibold">
-            Un fatto tuo che nessuno può copiare <span className="font-normal text-muted-foreground">(facoltativo: da dove vieni, cosa facevi prima)</span>
+          <label htmlFor="criterio-bio" className="pt-1 text-[14px] font-semibold">
+            Cosa vedi tu che gli altri del tuo settore non vedono? <span className="font-normal text-muted-foreground">(facoltativo)</span>
           </label>
-          <Input id="fatto-suo" maxLength={300} value={fattoSuo} onChange={(e) => setFattoSuo(e.target.value)} placeholder="Es. 10 anni da infermiera in ospedale prima di aprire lo studio" />
+          <Input
+            id="criterio-bio"
+            maxLength={300}
+            value={criterio}
+            onChange={(e) => setCriterio(e.target.value)}
+            placeholder="Es. i miei clienti non mollano per pigrizia, mollano perché la scheda gli fa male alla schiena"
+          />
           <label htmlFor="richiesta-bio" className="pt-1 text-[14px] font-semibold">
             Vuoi qualcosa in particolare? <span className="font-normal text-muted-foreground">(facoltativo)</span>
           </label>

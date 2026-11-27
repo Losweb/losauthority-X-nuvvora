@@ -88,8 +88,8 @@ export interface PropostaBio {
 /** Aura propone tre bio da angoli diversi (27/11/2026). Non tocca il posizionamento: si salva con «Usa questa». */
 export function useProponiBio() {
   return useMutation({
-    mutationFn: async (r: { richiesta: string; bioAttuale: string; fattoSuo: string }) =>
-      (await invocaEdge<{ proposte: PropostaBio[] }>("aura-posizionamento", { azione: "bio", richiesta: r.richiesta, bio_attuale: r.bioAttuale, fatto_suo: r.fattoSuo })).proposte,
+    mutationFn: async (r: { richiesta: string; bioAttuale: string; criterio: string }) =>
+      (await invocaEdge<{ proposte: PropostaBio[] }>("aura-posizionamento", { azione: "bio", richiesta: r.richiesta, bio_attuale: r.bioAttuale, criterio: r.criterio })).proposte,
     onError: erroreMutation("Aura non è riuscita a proporre la bio"),
   });
 }
