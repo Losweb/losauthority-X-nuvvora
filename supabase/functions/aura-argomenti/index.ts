@@ -235,7 +235,9 @@ Deno.serve(async (req: Request) => {
       const ultimo = st ? Date.parse((st as { synced_at: string }).synced_at) : 0;
       if (Date.now() - ultimo < 7 * 24 * 3600 * 1000) return json({ ok: true, fatte: 0, errori: 0, restano: 0 });
       const r = await riordina(admin);
-      await admin.from("sync_stati").upsert({ chiave: "aura_argomenti_riordino", synced_at: new Date().toISOString(), esito: "ok", dettaglio: `${r.gruppi} gruppi uniti, ${r.tolti} argomenti tolti`, totale: r.gruppi, nuove: 0 });
+      // Se questa riga non si salva il riordino riparte a ogni giro del cron (successo il 27/11: CHECK su chiave).
+      const { error: errStato } = await admin.from("sync_stati").upsert({ chiave: "aura_argomenti_riordino", synced_at: new Date().toISOString(), esito: "ok", dettaglio: `${r.gruppi} gruppi uniti, ${r.tolti} argomenti tolti`, totale: r.gruppi, nuove: 0 });
+      if (errStato) await logError("aura-argomenti", errStato, { passo: "sync_stati riordino" }).catch(() => {});
       return json({ ok: true, fatte: 0, errori: 0, restano: 0, riordino: r });
     }
 
