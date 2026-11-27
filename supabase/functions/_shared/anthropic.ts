@@ -1,4 +1,5 @@
 import { registraConsumo, type ConsumoAnthropic } from "./consumi.ts";
+import { adminClient } from "./supabase.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 export const ANTHROPIC_MODEL = Deno.env.get("ANTHROPIC_MODEL") || "claude-sonnet-4-6";
@@ -54,8 +55,29 @@ export interface StreamAnthropicOptions {
   utente?: string | null;
   /** Tempo massimo per tutta la risposta (stream compreso): oltre si interrompe e torna null. Facoltativo. */
   timeoutMs?: number;
+  /** Quanto ragiona un modello della famiglia 5 (default ANTHROPIC_EFFORT o "low"). Ignorato dai modelli vecchi. */
+  effort?: Effort;
   /** Interruzione dall'esterno (di solito `req.signal`: il cliente ha premuto stop): si chiude lo stream e torna null. */
   signal?: AbortSignal;
+}
+
+/**
+ * I modelli della famiglia 5 (27/11/2026: Sonnet 5.5, Haiku 5.5) costano meno per token
+ * ma ragionano prima di rispondere, e il ragionamento si paga come output. Si regola
+ * con `effort` (low = ragiona poco o niente sulle richieste semplici). Il ragionamento
+ * conta dentro max_tokens: si aggiunge spazio perché non tagli la risposta.
+ */
+export type Effort = "low" | "medium" | "high";
+export function eModelloNuovo(model: string): boolean {
+  return /^claude-(sonnet|haiku|opus)-5/.test(model);
+}
+const EFFORT_DEFAULT = (Deno.env.get("ANTHROPIC_EFFORT") || "low") as Effort;
+const SPAZIO_RAGIONAMENTO = 4000;
+
+function corpo(model: string, effort: Effort | undefined, maxTokens: number, system: Blocco[], user: string | Blocco[]): Record<string, unknown> {
+  const base: Record<string, unknown> = { model, max_tokens: maxTokens, stream: true, system, messages: [{ role: "user", content: user }] };
+  if (!eModelloNuovo(model)) return base;
+  return { ...base, max_tokens: maxTokens + SPAZIO_RAGIONAMENTO, output_config: { effort: effort ?? EFFORT_DEFAULT } };
 }
 
 /**
@@ -66,11 +88,27 @@ export interface StreamAnthropicOptions {
  * fissi del messaggio utente li marca il chiamante con `bloccoCache`.
  * Il consumo (token normali, letti e scritti in cache, output) si registra in
  * `aura_consumi` senza bloccare la risposta.
+ * Prova dei modelli (secret ANTHROPIC_MODEL_CONFRONTO): la stessa richiesta si rifà in
+ * sottofondo con i modelli della prova e le due versioni finiscono in `aura_confronti`.
  */
 export async function streamAnthropicText(opts: StreamAnthropicOptions): Promise<string | null> {
   if (!ANTHROPIC_API_KEY) return null;
   const model = opts.model ?? ANTHROPIC_MODEL;
   const system = typeof opts.system === "string" ? [bloccoCache(opts.system)] : opts.system;
+  const esito = await chiama(model, opts.effort, system, opts, opts.tag, segnale(opts));
+  const testo = esito?.testo ?? null;
+  if (CONFRONTI.length > 0 && !opts.signal?.aborted) inSottofondo(confronta(model, testo, system, opts));
+  return testo;
+}
+
+interface Esito {
+  testo: string | null;
+  consumo: ConsumoAnthropic;
+  ms: number;
+}
+
+async function chiama(model: string, effort: Effort | undefined, system: Blocco[], opts: StreamAnthropicOptions, tag: string, signal: AbortSignal | undefined): Promise<Esito | null> {
+  const inizio = Date.now();
   let res: Response;
   try {
     res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -80,29 +118,20 @@ export async function streamAnthropicText(opts: StreamAnthropicOptions): Promise
         "anthropic-version": ANTHROPIC_VERSION,
         "content-type": "application/json",
       },
-      signal: segnale(opts),
+      signal,
       // toWellFormed: un'emoji spezzata da un taglio (surrogato spaiato) farebbe rifiutare il JSON all'API.
-      body: JSON.stringify(
-        {
-          model,
-          max_tokens: opts.maxTokens,
-          stream: true,
-          system,
-          messages: [{ role: "user", content: opts.user }],
-        },
-        (_chiave, valore) => (typeof valore === "string" ? valore.toWellFormed() : valore),
-      ),
+      body: JSON.stringify(corpo(model, effort, opts.maxTokens, system, opts.user), (_chiave, valore) => (typeof valore === "string" ? valore.toWellFormed() : valore)),
     });
   } catch (err) {
-    console.error(`[${opts.tag}] errore rete Anthropic:`, err);
+    console.error(`[${tag}] errore rete Anthropic:`, err);
     return null;
   }
   if (!res.ok || !res.body) {
     const errText = await res.text().catch(() => "");
-    console.error(`[${opts.tag}] Anthropic`, res.status, errText.slice(0, 300));
+    console.error(`[${tag}] Anthropic`, res.status, errText.slice(0, 300));
     return null;
   }
-  const consumo: ConsumoAnthropic = { funzione: opts.tag, utente: opts.utente ?? null, modello: model, input: 0, cacheLettura: 0, cacheScrittura: 0, output: 0 };
+  const consumo: ConsumoAnthropic = { funzione: tag, utente: opts.utente ?? null, modello: model, input: 0, cacheLettura: 0, cacheScrittura: 0, output: 0 };
   let text = "";
   try {
     const reader = res.body.getReader();
@@ -121,12 +150,14 @@ export async function streamAnthropicText(opts: StreamAnthropicOptions): Promise
         if (!payload || payload === "[DONE]") continue;
         try {
           const evt = JSON.parse(payload);
+          // Solo il testo: i blocchi `thinking` dei modelli nuovi (vuoti di default) si saltano.
           if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
             text += evt.delta.text as string;
           } else if (evt.type === "message_start") {
             leggiUsage(consumo, evt.message?.usage);
           } else if (evt.type === "message_delta") {
             leggiUsage(consumo, evt.usage);
+            if (evt.delta?.stop_reason === "refusal") console.error(`[${tag}] Anthropic ha rifiutato la richiesta`);
           }
         } catch {
           /* riga SSE non-JSON */
@@ -134,13 +165,53 @@ export async function streamAnthropicText(opts: StreamAnthropicOptions): Promise
       }
     }
   } catch (err) {
-    console.error(`[${opts.tag}] lettura stream:`, err);
+    console.error(`[${tag}] lettura stream:`, err);
     return null;
   } finally {
     await registraConsumo(consumo);
   }
   const out = text.trim();
-  return out.length > 0 ? out : null;
+  return { testo: out.length > 0 ? out : null, consumo, ms: Date.now() - inizio };
+}
+
+/** "claude-sonnet-5-5@low,claude-haiku-5-5@low" → i modelli della prova. Vuoto = nessuna prova. */
+const CONFRONTI: Array<{ model: string; effort?: Effort }> = (Deno.env.get("ANTHROPIC_MODEL_CONFRONTO") ?? "")
+  .split(",")
+  .map((v) => v.trim())
+  .filter(Boolean)
+  .map((v) => {
+    const [model, effort] = v.split("@");
+    return { model, effort: (effort || undefined) as Effort | undefined };
+  });
+
+async function confronta(modelloOriginale: string, testoOriginale: string | null, system: Blocco[], opts: StreamAnthropicOptions): Promise<void> {
+  for (const c of CONFRONTI) {
+    if (c.model === modelloOriginale) continue;
+    const esito = await chiama(c.model, c.effort, system, opts, `${opts.tag}~confronto`, AbortSignal.timeout(180_000));
+    if (!esito) continue;
+    const { error } = await adminClient().from("aura_confronti").insert({
+      funzione: opts.tag,
+      user_id: opts.utente ?? null,
+      modello_originale: modelloOriginale,
+      testo_originale: testoOriginale,
+      modello: c.model,
+      effort: eModelloNuovo(c.model) ? (c.effort ?? EFFORT_DEFAULT) : null,
+      testo: esito.testo,
+      input_tokens: esito.consumo.input,
+      cache_lettura_tokens: esito.consumo.cacheLettura,
+      cache_scrittura_tokens: esito.consumo.cacheScrittura,
+      output_tokens: esito.consumo.output,
+      millisecondi: esito.ms,
+    });
+    if (error) console.error(`[${opts.tag}] aura_confronti:`, error.message);
+  }
+}
+
+/** Lavoro dopo la risposta: su Supabase la funzione resta viva finché la promessa finisce. */
+function inSottofondo(p: Promise<void>): void {
+  const er = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } }).EdgeRuntime;
+  const sicura = p.catch((err) => console.error("[confronto]", err));
+  if (er) er.waitUntil(sicura);
 }
 
 function segnale(opts: StreamAnthropicOptions): AbortSignal | undefined {
