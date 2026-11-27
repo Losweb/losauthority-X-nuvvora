@@ -18,12 +18,17 @@ import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.
 import { bloccoPosizionamento } from "../_shared/posizionamento/blocco.ts";
 import { eRicompensa } from "../_shared/lezioni.ts";
 import { costruisciPrompt, eLive, estraiRisposta, lezioniPertinenti, SYSTEM, type Lezione, type Storico, type TestoCapitolo } from "./prompt.ts";
+import { leggiArgomenti, vociPerArgomenti } from "../_shared/argomenti.ts";
+import { bloccoMappa, candidate, estraiScelti, MODELLO_SCEGLI, promptScegli, SYSTEM_SCEGLI } from "./mappa.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 type Body = { messaggio?: unknown; riprova_messaggio_id?: unknown };
 
 const MAX_MESSAGGIO = 4000;
-const MAX_STORICO = 12;
+// 6 e non 12 (27/11/2026): le risposte ora sono più lunghe e la memoria lunga non serve a trovare una lezione.
+const MAX_STORICO = 6;
+// Sotto questo numero di argomenti la mappa non è ancora pronta: si usa il catalogo intero di prima.
+const MIN_ARGOMENTI_MAPPA = 10;
 const MSG_ERRORE_AURA = "Aura non riesce a rispondere in questo momento. Riprova tra poco.";
 
 /** Riprova: la riga di Aura in errore e il messaggio del cliente che la precede. */
@@ -142,8 +147,21 @@ Deno.serve(async (req: Request) => {
 
     const dati = await contesto(admin, c.id, auraId);
     const pertinenti = lezioniPertinenti(dati.lezioni, messaggio);
-    const testi = await testiCapitoli(admin, pertinenti).catch(() => new Map<string, TestoCapitolo[]>());
-    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, pertinenti, testiCapitoli: testi, messaggio }), maxTokens: 1200, tag: "aura-coach", utente: c.id });
+    const argomenti = await leggiArgomenti(admin).catch(() => []);
+    let daMappa: string | null = null;
+    let testi = new Map<string, TestoCapitolo[]>();
+    if (argomenti.length >= MIN_ARGOMENTI_MAPPA) {
+      // 1. Il modello piccolo sceglie gli argomenti dall'elenco (poche centinaia di token).
+      const scelta = await streamAnthropicText({ system: SYSTEM_SCEGLI, user: promptScegli(argomenti, dati.storico, messaggio), maxTokens: 60, model: MODELLO_SCEGLI, tag: "aura-coach-argomenti", utente: c.id, timeoutMs: 20_000 }).catch(() => null);
+      const scelti = estraiScelti(scelta, argomenti);
+      // 2. La mappa dà le lezioni; 3. il coach legge solo quelle.
+      const voci = await vociPerArgomenti(admin, scelti.map((a) => a.id)).catch(() => []);
+      const perId = new Map(dati.lezioni.map((l) => [l.id, l]));
+      daMappa = bloccoMappa(scelti, candidate(scelti, voci, perId, pertinenti));
+    } else {
+      testi = await testiCapitoli(admin, pertinenti).catch(() => new Map<string, TestoCapitolo[]>());
+    }
+    const testo = await streamAnthropicText({ system: SYSTEM, user: costruisciPrompt({ ...dati, pertinenti, testiCapitoli: testi, daMappa, messaggio }), maxTokens: 1200, tag: "aura-coach", utente: c.id });
     if (!testo) {
       await admin.from("coach_messaggi").update({ stato: "errore", errore: "Nessuna risposta dal modello" }).eq("id", auraId);
       await logError("aura-coach:anthropic", "Nessuna risposta da Aura", { user: c.id }, { silent: true });

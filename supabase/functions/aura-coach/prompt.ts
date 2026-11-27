@@ -5,7 +5,8 @@
  * fisso messo in cache; dopo la scheda del cliente arrivano quelle che
  * combaciano per parole chiave con il messaggio. Le live con i capitoli
  * mostrano il minutaggio: Aura indica da che minuto guardare.
- * Risposta: testo breve + blocco <lezioni>[{"id","minuto"?}, …]</lezioni> (0-3).
+ * Risposta: prima la risposta al dubbio (dal materiale di Wesley: passaggi numerati o
+ * poche frasi), poi la lezione dove vederlo, poi il blocco <lezioni>[{"id","minuto"?}, …]</lezioni> (0-3).
  *
  * 26/11/2026 (Wesley: «ho accennato a come edito i video con Claude ma non era un
  * vero tutorial, è una perdita di tempo far vedere quel pezzo»). Il coach mandava
@@ -32,9 +33,17 @@ export interface Lezione {
   keywords: string[];
 }
 
-export const SYSTEM = `Sei Aura nel ruolo di "Wesley Coach", dentro Upscale, il percorso di Wesley Caicedo per creator e professionisti che crescono sui social. Il cliente ti scrive quando è bloccato o vuole imparare qualcosa; tu lo orienti verso la LEZIONE giusta della classroom Skool di Wesley e gli dai una prima indicazione pratica.
+export const SYSTEM = `Sei Aura nel ruolo di "Wesley Coach", dentro Upscale, il percorso di Wesley Caicedo per creator e professionisti che crescono sui social. Il cliente ti scrive quando è bloccato o ha un dubbio: PRIMA rispondi al dubbio, in modo che possa sbloccarsi subito, POI gli indichi la LEZIONE della classroom Skool di Wesley dove lo vede fatto o lo approfondisce.
 
-Lavori SOLO con il CATALOGO LEZIONI che ricevi nel contesto: ogni lezione ha un id, il corso, il titolo e (quando c'è) una descrizione; le LIVE hanno anche i capitoli con il minutaggio e la durata ("27:40 (8 min) educare e qualificare il cliente alla vendita"). Non inventare lezioni, non citare lezioni che non sono nel catalogo, non inventare cosa dice una lezione se non ha descrizione: in quel caso di' cosa tratta a partire dal titolo e dal corso.
+DA DOVE PRENDI LA RISPOSTA (rispondi come Wesley, non come un'intelligenza artificiale qualsiasi)
+- Solo dal materiale di Wesley che ricevi: il METODO DI WESLEY, il MATERIALE DELLE LEZIONI SUL TEMA (le descrizioni complete, spesso con i passaggi e i prompt esatti), le descrizioni nel catalogo e, per le live, cosa si dice davvero nei capitoli.
+- Se il materiale copre il dubbio, usalo: stessi passaggi, stessi strumenti, stesse parole di Wesley. Non aggiungere strumenti, numeri o procedure che nel materiale non ci sono.
+- Ogni passaggio, numero (secondi, percentuali, frequenze, prezzi) e consiglio della tua risposta deve stare scritto nel materiale che ricevi. Prima di consegnare rileggi: se una frase non la ritrovi nel materiale, toglila. Meglio una risposta corta e vera che una completa e inventata.
+- Le tue risposte precedenti nella CONVERSAZIONE FINORA non sono materiale di Wesley: se lì avevi scritto passaggi che nel materiale non ci sono, non ripeterli.
+- Non attribuire mai a Wesley o a una lezione qualcosa che nel materiale non è scritto («il principio che trovi nel corso…»): se una lezione non ha descrizione, sai solo il suo titolo.
+- Se il materiale NON copre il dubbio, non improvvisare una risposta tua e NON scrivere passaggi: dillo con onestà («questo nelle lezioni non lo spiego nel dettaglio»), dai al massimo un consiglio di buon senso in una frase, presentato come tale, e suggerisci di portarlo a Wesley nella prossima live.
+
+Le lezioni le scegli SOLO tra quelle che ricevi nel contesto: le LEZIONI SUGLI ARGOMENTI DEL MESSAGGIO (dalla mappa per argomenti: per ogni lezione la profondità, il minuto e cosa dice) oppure, se manca, il CATALOGO LEZIONI. Le LIVE hanno il minutaggio e la durata ("dal minuto 27:40 (8 min)"). Nella mappa la profondità è già scritta: PASSO PASSO prima di SPIEGAZIONE, SPIEGAZIONE prima di ACCENNO; un ACCENNO non lo proponi come lezione da vedere se c'è altro. Non inventare lezioni, non citare lezioni che non sono nel catalogo, non inventare cosa dice una lezione se non ha descrizione: in quel caso di' cosa tratta a partire dal titolo e dal corso.
 
 COME SCEGLI LA LEZIONE (il tempo del cliente vale: mandalo solo dove c'è davvero la risposta)
 - Prima le lezioni dei CORSI: sono fatte apposta su un tema, passo per passo. Se una lezione di corso tratta quello che chiede il cliente, è lei la prima, prima di qualsiasi live.
@@ -46,17 +55,24 @@ COME SCEGLI LA LEZIONE (il tempo del cliente vale: mandalo solo dove c'è davver
 - I «Livello 5/6/7» non sono lezioni: sono ricompense che si sbloccano salendo di livello (le trovi a parte, sotto RICOMPENSE DEI LIVELLI). Non mandare mai il cliente lì come se fosse una lezione.
 
 Come rispondi, SEMPRE in questo ordine:
-1. Testo breve (2-5 frasi), italiano, dai del tu, voce di Wesley: diretta, concreta, zero fuffa. Prima fai capire che hai colto il problema, poi dai UNA indicazione pratica (dalla descrizione o dal capitolo della lezione se c'è), poi di' che la lezione da vedere è quella che segue. Se scegli una live e la risposta sta in UNO dei suoi capitoli, dillo nel testo con il minuto, es. «guarda dal minuto 27:40, dove parla di come educare il cliente alla vendita». Se il messaggio è troppo vago per scegliere, fai UNA domanda e basta.
-2. Se hai scelto lezioni, subito dopo un blocco ESATTAMENTE così, con gli id presi dal catalogo:
+1. La risposta al dubbio. Italiano, dai del tu, voce di Wesley: diretta, concreta, zero fuffa.
+   - Una frase che fa capire che hai colto il problema (niente complimenti, niente «ottima domanda»).
+   - Poi la risposta vera. Se è un procedimento, da 3 a 5 passaggi concreti, uno per riga, numerati così: «1. …» (testo semplice). Se è una domanda secca («quanto deve durare un reel?»), rispondi in 1-3 frasi.
+   - Se il cliente ha una scheda o un posizionamento, adatta l'esempio al suo lavoro, ma senza cambiare i passaggi di Wesley.
+   - In tutto al massimo circa 150 parole: deve potersi sbloccare leggendo, non studiare.
+   Se il messaggio è troppo vago per rispondere, fai UNA domanda e basta.
+   Se il cliente rifà una domanda già fatta, rispondi di nuovo con calma e non dire mai «te l'ho già detto» o «ti ho già risposto»: magari non ha capito o non ha trovato la lezione.
+2. Poi una frase che porta alla lezione: cosa ci trova in più («lì lo vedi fatto passo per passo, con i prompt da copiare»). Se è un corso intero, quante lezioni e da quale partire. Se scegli una live e la risposta sta in UNO dei suoi capitoli, di' il minuto, es. «guarda dal minuto 27:40, dove parla di come educare il cliente alla vendita». Per una domanda secca a cui hai già risposto del tutto, la lezione può anche mancare: non mettere un link per forza.
+3. Se hai scelto lezioni, subito dopo un blocco ESATTAMENTE così, con gli id presi dal catalogo:
 <lezioni>
 [{"id": "id-della-lezione", "minuto": "27:40"}, {"id": "eventuale-seconda"}]
 </lezioni>
    Da 1 a 3 lezioni, la più utile per prima. JSON valido, nessun testo dentro il blocco oltre all'array. "minuto" SOLO se la lezione ha i capitoli e uno risponde alla domanda: copialo ESATTAMENTE come sta nel catalogo (es. "27:40" o "1:12:00"). Se conviene vedere tutta la lezione, ometti "minuto".
-3. Se nessuna lezione risponde davvero alla domanda, dillo con onestà, dai comunque un consiglio pratico in una frase e suggerisci di scriverlo a Wesley nella prossima live. NON mettere il blocco <lezioni>.
+4. Se nessuna lezione e nessun materiale rispondono davvero alla domanda, dillo con onestà, dai al massimo un consiglio di buon senso in una frase e suggerisci di scriverlo a Wesley nella prossima live. NON mettere il blocco <lezioni>.
 
-Le LEZIONI PIÙ PERTINENTI dopo il catalogo sono un aiuto (combaciano per parole chiave): scegli tu se sono davvero quelle giuste, guardando anche il resto del catalogo e seguendo le regole qui sopra.
+Le lezioni arrivano già scelte per argomento (o per parole chiave): scegli tu se sono davvero quelle giuste, seguendo le regole qui sopra. Il "minuto" nel blocco <lezioni> copialo esattamente come «dal minuto …» nella mappa.
 Se nel contesto c'è il blocco POSIZIONAMENTO DEL CLIENTE, resta dentro quel posizionamento: parla come quella persona e non dire le cose che «dicono già tutti».
-Scrivi in testo semplice: NIENTE markdown, niente asterischi, niente titoli, niente elenchi. Non mettere link nel testo: i link li mostra l'app.
+Scrivi in testo semplice: NIENTE markdown, niente asterischi, niente titoli, niente elenchi puntati. L'unico elenco ammesso sono i passaggi numerati «1. …», uno per riga. Non mettere link nel testo: i link li mostra l'app.
 Non promettere risultati. Nessun consiglio legale, medico o finanziario. Niente testo dopo il blocco </lezioni>.`;
 
 export interface Storico {
@@ -83,6 +99,11 @@ export interface DatiCoach {
   pertinenti: Lezione[];
   /** Per le live pertinenti pubblicate dal gestionale: url della lezione → i capitoli con quello che si dice davvero. */
   testiCapitoli?: Map<string, TestoCapitolo[]>;
+  /**
+   * Il blocco della mappa per argomenti (`mappa.ts`, 27/11/2026). Se c'è, il prompt NON
+   * contiene il catalogo intero: solo il metodo, il cliente, queste lezioni e la conversazione.
+   */
+  daMappa?: string | null;
   storico: Storico[];
   messaggio: string;
 }
@@ -237,6 +258,37 @@ function rigaLezione(l: Lezione): string {
   return `[${l.id}] ${tipo}${l.titolo}${descr}`;
 }
 
+/** Quanto della descrizione di una lezione e quanto materiale in tutto entrano per rispondere al dubbio. */
+const MAX_MATERIALE_LEZIONE = 3500;
+const MAX_MATERIALE = 14000;
+
+/**
+ * Le descrizioni COMPLETE delle lezioni di corso sul tema (i corsi interi, poi le
+ * pertinenti), da cui il coach prende la risposta al dubbio (26/11/2026, Wesley:
+ * «il coach potrebbe rispondere al dubbio oltre a dare solo il link?»). Nel catalogo
+ * ne entrano 700 caratteri; qui intere, perché spesso sono già i passaggi e i prompt
+ * della lezione. Le live no: i loro capitoli e testi arrivano già a parte. null se non c'è niente.
+ */
+function materialeSulTema(corsi: CorsoTema[], pertinenti: Lezione[]): string | null {
+  const viste = new Set<string>();
+  const scelte: Lezione[] = [];
+  for (const l of [...corsi.flatMap((c) => [c.prima, ...c.sulTema]), ...pertinenti.slice(0, 5)]) {
+    if (viste.has(l.id) || eLive(l) || !l.descrizione?.trim()) continue;
+    viste.add(l.id);
+    scelte.push(l);
+  }
+  const blocchi: string[] = [];
+  let totale = 0;
+  for (const l of scelte) {
+    const testo = taglia(l.descrizione!.replace(/[ \t]+/g, " ").replace(/\n{2,}/g, "\n").trim(), MAX_MATERIALE_LEZIONE);
+    if (totale + testo.length > MAX_MATERIALE) break;
+    totale += testo.length;
+    blocchi.push(`[${l.id}] ${l.corso ?? ""} › ${l.titolo}\n${testo}`);
+  }
+  if (blocchi.length === 0) return null;
+  return `=== MATERIALE DELLE LEZIONI SUL TEMA (descrizioni complete scritte da Wesley: la risposta al dubbio la prendi da qui) ===\n${blocchi.join("\n\n")}`;
+}
+
 /**
  * Tre tratti per il prompt caching: metodo + catalogo intero (fissi, uguali per
  * TUTTI i clienti), scheda del cliente, poi le lezioni pertinenti per parole
@@ -245,6 +297,18 @@ function rigaLezione(l: Lezione): string {
 export function costruisciPrompt(d: DatiCoach): Blocco[] {
   const fisso: string[] = [];
   if (d.conoscenza) fisso.push(`=== METODO DI WESLEY ===\n${d.conoscenza}`);
+  if (d.daMappa) {
+    // Strada della mappa per argomenti: niente catalogo intero, scheda e conversazione più corte.
+    if (d.ricompense?.length) fisso.push(bloccoRicompense(d.ricompense));
+    const cliente = [`=== CLIENTE: ${d.nome} ===\n--- Scheda onboarding (per capire il suo contesto) ---${taglia(d.scheda, 2000)}`];
+    if (d.posizionamento) cliente.push(taglia(d.posizionamento, 1500));
+    const variabile = [d.daMappa];
+    if (d.storico.length > 0) {
+      variabile.push(`=== CONVERSAZIONE FINORA ===\n${d.storico.map((m) => `${m.ruolo === "cliente" ? "CLIENTE" : "AURA"}: ${taglia(m.contenuto, 600)}`).join("\n\n")}`);
+    }
+    variabile.push(`=== NUOVO MESSAGGIO DEL CLIENTE ===\n${d.messaggio}`);
+    return blocchiPrompt(fisso, cliente, variabile);
+  }
   const perCorso = new Map<string, Lezione[]>();
   for (const l of d.lezioni) {
     const k = l.corso ?? "Altro";
@@ -255,10 +319,7 @@ export function costruisciPrompt(d: DatiCoach): Blocco[] {
     .map(([corso, ls]) => `## ${corso} (${ls.length === 1 ? "1 lezione" : `${ls.length} lezioni, in ordine`})\n${ls.map(rigaLezione).join("\n")}`)
     .join("\n\n");
   fisso.push(`=== CATALOGO LEZIONI SKOOL (usa SOLO questi id) ===\n${catalogo}`);
-  if (d.ricompense?.length) {
-    const premi = [...new Set(d.ricompense.map((l) => l.corso ?? l.titolo))].map((c) => `- ${c}`).join("\n");
-    fisso.push(`=== RICOMPENSE DEI LIVELLI (NON sono lezioni) ===\nSi sbloccano salendo di livello nella community Skool: non si guardano, non hanno id da usare e non vanno MAI nel blocco <lezioni>. Puoi nominarle nel testo solo se c'entrano davvero con la domanda («quando arrivi al livello 6 la content series te la costruiamo insieme»), dopo aver dato la lezione da vedere adesso.\n${premi}`);
-  }
+  if (d.ricompense?.length) fisso.push(bloccoRicompense(d.ricompense));
   const cliente = [`=== CLIENTE: ${d.nome} ===\n--- Scheda onboarding (per capire il suo contesto) ---${taglia(d.scheda, 5000)}`];
   if (d.posizionamento) cliente.push(d.posizionamento);
   const variabile: string[] = [];
@@ -270,6 +331,13 @@ export function costruisciPrompt(d: DatiCoach): Blocco[] {
     variabile.push(
       `=== CORSI INTERI SUL TEMA DEL MESSAGGIO ===\nC'è un corso fatto apposta: è lui la risposta principale, prima di qualsiasi live. Dillo nel testo (quante lezioni, da quale partire) e metti nel blocco la prima lezione del corso, più quella che risponde in modo più preciso se è un'altra. Se il messaggio in realtà parla d'altro, ignora questa sezione.\n${righe.join("\n\n")}`,
     );
+  }
+  const materiale = materialeSulTema(corsi, d.pertinenti);
+  const testiLive = d.pertinenti.some((l) => l.url && d.testiCapitoli?.get(l.url)?.length);
+  if (materiale) variabile.push(materiale);
+  else if (!testiLive) {
+    // Niente descrizioni né trascrizioni sul tema: il coach non ha da dove prendere i passaggi (26/11/2026, s'era inventato «i 5 elementi di un prompt»).
+    variabile.push("=== MATERIALE SUL TEMA: NESSUNO ===\nPer questo tema non hai il testo delle lezioni, solo i titoli. NON scrivere passaggi e non spiegare cosa insegna una lezione: di' in una o due frasi quale lezione o corso guardare e perché il titolo c'entra con il suo dubbio.");
   }
   if (d.pertinenti.length > 0) {
     variabile.push(`=== LEZIONI PIÙ PERTINENTI PER PAROLE CHIAVE ===\n${d.pertinenti.map((l) => `${rigaLezione(l)} (corso: ${l.corso ?? "—"})`).join("\n")}`);
@@ -291,6 +359,11 @@ export function costruisciPrompt(d: DatiCoach): Blocco[] {
   }
   variabile.push(`=== NUOVO MESSAGGIO DEL CLIENTE ===\n${d.messaggio}`);
   return blocchiPrompt(fisso, cliente, variabile);
+}
+
+function bloccoRicompense(ricompense: Lezione[]): string {
+  const premi = [...new Set(ricompense.map((l) => l.corso ?? l.titolo))].map((c) => `- ${c}`).join("\n");
+  return `=== RICOMPENSE DEI LIVELLI (NON sono lezioni) ===\nSi sbloccano salendo di livello nella community Skool: non si guardano, non hanno id da usare e non vanno MAI nel blocco <lezioni>. Puoi nominarle nel testo solo se c'entrano davvero con la domanda («quando arrivi al livello 6 la content series te la costruiamo insieme»), dopo aver dato la lezione da vedere adesso.\n${premi}`;
 }
 
 /** Toglie il markdown leggero che il modello a volte infila comunque. */
