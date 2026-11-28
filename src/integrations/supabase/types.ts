@@ -741,6 +741,7 @@ export type Database = {
           created_at: string
           da_attivare: boolean
           data_inizio: string | null
+          data_fine: string | null
           fase: string
           hub_creato_il: string | null
           id: string
@@ -754,6 +755,7 @@ export type Database = {
           profilo: string | null
           prossima_call: string | null
           prossima_call_source: string | null
+          scadenza_avvisata: string | null
           stato_onboarding: string
           tags: string[]
           telefono: string | null
@@ -765,6 +767,7 @@ export type Database = {
           created_at?: string
           da_attivare?: boolean
           data_inizio?: string | null
+          data_fine?: string | null
           fase?: string
           hub_creato_il?: string | null
           id: string
@@ -778,6 +781,7 @@ export type Database = {
           profilo?: string | null
           prossima_call?: string | null
           prossima_call_source?: string | null
+          scadenza_avvisata?: string | null
           stato_onboarding?: string
           tags?: string[]
           telefono?: string | null
@@ -789,6 +793,7 @@ export type Database = {
           created_at?: string
           da_attivare?: boolean
           data_inizio?: string | null
+          data_fine?: string | null
           fase?: string
           hub_creato_il?: string | null
           id?: string
@@ -802,6 +807,7 @@ export type Database = {
           profilo?: string | null
           prossima_call?: string | null
           prossima_call_source?: string | null
+          scadenza_avvisata?: string | null
           stato_onboarding?: string
           tags?: string[]
           telefono?: string | null
@@ -3738,6 +3744,7 @@ export type Database = {
           call_corrente: number | null
           created_at: string | null
           da_attivare: boolean | null
+          data_fine: string | null
           data_inizio: string | null
           di_wesley_aperti: number | null
           email: string | null
@@ -3853,6 +3860,17 @@ export type Database = {
         }[]
       }
       registra_sito: { Args: { p_url: string }; Returns: undefined }
+      scadenze_programmi_da_avvisare: {
+        Args: { p_giorni?: number }
+        Returns: {
+          data_fine: string
+          data_inizio: string
+          email: string
+          id: string
+          nome: string
+          programma: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

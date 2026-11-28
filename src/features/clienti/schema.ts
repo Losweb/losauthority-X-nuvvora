@@ -18,14 +18,21 @@ export const nuovoClienteSchema = z.object({
 });
 export type NuovoClienteValues = z.infer<typeof nuovoClienteSchema>;
 
-export const datiClienteSchema = z.object({
-  telefono: z.string().trim(),
-  instagram: z.string().trim(),
-  tiktok: z.string().trim(),
-  data_inizio: z.string(),
-  prossima_call: z.string(),
-  note: z.string().trim().max(5000, "Massimo 5000 caratteri"),
-});
+export const datiClienteSchema = z
+  .object({
+    telefono: z.string().trim(),
+    instagram: z.string().trim(),
+    tiktok: z.string().trim(),
+    data_inizio: z.string(),
+    data_fine: z.string(),
+    prossima_call: z.string(),
+    note: z.string().trim().max(5000, "Massimo 5000 caratteri"),
+  })
+  // Date ISO "YYYY-MM-DD": il confronto tra stringhe basta (stesso check del database).
+  .refine((v) => v.data_fine === "" || v.data_inizio === "" || v.data_fine > v.data_inizio, {
+    message: "La fine deve venire dopo l'inizio",
+    path: ["data_fine"],
+  });
 export type DatiClienteValues = z.infer<typeof datiClienteSchema>;
 
 export const statoClienteSchema = z.object({

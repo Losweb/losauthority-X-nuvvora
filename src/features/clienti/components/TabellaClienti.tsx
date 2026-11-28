@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/shared/utils/formatDate";
 import type { ClienteRiga } from "../types";
 import { BadgeFase, BadgeStatoOnboarding, BadgeTag } from "./BadgesCliente";
+import { FinePercorso } from "./FinePercorso";
 import { LinkRapidi } from "./LinkRapidi";
 import { ProssimaCallCella } from "./ProssimaCallCella";
 
@@ -102,6 +103,9 @@ function ListaClientiMobile({ righe, idPersonale }: { righe: ClienteRiga[]; idPe
               <VoceMobile etichetta="Inizio">
                 <span className="text-muted-foreground">{formatDate(c.data_inizio)}</span>
               </VoceMobile>
+              <VoceMobile etichetta="Fine">
+                <FinePercorso data={c.data_fine} className="text-muted-foreground" />
+              </VoceMobile>
               <VoceMobile etichetta="Fatture">
                 <FattureCella c={c} />
               </VoceMobile>
@@ -132,6 +136,7 @@ export function TabellaClienti({ righe, idPersonale = null }: { righe: ClienteRi
               <TableHead>Fase</TableHead>
               <TableHead>Stato</TableHead>
               <TableHead>Inizio</TableHead>
+              <TableHead>Fine</TableHead>
               <TableHead>Prossima call</TableHead>
               <TableHead>Fatture</TableHead>
               <TableHead>Link rapidi</TableHead>
@@ -164,6 +169,9 @@ export function TabellaClienti({ righe, idPersonale = null }: { righe: ClienteRi
                   <StatoCella c={c} />
                 </TableCell>
                 <TableCell className="text-muted-foreground">{formatDate(c.data_inizio)}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  <FinePercorso data={c.data_fine} />
+                </TableCell>
                 <TableCell>
                   <ProssimaCallCella iso={c.prossima_call} />
                 </TableCell>

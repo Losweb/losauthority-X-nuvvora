@@ -9,7 +9,7 @@ Risposta sempre `{ ok: true, ...dati }` oppure `{ ok: false, error: "<messaggio 
 | Tipo | Come | Funzioni |
 | --- | --- | --- |
 | Utente loggato (JWT) | `richiediTeam` / `richiediFinance` / `richiediAdmin` / `richiediUtente` da `_shared/supabase.ts` | tutte quelle chiamate dalla UI |
-| Job pg_cron | `Authorization: Bearer <CRON_SECRET>` (`richiediCronOTeam`: accetta anche un utente team per il lancio manuale) | payment-reminders, fathom-autoassign, aura-compiti, notion-compiti, genera-hub, skool-lezioni, instagram-sync, kit-brand-leggi (`autorizzatoCron`; cron ogni 30 minuti, migrazione 52) |
+| Job pg_cron | `Authorization: Bearer <CRON_SECRET>` (`richiediCronOTeam`: accetta anche un utente team per il lancio manuale) | payment-reminders, scadenze-programmi, fathom-autoassign, aura-compiti, notion-compiti, genera-hub, skool-lezioni, instagram-sync, kit-brand-leggi (`autorizzatoCron`; cron ogni 30 minuti, migrazione 52) |
 | Webhook esterno | token proprio nel query/header, `verify_jwt: false` | fathom-webhook, telegram-webhook, calendar-sync |
 
 ## Funzioni
@@ -27,6 +27,7 @@ Risposta sempre `{ ok: true, ...dati }` oppure `{ ok: false, error: "<messaggio 
 | `fathom-riassunto` | team | `{ chiamata_id }` | `{ ok, riassunto }` | Scarica il riassunto dall'API Fathom, lo traduce in italiano, aggiorna `chiamate` |
 | `telegram-webhook` | `x-telegram-bot-api-secret-token` = TELEGRAM_WEBHOOK_SECRET; chat in TELEGRAM_ALLOWED_CHAT_IDS | update Telegram | `{ ok }` | Aura risponde a domande sui numeri con uno snapshot (clienti, fatture, F24, spese, chiamate). Sola lettura |
 | `payment-reminders` | cron o team | `{}` | `{ ok, fatture, f24, scadenza }` | Telegram **48 ore prima**: fatture non pagate con `prossimo_pagamento` = oggi+2 e F24 non pagati con `scadenza` = oggi+2 (decisione di Wesley, 26/09/2026) |
+| `scadenze-programmi` | cron (07:10 UTC) o team | `{}` | `{ ok, avvisati, giorni }` | Telegram **30 giorni prima** della fine del programma (`clienti.data_fine`), una volta per data di fine: la RPC `scadenze_programmi_da_avvisare` (solo service role) prende e segna `scadenza_avvisata`; se Telegram rifiuta il messaggio la rimette a null e il giorno dopo riprova (richiesta di Wesley, 28/11/2026, migrazione 87) |
 | `skool-lezioni` | cron o team (dal 17/10/2026; prima solo admin) | `{}` | `{ ok, lezioni, nuove }` | Apify → upsert `lezioni` per `key` (descrizione fino a 2000 caratteri dal 29/09/2026, prima 400: i capitoli delle live non vanno più persi); `sync_stati('skool')`; Telegram se nuove o cookie scaduto |
 | `calendar-sync` | `Authorization: Bearer <CALENDAR_SYNC_SECRET>` | `{ eventi: [{ inizio: ISO, invitati: string[] }] }` | `{ ok, aggiornati }` | Abbina invitati ↔ email cliente, imposta `prossima_call` (istante reale ISO) con source `calendar`; azzera quelle sparite |
 | `spese-scansiona` | finance | `{ storage_path }` (bucket `ricevute`) | `{ ok, spesa }` | Claude vision legge importo/descrizione/data e INSERISCE la spesa variabile con `ricevuta_path` |

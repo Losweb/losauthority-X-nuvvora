@@ -1,6 +1,7 @@
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, parseISO } from "date-fns";
+import { addMonths, format, parseISO } from "date-fns";
+import { MODELLI_CONTRATTO } from "@contratti/modelli.ts";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
@@ -9,6 +10,10 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { useAggiornaCliente } from "../hooks/useAggiornaCliente";
 import { datiClienteSchema, normalizzaSocial, type DatiClienteValues } from "../schema";
 import type { ClienteDettaglio } from "../types";
+import { GIORNI_PROMEMORIA_FINE } from "./FinePercorso";
+
+/** Durata del programma in vendita (oggi solo UPSCALE): serve al tasto «Inizio + N mesi». */
+const PROGRAMMA = MODELLI_CONTRATTO.upscale;
 
 /** ISO → valore per <input type="datetime-local"> nell'ora del browser. */
 function perDatetimeLocal(iso: string | null): string {
@@ -28,10 +33,17 @@ export function FormDatiCliente({ cliente }: { cliente: ClienteDettaglio }) {
     instagram: cliente.instagram ?? "",
     tiktok: cliente.tiktok ?? "",
     data_inizio: cliente.data_inizio ?? "",
+    data_fine: cliente.data_fine ?? "",
     prossima_call: perDatetimeLocal(cliente.prossima_call),
     note: cliente.note ?? "",
   };
   const form = useForm<DatiClienteValues>({ resolver: zodResolver(datiClienteSchema), defaultValues: defaults });
+  const inizio = useWatch({ control: form.control, name: "data_inizio" });
+
+  function fineDaDurata() {
+    if (!inizio) return;
+    form.setValue("data_fine", format(addMonths(parseISO(inizio), PROGRAMMA.durataMesi), "yyyy-MM-dd"), { shouldDirty: true, shouldValidate: true });
+  }
 
   function onSubmit(v: DatiClienteValues) {
     const callCambiata = v.prossima_call !== defaults.prossima_call;
@@ -40,6 +52,7 @@ export function FormDatiCliente({ cliente }: { cliente: ClienteDettaglio }) {
       instagram: normalizzaSocial(v.instagram, "instagram"),
       tiktok: normalizzaSocial(v.tiktok, "tiktok"),
       data_inizio: v.data_inizio || null,
+      data_fine: v.data_fine || null,
       note: v.note || null,
       // Segnata "manuale": la sync col calendario non la sovrascrive.
       ...(callCambiata
@@ -80,6 +93,29 @@ export function FormDatiCliente({ cliente }: { cliente: ClienteDettaglio }) {
             {campo("instagram", "Instagram (link o @handle)", "text", "@nome")}
             {campo("tiktok", "TikTok (link o @handle)", "text", "@nome")}
             {campo("data_inizio", "Inizio percorso", "date")}
+            <FormField
+              control={form.control}
+              name="data_fine"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fine percorso</FormLabel>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <FormControl>
+                      <Input type="date" className="w-auto" {...field} />
+                    </FormControl>
+                    {inizio ? (
+                      <Button type="button" variant="outline" size="sm" onClick={fineDaDurata}>
+                        Inizio + {PROGRAMMA.durataMesi} mesi ({PROGRAMMA.programma})
+                      </Button>
+                    ) : null}
+                  </div>
+                  <FormDescription>
+                    Con un contratto attivo si compila da sola con la sua scadenza. {GIORNI_PROMEMORIA_FINE} giorni prima arriva un messaggio Telegram al team.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="prossima_call"

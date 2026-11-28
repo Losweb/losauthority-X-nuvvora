@@ -3,6 +3,7 @@ import { buttonVariants } from "@/shared/components/ui/button";
 import { formatDate } from "@/shared/utils/formatDate";
 import type { ClienteDettaglio } from "../types";
 import { BadgeFase } from "./BadgesCliente";
+import { FinePercorso } from "./FinePercorso";
 import { NoteCliente } from "./NoteCliente";
 import { PianoAzione } from "./PianoAzione";
 import { ProssimaCallCella } from "./ProssimaCallCella";
@@ -28,6 +29,9 @@ export function PanoramicaTab({ cliente }: { cliente: ClienteDettaglio }) {
           <ProssimaCallCella iso={cliente.prossima_call} />
         </Voce>
         <Voce etichetta="Inizio percorso">{formatDate(cliente.data_inizio)}</Voce>
+        <Voce etichetta="Fine percorso">
+          <FinePercorso data={cliente.data_fine} />
+        </Voce>
         <Voce etichetta="Hub Notion">
           {cliente.notion_hub_url ? (
             <a href={cliente.notion_hub_url} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
