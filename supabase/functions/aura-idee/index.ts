@@ -20,7 +20,7 @@ import { ANTHROPIC_MODEL, HAS_ANTHROPIC, streamAnthropicText } from "../_shared/
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { bloccoPosizionamento } from "../_shared/posizionamento/blocco.ts";
-import { costruisciPrompt, estraiProposte, SYSTEM, type StileScelto, type Storico, type TopPubblicazione } from "./prompt.ts";
+import { costruisciPrompt, estraiProposte, SYSTEM, SYSTEM_STILE, type StileScelto, type Storico, type TopPubblicazione } from "./prompt.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { controllaCrediti } from "../_shared/crediti.ts";
 
@@ -36,6 +36,12 @@ const MAX_STORICO = 12;
 const MSG_ERRORE_AURA = "Aura non riesce a rispondere in questo momento. Riprova tra poco.";
 /** Stesso testo di ERRORE_FERMATA nel frontend (features/idee/types.ts): lì diventa «Hai fermato Aura». */
 const ERRORE_FERMATA = "Fermata";
+/**
+ * Con uno stile scelto scrive Opus, con ragionamento medio (prova del 28/11/2026: idee molto più
+ * vicine agli script originali; ~6-7 crediti a messaggio, ~12 il primo). Se Opus non risponde
+ * (a volte rifiuta) la stessa richiesta passa al modello normale. Senza stile non cambia nulla.
+ */
+const MODELLO_STILE = "claude-opus-5-5";
 
 interface Messaggio {
   id: string;
@@ -179,7 +185,7 @@ Deno.serve(async (req: Request) => {
       if (e1) throw e1;
       const { data: aura, error: e2 } = await admin
         .from("idee_messaggi")
-        .insert({ sessione_id: sessioneId, ruolo: "aura", stato: "in_corso", modello: ANTHROPIC_MODEL })
+        .insert({ sessione_id: sessioneId, ruolo: "aura", stato: "in_corso", modello: stileId ? MODELLO_STILE : ANTHROPIC_MODEL })
         .select("id")
         .single();
       if (e2 || !aura) throw e2 ?? new Error("messaggio aura non creato");
@@ -189,10 +195,12 @@ Deno.serve(async (req: Request) => {
     // In riprova lo stile potrebbe essere stato eliminato nel frattempo: si prosegue senza.
     const [dati, stile] = await Promise.all([contesto(admin, c.id, sessioneId, auraId), stilePer(admin, c.id, stileId).catch(() => null)]);
     const testo = await streamAnthropicText({
-      system: SYSTEM,
+      // Con lo stile: le regole per trovare idee del livello degli script originali (SYSTEM_STILE).
+      system: stile ? SYSTEM + SYSTEM_STILE : SYSTEM,
       user: costruisciPrompt({ ...dati, stile, messaggio }),
-      // 5 script da ~160 parole + la risposta stanno larghi in 4000.
-      maxTokens: 4000,
+      // 5 script da ~160 parole + la risposta stanno larghi in 4000; con lo stile gli script sono più lunghi.
+      maxTokens: stile ? 7000 : 4000,
+      ...(stile ? { model: MODELLO_STILE, effort: "medium" as const, riserva: { model: ANTHROPIC_MODEL, effort: "medium" as const } } : {}),
       tag: "aura-idee",
       utente: c.id,
       signal: req.signal,

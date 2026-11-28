@@ -48,6 +48,29 @@ Se nel contesto c'è il blocco POSIZIONAMENTO DEL CLIENTE, resta dentro quel pos
 Scrivi in testo semplice: NIENTE markdown, niente asterischi, niente titoli, niente elenchi nella risposta parlata.
 Non promettere risultati. Nessun consiglio legale, medico o finanziario. Niente testo dopo il blocco </idee>.`;
 
+/**
+ * Le regole in più quando il cliente sceglie uno STILE (20261128): la forma la copiava già
+ * bene; le idee dentro i blocchi erano le prime che vengono in mente («il lato umano», «le
+ * domande frequenti»). Qui Aura capisce il TRUCCO di ogni blocco negli script originali,
+ * pensa più idee per blocco in un <ragionamento> che il cliente non vede, scarta quelle che
+ * farebbe chiunque e tiene la più concreta. Il blocco <ragionamento> lo toglie `estraiProposte`.
+ */
+export const SYSTEM_STILE = `
+
+QUANDO C'È UNO STILE SCELTO: LE IDEE CONTANO PIÙ DELLA FORMA.
+La forma (hook, struttura, ritmo, chiusura) la prendi dagli script originali. Ma uno script nello stile con idee banali dentro non vale niente: negli originali ogni blocco funziona perché l'idea è concreta, visiva e inaspettata. Il tuo lavoro è trovare idee di quel livello per l'argomento chiesto.
+
+Prima di scrivere lavora così, tra te e te (nella risposta non scrivere questi passaggi: la risposta resta la parte parlata + il blocco <idee>):
+1. IL TRUCCO DI OGNI BLOCCO. Negli script originali, per ogni blocco, individua cosa rende forte l'idea, non l'idea stessa. Esempi di trucchi: un accostamento che nessuno si aspetta tra il prodotto e qualcosa di famoso o di un altro mondo; una frase da mettere sopra il video che fa taggare un amico; un fatto curioso e verificabile che quasi nessuno sa; il pubblico che manda qualcosa nei commenti e riceve una risposta su misura in video; l'IA che mostra un risultato prima che esista.
+2. IDEE CANDIDATE. Per l'argomento chiesto, per OGNI blocco trova almeno 5 idee diverse che applicano quel trucco, ognuna con cosa si VEDE nel video.
+3. SCARTO. Elimina ogni idea che: la fa già chiunque di quel settore; è un tema e non una scena (es. «il lato umano», «le domande frequenti», «la cura dei dettagli», «personalizzare»); non si capisce in due secondi a volume spento; nessuno la manderebbe a un amico.
+4. SCELTA. Per ogni blocco tieni l'idea più specifica e sorprendente rimasta. Lo script usa SOLO le idee scelte.
+
+Altre regole con uno stile:
+- L'argomento del video è quello del messaggio, anche se è un settore diverso da quello del cliente: la scheda, i dolori e il posizionamento del cliente servono per la voce e per la chiusura, non per scegliere le idee dei blocchi.
+- Le idee dei blocchi le inventi tu: devono essere creative. È vietato solo inventare numeri, risultati o fatti sul cliente; un fatto curioso nel video deve essere vero.
+- Dentro ogni blocco: una frase per l'idea (cosa si vede, con l'esempio preciso, anche la frase esatta da mettere a schermo) e una per il perché funziona (attenzione, fiducia o vendita), come negli originali.`;
+
 export interface Storico {
   ruolo: "cliente" | "aura";
   contenuto: string;
@@ -145,8 +168,20 @@ function pulisci(t: string): string {
   return t.replace(/\*\*(.+?)\*\*/g, "$1").replace(/^#{1,6}\s+/gm, "").trim();
 }
 
+/** Toglie il blocco <ragionamento> (anche se non è chiuso: allora tutto fino a <idee> o alla fine). */
+export function togliRagionamento(testo: string): string {
+  const a = testo.indexOf("<ragionamento>");
+  if (a === -1) return testo;
+  const b = testo.indexOf("</ragionamento>", a);
+  if (b !== -1) return (testo.slice(0, a) + testo.slice(b + "</ragionamento>".length)).trim();
+  const idee = testo.indexOf("<idee>", a);
+  return (testo.slice(0, a) + (idee !== -1 ? testo.slice(idee) : "")).trim();
+}
+
 /** Separa la risposta parlata dal blocco <idee> e valida le proposte (max 3). */
-export function estraiProposte(testo: string): { risposta: string; proposte: Proposta[] } {
+export function estraiProposte(grezzoTesto: string): { risposta: string; proposte: Proposta[] } {
+  // Il ragionamento dello stile (SYSTEM_STILE) non si mostra e non si salva.
+  const testo = togliRagionamento(grezzoTesto);
   const apre = testo.indexOf("<idee>");
   const chiude = testo.indexOf("</idee>");
   if (apre === -1) return { risposta: pulisci(testo), proposte: [] };

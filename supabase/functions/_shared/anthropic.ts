@@ -59,6 +59,11 @@ export interface StreamAnthropicOptions {
   effort?: Effort;
   /** Interruzione dall'esterno (di solito `req.signal`: il cliente ha premuto stop): si chiude lo stream e torna null. */
   signal?: AbortSignal;
+  /**
+   * Modello di riserva: se il primo non dà testo (rifiuto, errore, risposta vuota) e il cliente non
+   * ha fermato, si rifà la stessa richiesta con questo. Serve con Opus, che a volte rifiuta (28/11/2026).
+   */
+  riserva?: { model: string; effort?: Effort };
 }
 
 /**
@@ -96,7 +101,12 @@ export async function streamAnthropicText(opts: StreamAnthropicOptions): Promise
   const model = opts.model ?? ANTHROPIC_MODEL;
   const system = typeof opts.system === "string" ? [bloccoCache(opts.system)] : opts.system;
   const esito = await chiama(model, opts.effort, system, opts, opts.tag, segnale(opts));
-  const testo = esito?.testo ?? null;
+  let testo = esito?.testo ?? null;
+  if (!testo && opts.riserva && opts.riserva.model !== model && !opts.signal?.aborted) {
+    console.error(`[${opts.tag}] ${model} senza risposta: riprovo con ${opts.riserva.model}`);
+    const seconda = await chiama(opts.riserva.model, opts.riserva.effort, system, opts, opts.tag, segnale(opts));
+    testo = seconda?.testo ?? null;
+  }
   if (CONFRONTI.length > 0 && !opts.signal?.aborted) inSottofondo(confronta(model, testo, system, opts));
   return testo;
 }

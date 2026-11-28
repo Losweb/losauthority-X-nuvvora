@@ -31,6 +31,8 @@ type Body = {
 
 const MAX_SCRIPT = 10;
 const MAX_LUNGHEZZA_SCRIPT = 8000;
+/** Lo stile si scrive una volta sola: lo scrive Opus (28/11/2026), con il modello normale come riserva. */
+const MODELLO_STILE = "claude-opus-5-5";
 const MSG_ERRORE_AURA = "Aura non riesce a studiare gli script in questo momento. Riprova tra poco.";
 
 interface Stile {
@@ -71,7 +73,7 @@ async function perAggiorna(admin: SupabaseClient, clienteId: string, stileId: st
   if ((data as { stato: string }).stato === "in_corso") throw new HttpError(409, "Aura sta già lavorando su questo stile.");
   const { data: aggiornato, error } = await admin
     .from("stili")
-    .update({ script_fonte: script, note, stato: "in_corso", errore: null, modello: ANTHROPIC_MODEL })
+    .update({ script_fonte: script, note, stato: "in_corso", errore: null, modello: MODELLO_STILE })
     .eq("id", stileId)
     .select("id, titolo, note, script_fonte")
     .single();
@@ -93,7 +95,7 @@ async function perRiprova(admin: SupabaseClient, clienteId: string, stileId: str
   // Solo gli stili in errore si rifanno: uno pronto potrebbe avere istruzioni ritoccate dal cliente.
   if (s.stato !== "errore") throw new HttpError(409, "Questo stile è già pronto.");
   if (s.script_fonte.length === 0) throw new HttpError(400, "Questo stile non ha script da cui ripartire.");
-  await admin.from("stili").update({ stato: "in_corso", errore: null, modello: ANTHROPIC_MODEL }).eq("id", s.id);
+  await admin.from("stili").update({ stato: "in_corso", errore: null, modello: MODELLO_STILE }).eq("id", s.id);
   return s;
 }
 
@@ -140,7 +142,7 @@ Deno.serve(async (req: Request) => {
       const nuovo = leggiNuovo(body);
       const { data, error } = await admin
         .from("stili")
-        .insert({ cliente_id: c.id, titolo: nuovo.titolo, note: nuovo.note, script_fonte: nuovo.script, stato: "in_corso", modello: ANTHROPIC_MODEL })
+        .insert({ cliente_id: c.id, titolo: nuovo.titolo, note: nuovo.note, script_fonte: nuovo.script, stato: "in_corso", modello: MODELLO_STILE })
         .select("id, titolo, note, script_fonte")
         .single();
       if (error || !data) throw error ?? new Error("stile non creato");
@@ -151,7 +153,10 @@ Deno.serve(async (req: Request) => {
     const testo = await streamAnthropicText({
       system: SYSTEM,
       user: costruisciPrompt({ ...dati, titolo: stile.titolo, note: stile.note, script: stile.script_fonte }),
-      maxTokens: 2500,
+      maxTokens: 3500,
+      model: MODELLO_STILE,
+      effort: "medium",
+      riserva: { model: ANTHROPIC_MODEL, effort: "medium" },
       tag: "aura-stile",
       utente: c.id,
     });
