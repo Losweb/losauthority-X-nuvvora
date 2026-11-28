@@ -7,51 +7,58 @@
  * è suo e non farebbe un copywriter qualsiasi, e lasciando fuori conteggi fissi, checklist e
  * le sue formule personali che finirebbero negli script dei clienti.
  */
-export const METODO_IDEE = `CHI PARLA E A CHI
-- Lo script lo dice il cliente (il professionista) nei SUOI video. Il protagonista è chi guarda: il suo avatar.
-- «Io» solo nell'hook, al passato, al massimo due righe. Poi il mondo (i verbi sono suoi: «ti dicono di…», «ti hanno messo in testa che…»), poi la lezione per chi guarda («tu»).
-- «Tu» è chi subisce i verbi del mondo, mai il soggetto di un'etichetta: niente «ti senti…», «anche tu sei una di quelle che…». Chi non si riconosce nell'etichetta se ne va.
-- L'autorità viene dall'esperienza con i clienti, UNA volta sola, e solo se serve a quello script. Non è una formula fissa: niente «lo vedo ogni settimana…» in ogni video; dilla ogni volta con un dettaglio diverso e concreto, oppure non dirla. Mai condividere la debolezza di chi guarda («anch'io ho le bozze ferme»).
-- «Loro sì, tu no»: se chi guarda non ha ancora iniziato, i risultati dei clienti lo escludono. In quel caso niente «i miei clienti hanno fatto…».
+export const METODO_IDEE = `LA VOCE (la regola che vale più di tutte le altre)
+- Chi parla è uno che ti sta aiutando, non uno che ti vende. Ti fa vedere come funziona una cosa, con un esempio concreto, e poi ti dice come applicarla. Tono calmo, curioso, generoso: come lo spiegheresti a un amico al bar.
+- Se nel contesto ci sono gli SCRIPT DEL CLIENTE (i video del suo Calendario), quella è la sua voce: imita come apre, la lunghezza delle frasi, come passa dall'esempio a chi guarda, come chiude. Vale più delle regole qui sotto.
+- Il percorso tipico, da usare con libertà: un fatto, un caso o una domanda concreta che incuriosisce → come funziona, passo per passo, con dettagli veri → il principio in una frase semplice → come lo applica chi guarda, con un esempio del suo mondo → una chiusura leggera. Esempio della logica (NON da copiare): «Ventimila dollari… per pulire una casa già pulita.» → cosa fanno ora per ora → «Funziona così, per qualsiasi servizio che costa più della media.» → «Mettiamo che sei un grafico, e costi il triplo degli altri…» → «E se vuoi vedere altre strategie, le trovi sul mio profilo.»
+- Suona da venditore, quindi NON farlo: frasi spezzate a effetto («Sulla porta.», «Tutto qui.», «Deve esistere.»); scene da romanzo con dettagli inventati («la giacca addosso, la mano sulla maniglia»); accusare chi guarda o il mondo senza motivo («ti hanno messo in testa che…», «stai sbagliando»); frasi da palco; chiudere con un «scrivimi» un video che doveva solo aiutare.
+- Prova finale: leggilo ad alta voce. Se sembra la pubblicità di qualcuno, riscrivilo come lo diresti tu a una persona che ti ha chiesto aiuto.
+
+CHI PARLA E A CHI
+- Lo script lo dice il cliente (il professionista) nei SUOI video, a chi guarda: il suo avatar. Al centro c'è il problema di chi guarda, non il cliente.
+- «Tu» va bene quando spieghi a chi guarda cosa fare; mai un'etichetta da appiccicargli addosso («ti senti…», «anche tu sei una di quelle che…»).
+- L'esperienza con i clienti dà credibilità, UNA volta sola e solo se serve, con un dettaglio concreto e vero; non è una formula da mettere in ogni video («lo vedo ogni settimana…»). Mai condividere la debolezza di chi guarda («anch'io ho le bozze ferme»).
+- Se chi guarda non ha ancora iniziato, i risultati dei clienti lo escludono («loro sì, io no»): in quel caso meglio un esempio che può fare anche lui.
 
 DAL TEMA AL MOMENTO
-- Mai il tema come lo chiama il professionista («personal branding», «artrosi canina», «gestione dei DM»). Il momento in cui chi guarda lo incontra a casa, con le sue parole, prima di sapere che gli serve qualcuno: «il tuo cane non sale più sul divano», «ti scrivono "quanto costa?" e tu mandi il listino».
-- Le frasi «vere» dell'avatar (dette da clienti veri) sono oro: usale parola per parola nell'hook o nella credenza da rompere.
-- Domanda soglia: una scena di casa + «è normale o devo preoccuparmi?». Il video poi dice dov'è il confine: fin qui puoi aspettare, oltre questo segnale chiami. Senza il confine è un consiglio gratis che non porta clienti.
+- Mai il tema come lo chiama il professionista («personal branding», «artrosi canina», «gestione dei DM»). Il momento in cui chi guarda lo incontra nella sua giornata, con le sue parole: «il tuo cane non sale più sul divano», «ti scrivono "quanto costa?" e tu mandi il listino». Il momento si racconta in modo semplice, come succede davvero, senza ricamarlo.
+- Le frasi «vere» dell'avatar (dette da clienti veri) sono oro: usale parola per parola.
+- Domanda soglia: una situazione di tutti i giorni + «è normale o devo preoccuparmi?». Il video poi dice dov'è il confine: fin qui puoi aspettare, oltre questo segnale chiami.
 - Una lezione per video. Se ne escono due, la seconda è il prossimo video.
 
 HOOK E TITOLO
-- Un'ancora concreta (un numero, un'età, una scena) e un vuoto. Due ancore fanno un riassunto, zero fanno clickbait vago.
-- Una parola di costo: sbagliato, tardi, costa, nessuno, da anni, antipatico. Niente paura (rischi, pericolo) e niente festa (incredibile, successo, pazzesco): suonano da guru.
+- L'hook incuriosisce con qualcosa di concreto: un fatto curioso e vero, un caso, un numero, una situazione che chi guarda riconosce, una domanda che si fa davvero. Promette una cosa che il video poi dà.
+- Un'ancora concreta e un vuoto da riempire. Niente frasi gridate, niente paura (rischi, pericolo), niente festa (incredibile, successo, pazzesco).
 - Il titolo in copertina e la prima frase detta sono due metà dello stesso pensiero, non la stessa frase ripetuta.
-- Esempi della logica (NON da copiare, servono a capire): «Da anni vendi "male" e non te ne sei accorto» (diagnosi che chi guarda non sa di avere, virgolette su una parola); «Il tuo cane non sale più sul divano. È l'età o devo preoccuparmi?» (momento + soglia); «Non è che non sei brava. È che non ti sei data il tempo.» (credenza negata); «Se sei bravo nel tuo lavoro ma i clienti arrivano solo dal passaparola» (chiamata per situazione).
-- La forma «Il problema non è X. È Y.» funziona SOLO se X è la colpa che si dà chi guarda e Y è un meccanismo concreto che si vede. Con una Y astratta («è cosa comunichi», «è il sistema») è la frase che dicono tutti: non usarla.
+- Esempi della logica (NON da copiare): «Ventimila dollari… per pulire una casa già pulita.» (fatto curioso); «Il tuo cane non sale più sul divano. È l'età o devo preoccuparmi?» (situazione + soglia); «Dovessi lanciare un nutrizionista sui social, questo è quello che farei.» (ti faccio vedere come ragiono); «Se sei bravo nel tuo lavoro ma i clienti arrivano solo dal passaparola» (chiamata per situazione).
+- Evita «Il problema non è X. È Y.» e «Se fai X, stai sbagliando»: è la frase che dicono tutti i coach.
 
 COME SI SVILUPPA
-- La credenza detta con le parole dell'avatar («Così ti dici: vabbè, forse non sono brava. E smetti.»), poi rotta da un fatto normale, non da un incoraggiamento («Ma a venti post è normale che non succeda niente.»).
-- Un nemico esterno che ci guadagna se chi guarda resta fermo, citato con la sua frase («"Ma chi te lo fa fare." Non è una frase tua. Te l'hanno messa in testa.»). Se la credenza sta nella sua testa, chiediti chi ce l'ha messa.
-- Al posto della paura, quello che succede davvero («qualcuno lo guarda, un paio commentano. E di tutte le cose brutte che ti avevano messo in testa, non ne succede una.»).
-- Il meccanismo si mostra con un esempio che prova proprio questa tesi («Al primo video ci hai messo un'ora per dire tre frasi. Al ventesimo ci metti dieci minuti.»).
+- Spiega come funziona, passo per passo, con dettagli veri e concreti: cosa si fa, in che ordine, perché. È questo che fa sentire chi guarda aiutato.
+- Il principio va detto in una frase semplice, poi applicato al mondo di chi guarda con un esempio («Mettiamo che sei…»).
+- Una credenza sbagliata si può smontare, se il video parla proprio di quella: dilla con le parole dell'avatar e rispondi con un fatto normale, senza prediche. Non è obbligatorio, e non si accusa nessuno.
 - I punti in ordine di impatto: quello che fa alzare il sopracciglio va per primo.
-- Collega le frasi con MA o QUINDI, mai con «e poi». Ogni affermazione forte ha il suo perché.
+- Collega le frasi con le parole del parlato (così, quindi, perciò, ma, in questo modo), mai con «e poi». Ogni affermazione forte ha il suo perché.
 - Numeri sulla scala dell'avatar (5 mila al mese, 3 clienti, 30 giorni), mai cifre da guru.
 
 COSA SI VEDE
-- Ogni idea è una scena che il cliente può girare con il telefono, non solo una persona ferma che parla. Almeno un'idea su tre è un «come»: si vede fare la cosa.
-- Tre livelli: copertina, testo fisso a schermo e voce sono tre cose diverse. Il testo fisso migliore è mezza frase che la voce completa a un certo punto («Se ti criticano…» → «…vuol dire che ti stai muovendo»).
+- Ogni idea è una cosa che il cliente può girare con il telefono, non solo una persona ferma che parla. Almeno un'idea su tre è un «come»: si vede fare la cosa.
+- Copertina, testo fisso a schermo e voce sono tre cose diverse. Se ti viene, un testo fisso che la voce completa a un certo punto funziona bene.
 - Oltre i 40 secondi, un rilancio ogni 15 secondi circa.
 
 RITMO E LINGUA
-- Frasi di 3-10 parole nei punti chiave (hook, svolta, lezione), mai oltre le 20. Varia: corta, corta, lunga, corta. Il punto è un respiro.
-- Test: un bambino di 10 anni e un nonno di 80 capiscono al primo ascolto. Niente frasi passive nei punti chiave, niente giochi di parole da decifrare.
-- Parlato vero: «vabbè», «tutto qui», «io e te», frasi intere. Un solo «ma» per frase, sull'ultima svolta.
-- Al massimo UNA domanda e UNA frase scolpita in tutto lo script. Una catena di aforismi fa decifrare invece di seguire.
+- Frasi intere e semplici, come si parla. Brevi nei punti chiave, mai oltre le 20 parole. Niente frammenti di una o due parole messi lì per fare effetto.
+- Test: un bambino di 10 anni e un nonno di 80 capiscono al primo ascolto. Niente giochi di parole da decifrare.
+- Al massimo UNA domanda e UNA frase forte in tutto lo script. Una catena di aforismi fa decifrare invece di seguire.
 - Mai: mindset, mentalità, guru, segreto, pazzesco, incredibile, rivoluzionario, garantito, game changer, «ti svelo», «il metodo definitivo», «in questo video ti parlo di», «in un mondo dove», «scopriamo insieme», «immagina di», «che aspetti?», «sbloccare il potenziale», «ricorda che», «spoiler», il trattino lungo. Mai promettere certezze («ti porterà risultati»).
 
 CHIUSURA E CTA
-- Un solo picco finale: o una frase da salvare o una domanda specchio, non tutte e due.
-- Una sola CTA, legata all'obiezione o allo stato d'animo di chi guarda («se invece non sai da dove iniziare, scrivimi»), oppure una presentazione semplice più un verbo («Io sono Sonia. Aiuto le donne come te a portare online la loro passione. Scrivimi.»). Una piccola azione concreta funziona («mandamelo: lo guardo volentieri»).
-- Mai un complimento o una morale come chiusura. Se l'autorità è già uscita nello script, chiudi sulla lezione senza presentarti.
+- Una sola chiusura, leggera e coerente con la tipologia:
+  - DARE VALORE (ispirare, intrattenere, insegnare): non vende. «Seguimi», «salvalo per quando ti serve», «altre strategie le trovi sul mio profilo», oppure una domanda nei commenti. Niente «scrivimi».
+  - CONNESSIONE: una frase sincera su come lavora o perché lo fa, oppure «seguimi». Niente «scrivimi».
+  - VENDITA: qui sì, un invito semplice («se vuoi che ci lavoriamo insieme, scrivimi»), legato al problema del video, oppure una presentazione semplice («Io sono Sonia. Aiuto le donne come te a portare online la loro passione. Scrivimi.»).
+  - CONTENT SERIES: la richiesta di commento della serie.
+- Mai un complimento o una morale come chiusura.
 
 LE TIPOLOGIE (i nomi sono di Wesley)
 DARE VALORE: fa crescere il profilo e lo fa scoprire da chi non lo conosce. Non vende. Resta sempre nel territorio di quello che il cliente vende: dopo dieci video deve essere conosciuto per la sua offerta. Si divide in tre:

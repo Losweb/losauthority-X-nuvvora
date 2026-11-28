@@ -15,6 +15,27 @@ const json = (v: unknown, max: number) => {
   return t.length > max ? `${t.slice(0, max)}…` : t;
 };
 
+/**
+ * La voce del cliente (28/11/2026, Wesley: il copy di Aura «sembra macchinoso, mi sento un
+ * venditore»): fino a 3 script dei video nel suo Calendario, prima i pubblicati. Si saltano
+ * quelli arrivati da Crea idee (scritti da Aura): servono le parole sue, non le nostre.
+ */
+const MAX_SCRIPT_VOCE = 3;
+async function scriptDelCliente(admin: SupabaseClient, clienteId: string): Promise<string | null> {
+  const [{ data: contenuti }, { data: daIdee }] = await Promise.all([
+    admin.from("contenuti").select("id, script, stato").eq("cliente_id", clienteId).not("script", "is", null).order("updated_at", { ascending: false }).limit(30),
+    admin.from("idee").select("contenuto_id").eq("cliente_id", clienteId).not("contenuto_id", "is", null),
+  ]);
+  const diAura = new Set(((daIdee ?? []) as Array<{ contenuto_id: string }>).map((i) => i.contenuto_id));
+  const scelti = ((contenuti ?? []) as Array<{ id: string; script: string; stato: string }>)
+    .filter((c) => !diAura.has(c.id) && c.script.trim().length >= 200)
+    .sort((a, b) => Number(b.stato === "pubblicato") - Number(a.stato === "pubblicato"))
+    .slice(0, MAX_SCRIPT_VOCE);
+  if (scelti.length === 0) return null;
+  const testi = scelti.map((c, i) => `[Script ${i + 1}${c.stato === "pubblicato" ? ", pubblicato" : ""}]\n${c.script.trim().slice(0, 1500)}`);
+  return `=== SCRIPT DEL CLIENTE (i suoi video: è la SUA voce, imitala) ===\n${testi.join("\n\n")}`;
+}
+
 export async function bloccoFondamenta(admin: SupabaseClient, clienteId: string): Promise<string | null> {
   const [{ data: mappa }, { data: schede }, { data: offerta }] = await Promise.all([
     admin.from("avatar_mappa").select("passo, ponte, arrivo, fuori").eq("cliente_id", clienteId).maybeSingle(),
@@ -46,6 +67,8 @@ export async function bloccoFondamenta(admin: SupabaseClient, clienteId: string)
         .join("\n"),
     );
   }
+  const voce = await scriptDelCliente(admin, clienteId);
+  if (voce) parti.push(voce);
   const o = offerta as { frase: string | null; scheda: Record<string, unknown> | null } | null;
   if (o && (o.frase || (o.scheda && Object.keys(o.scheda).length > 0))) {
     const scheda = o.scheda ?? {};
