@@ -3,7 +3,7 @@
 --
 -- 1) Tipologie delle idee con i nomi di Wesley: «dare valore» (ispirare, intrattenere,
 --    insegnare), connessione, vendita, content series. Le idee già fatte passano:
---    virale → intrattenere, consolidazione → insegnare. Solo Crea idee: le tipologie
+--    virale → intrattenere, consolidazione → insegnare (corretto dalla 085: → connessione). Solo Crea idee: le tipologie
 --    del Workflow (`tipologie_contenuto`) non cambiano (decisione di Wesley).
 -- 2) Crea idee scrive con Opus (scelta di Wesley dopo la prova A/B): un copy costa
 --    ~8-9 crediti invece di ~3, quindi la base mensile passa da 500 a 1000.

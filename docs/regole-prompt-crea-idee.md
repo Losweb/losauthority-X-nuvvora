@@ -15,12 +15,12 @@ Ogni risposta di Aura in Crea idee nasce da quattro pezzi, in quest'ordine:
 1. **System prompt** (codice, file `supabase/functions/aura-idee/prompt.ts`): chi è Aura, in che formato deve rispondere, i limiti. **Non si tocca.**
 2. **Metodo di Wesley** (database, tabella `aura_conoscenza`, ambito `idee`): blocchi di testo che entrano interi nel prompt con il titolo «METODO DI WESLEY (usa SOLO questo)». **Questo è il tuo campo di lavoro.** Oggi sono tre blocchi:
    - ordine 1 · «Struttura di un video breve» (hook, sviluppo, chiusura)
-   - ordine 2 · «Le quattro tipologie di contenuto» (virale, consolidazione, vendita, content series)
+   - ordine 2 · «Le quattro tipologie di contenuto» (le tipologie di allora; dal 28/11/2026 sono dare valore, connessione, vendita, content series)
    - ordine 3 · «Regole per proporre idee»
 3. **Dati del cliente** (automatici): scheda onboarding, analisi di Aura, kit brand, stile scelto con «/», idee già proposte, video che hanno funzionato meglio.
 4. **Conversazione** (automatica): gli ultimi 12 messaggi della sessione e il nuovo messaggio.
 
-Aura risponde con 2-4 frasi parlate e poi un blocco `<idee>` in JSON con al massimo tre proposte. Ogni proposta ha: `titolo`, `hook`, `script` (parlato, 100-160 parole; con uno stile scelto con «/» la lunghezza è quella degli script originali dello stile, che dall'08/11/2026 entrano interi nel prompt), `tipologia` (uno dei quattro valori: `virale`, `consolidazione`, `vendita`, `content_series`). Il codice legge quel blocco e crea le card. Se il formato cambia, le card non compaiono.
+Aura risponde con 2-4 frasi parlate e poi un blocco `<idee>` in JSON con al massimo tre proposte. Ogni proposta ha: `titolo`, `hook`, `script` (parlato, 100-160 parole; con uno stile scelto con «/» la lunghezza è quella degli script originali dello stile, che dall'08/11/2026 entrano interi nel prompt), `tipologia` (dal 28/11/2026: `ispirare`, `intrattenere`, `insegnare`, `connessione`, `vendita`, `content_series`). Il codice legge quel blocco e crea le card. Se il formato cambia, le card non compaiono.
 
 ## Problemi noti da risolvere (21/10/2026)
 
