@@ -20,6 +20,8 @@ import { ANTHROPIC_MODEL, HAS_ANTHROPIC, streamAnthropicText } from "../_shared/
 import { logError } from "../_shared/log.ts";
 import { leggiMateriale, nomeCliente, renderScheda } from "../_shared/materiale.ts";
 import { bloccoPosizionamento } from "../_shared/posizionamento/blocco.ts";
+import { bloccoFondamenta } from "./fondamenta.ts";
+import { METODO_IDEE } from "../_shared/idee/metodo.ts";
 import { costruisciPrompt, estraiProposte, SYSTEM, SYSTEM_STILE, type StileScelto, type Storico, type TopPubblicazione } from "./prompt.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { controllaCrediti } from "../_shared/crediti.ts";
@@ -37,11 +39,12 @@ const MSG_ERRORE_AURA = "Aura non riesce a rispondere in questo momento. Riprova
 /** Stesso testo di ERRORE_FERMATA nel frontend (features/idee/types.ts): lì diventa «Hai fermato Aura». */
 const ERRORE_FERMATA = "Fermata";
 /**
- * Con uno stile scelto scrive Opus, con ragionamento medio (prova del 28/11/2026: idee molto più
- * vicine agli script originali; ~6-7 crediti a messaggio, ~12 il primo). Se Opus non risponde
- * (a volte rifiuta) la stessa richiesta passa al modello normale. Senza stile non cambia nulla.
+ * Crea idee scrive con Opus, ragionamento medio (prove A/B del 28/11/2026, con e senza stile:
+ * idee molto più concrete; scelta di Wesley). Con uno stile ~6-7 crediti a messaggio (~12 il
+ * primo), senza ~8-9 (~15 il primo). Se Opus non risponde (a volte rifiuta) la stessa richiesta
+ * passa al modello normale.
  */
-const MODELLO_STILE = "claude-opus-5-5";
+const MODELLO_IDEE = "claude-opus-5-5";
 
 interface Messaggio {
   id: string;
@@ -108,10 +111,9 @@ async function perRiprova(admin: SupabaseClient, clienteId: string, auraId: stri
 }
 
 async function contesto(admin: SupabaseClient, clienteId: string, sessioneId: string, escludiAuraId: string) {
-  const [scheda, analisi, conoscenza, storico, idee, top, nome, posizionamento] = await Promise.all([
+  const [scheda, analisi, storico, idee, top, nome, posizionamento, fondamenta] = await Promise.all([
     leggiMateriale(admin, clienteId).catch(() => null),
     admin.from("analisi").select("contenuto").eq("cliente_id", clienteId).maybeSingle(),
-    admin.from("aura_conoscenza").select("titolo, contenuto").eq("ambito", "idee").eq("attivo", true).order("ordine"),
     admin
       .from("idee_messaggi")
       .select("ruolo, contenuto, stato")
@@ -130,8 +132,8 @@ async function contesto(admin: SupabaseClient, clienteId: string, sessioneId: st
       .limit(5),
     nomeCliente(admin, clienteId),
     bloccoPosizionamento(admin, clienteId),
+    bloccoFondamenta(admin, clienteId).catch(() => null),
   ]);
-  const blocchi = ((conoscenza.data ?? []) as Array<{ titolo: string; contenuto: string }>).map((b) => `## ${b.titolo}\n${b.contenuto}`);
   const storicoOrdinato = ((storico.data ?? []) as Storico[]).reverse();
   const topPubblicazioni: TopPubblicazione[] = ((top.data ?? []) as Array<Record<string, unknown>>).map((r) => ({
     titolo: (r.pubblicazioni as { titolo: string }).titolo,
@@ -143,7 +145,9 @@ async function contesto(admin: SupabaseClient, clienteId: string, sessioneId: st
     scheda: renderScheda(scheda),
     analisi: (analisi.data as { contenuto: string } | null)?.contenuto ?? null,
     posizionamento,
-    conoscenza: blocchi.join("\n\n"),
+    fondamenta,
+    // Il metodo vive nel codice dal 28/11/2026 (_shared/idee/metodo.ts), non più in aura_conoscenza.
+    conoscenza: METODO_IDEE,
     storico: storicoOrdinato,
     ideeRecenti: ((idee.data ?? []) as Array<{ titolo: string }>).map((i) => i.titolo),
     topPubblicazioni,
@@ -185,7 +189,7 @@ Deno.serve(async (req: Request) => {
       if (e1) throw e1;
       const { data: aura, error: e2 } = await admin
         .from("idee_messaggi")
-        .insert({ sessione_id: sessioneId, ruolo: "aura", stato: "in_corso", modello: stileId ? MODELLO_STILE : ANTHROPIC_MODEL })
+        .insert({ sessione_id: sessioneId, ruolo: "aura", stato: "in_corso", modello: MODELLO_IDEE })
         .select("id")
         .single();
       if (e2 || !aura) throw e2 ?? new Error("messaggio aura non creato");
@@ -198,9 +202,11 @@ Deno.serve(async (req: Request) => {
       // Con lo stile: le regole per trovare idee del livello degli script originali (SYSTEM_STILE).
       system: stile ? SYSTEM + SYSTEM_STILE : SYSTEM,
       user: costruisciPrompt({ ...dati, stile, messaggio }),
-      // 5 script da ~160 parole + la risposta stanno larghi in 4000; con lo stile gli script sono più lunghi.
-      maxTokens: stile ? 7000 : 4000,
-      ...(stile ? { model: MODELLO_STILE, effort: "medium" as const, riserva: { model: ANTHROPIC_MODEL, effort: "medium" as const } } : {}),
+      // Fino a 5 script + la risposta; con lo stile gli script sono più lunghi.
+      maxTokens: stile ? 7000 : 5000,
+      model: MODELLO_IDEE,
+      effort: "medium",
+      riserva: { model: ANTHROPIC_MODEL, effort: "medium" },
       tag: "aura-idee",
       utente: c.id,
       signal: req.signal,

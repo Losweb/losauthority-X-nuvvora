@@ -36,8 +36,8 @@ export const linkCreaIdee = (stileId: string) => `/area/crea-idee?stile=${stileI
 
 /** Spunti per la schermata vuota: un clic li mette nel composer. */
 export const SPUNTI = [
-  "Voglio un video virale sul problema più grande dei miei clienti",
-  "Dammi un'idea di consolidazione: un errore che ho fatto e cosa ho imparato",
+  "Un video che insegna una cosa pratica sul problema più grande dei miei clienti",
+  "Un video di connessione: come lavoro e perché lo faccio così",
   "Un contenuto di vendita per la mia offerta principale, senza sembrare uno spot",
-  "Propommi una content series che posso ripetere ogni settimana",
+  "Proponimi una content series che posso ripetere ogni settimana",
 ] as const;

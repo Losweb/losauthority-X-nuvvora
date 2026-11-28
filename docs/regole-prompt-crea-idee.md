@@ -1,5 +1,7 @@
 # Regole per lavorare sul prompt di «Crea idee»
 
+> **Aggiornamento 28/11/2026.** Il metodo NON vive più nel database: è nel codice, in `supabase/functions/_shared/idee/metodo.ts` (`METODO_IDEE`), e lo usano Crea idee e la creazione degli Stili. I blocchi di `aura_conoscenza` ambito `idee` non vengono più letti. Le tipologie sono quelle di Wesley: dare valore (ispirare, intrattenere, insegnare), connessione, vendita, content series. Il formato delle proposte è a tag (`<idea><titolo>…`), non più JSON. Le regole qui sotto valgono ancora per COME si scrive il metodo; per cambiarlo si modifica quel file e si ripubblicano `aura-idee` e `aura-stile`.
+
 Queste istruzioni sono per Claude quando aiuta Wesley a migliorare le risposte di Aura nella pagina **Crea idee** dell'area cliente. Leggile tutte prima di fare qualsiasi cosa.
 
 ## Il tuo ruolo

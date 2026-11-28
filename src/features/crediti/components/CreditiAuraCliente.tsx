@@ -22,7 +22,7 @@ export function CreditiAuraCliente({ clienteId }: { clienteId: string }) {
     <Card>
       <CardHeader>
         <CardTitle>Crediti di Aura</CardTitle>
-        <CardDescription>1 credito = 1 centesimo di costo. 500 al mese, si ricaricano il 1°.</CardDescription>
+        <CardDescription>1 credito = 1 centesimo di costo. 1.000 al mese, si ricaricano il 1°.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         {isLoading ? (

@@ -9,8 +9,10 @@ import { ETICHETTA_STATO_IDEA, eStatoIdea, type Idea } from "../types";
 import { BottoneCopia } from "./BottoneCopia";
 
 const BORDO_TIPOLOGIA: Record<TipologiaContenuto, string> = {
-  virale: "border-l-status-expiring",
-  consolidazione: "border-l-muted-foreground/60",
+  ispirare: "border-l-status-expiring",
+  intrattenere: "border-l-status-expiring",
+  insegnare: "border-l-status-expiring",
+  connessione: "border-l-muted-foreground/60",
   vendita: "border-l-status-active",
   content_series: "border-l-foreground",
 };

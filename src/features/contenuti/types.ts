@@ -25,20 +25,23 @@ export const COLORE_STATO_CONTENUTO: Record<StatoContenuto, { punto: string; bor
 };
 
 /**
- * Le quattro tipologie con cui Aura classifica le IDEE (`idee.tipologia`, prompt di aura-idee).
+ * Le tipologie con cui Aura classifica le IDEE (`idee.tipologia`, prompt di aura-idee). Dal 28/11/2026
+ * con i nomi di Wesley: «dare valore» (ispirare, intrattenere, insegnare), connessione, vendita, content series.
  * Nel Workflow le tipologie sono righe di `tipologie_contenuto` (le predefinite più quelle
  * dell'utente): quando un'idea passa nel Workflow, la sua tipologia diventa la predefinita
  * corrispondente (`CHIAVE_PER_TIPOLOGIA_IDEA`).
  */
-export const TIPOLOGIA_CONTENUTO_KEYS = ["virale", "consolidazione", "vendita", "content_series"] as const;
+export const TIPOLOGIA_CONTENUTO_KEYS = ["ispirare", "intrattenere", "insegnare", "connessione", "vendita", "content_series"] as const;
 export type TipologiaContenuto = (typeof TIPOLOGIA_CONTENUTO_KEYS)[number];
 
 type TonoBadge = "active" | "expiring" | "churn" | "neutral" | "outline";
 
 export const TIPOLOGIE_CONTENUTO: Record<TipologiaContenuto, { label: string; tono: TonoBadge }> = {
-  virale: { label: "Contenuto virale", tono: "expiring" },
-  consolidazione: { label: "Contenuto di consolidazione", tono: "neutral" },
-  vendita: { label: "Contenuto di vendita", tono: "active" },
+  ispirare: { label: "Dare valore · Ispirare", tono: "expiring" },
+  intrattenere: { label: "Dare valore · Intrattenere", tono: "expiring" },
+  insegnare: { label: "Dare valore · Insegnare", tono: "expiring" },
+  connessione: { label: "Connessione", tono: "neutral" },
+  vendita: { label: "Vendita", tono: "active" },
   content_series: { label: "Content series", tono: "outline" },
 };
 
@@ -46,10 +49,12 @@ export const TIPOLOGIE_CONTENUTO: Record<TipologiaContenuto, { label: string; to
 export const CHIAVI_TIPOLOGIA_PREDEFINITA = ["valore", "intrattenimento", "connessione", "vendita"] as const;
 export type ChiaveTipologia = (typeof CHIAVI_TIPOLOGIA_PREDEFINITA)[number];
 
-/** Da tipologia di un'idea di Aura alla predefinita del Workflow. */
+/** Da tipologia di un'idea di Aura alla predefinita del Workflow (che resta con le sue quattro, decisione di Wesley 28/11/2026). */
 export const CHIAVE_PER_TIPOLOGIA_IDEA: Record<TipologiaContenuto, ChiaveTipologia> = {
-  virale: "intrattenimento",
-  consolidazione: "valore",
+  ispirare: "valore",
+  intrattenere: "intrattenimento",
+  insegnare: "valore",
+  connessione: "connessione",
   vendita: "vendita",
   content_series: "connessione",
 };

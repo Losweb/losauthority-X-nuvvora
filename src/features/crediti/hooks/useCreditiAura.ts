@@ -5,7 +5,7 @@ import { logDev } from "@/shared/utils/errors";
 
 /**
  * Crediti di Aura del mese (27/11/2026, migrazione 083): 1 credito = 1 centesimo di costo
- * reale, base 500 al mese + quelli aggiunti dal team, ricarica il 1° del mese. Il team e
+ * reale, base 1000 al mese (500 fino al 28/11/2026) + quelli aggiunti dal team, ricarica il 1° del mese. Il team e
  * l'account del team non hanno limiti (`illimitato`). Il blocco vero lo fanno le Edge Function.
  */
 export interface StatoCrediti {

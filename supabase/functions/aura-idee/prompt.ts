@@ -2,14 +2,17 @@
  * Prompt di "Crea idee": Aura propone idee di video brevi partendo dal METODO di
  * Wesley (tabella aura_conoscenza), dal materiale del cliente (scheda onboarding,
  * analisi, idee recenti, pubblicazioni che hanno funzionato) e dalla conversazione.
- * Risposta in due parti: testo breve + blocco <idee>[...]</idee> con le proposte.
+ * Risposta in due parti: testo breve + blocco <idee> con un <idea> per proposta (tag, dal 28/11/2026:
+ * con il JSON gli script con le virgolette spagnole rompevano il blocco e il cliente non riceveva idee;
+ * il JSON vecchio si legge ancora).
  */
 import { type Blocco, blocchiPrompt } from "../_shared/anthropic.ts";
 
 /** Fino a 5 quando il cliente chiede più idee (di default Aura ne propone 1-3). */
 export const MAX_PROPOSTE = 5;
 
-export const TIPOLOGIE = ["virale", "consolidazione", "vendita", "content_series"] as const;
+/** Le tipologie delle idee (28/11/2026, nomi di Wesley): «dare valore» si divide in ispirare, intrattenere, insegnare. */
+export const TIPOLOGIE = ["ispirare", "intrattenere", "insegnare", "connessione", "vendita", "content_series"] as const;
 export type Tipologia = (typeof TIPOLOGIE)[number];
 
 export interface Proposta {
@@ -21,25 +24,38 @@ export interface Proposta {
 
 export const SYSTEM = `Sei Aura, la creatrice di idee di Upscale, il percorso di Wesley Caicedo per creator e professionisti che crescono sui social. Aiuti un cliente a trovare e scrivere idee per i suoi prossimi video brevi (TikTok, Instagram).
 
-Lavori SOLO con il METODO che ricevi nel contesto (blocco METODO DI WESLEY) e con i dati del cliente (scheda, analisi, idee già fatte, video che hanno funzionato). Non sei un assistente generico: se il cliente chiede altro, riportalo con gentilezza alle sue idee.
+Lavori con il METODO che ricevi nel contesto (blocco METODO DI WESLEY) e con i dati del cliente: AVATAR (a chi parlano i suoi video, con le frasi vere dei suoi clienti), OFFERTA (cosa vende), posizionamento, scheda, analisi, idee già fatte. Non sei un assistente generico: se il cliente chiede altro, riportalo con gentilezza alle sue idee.
 
-PRIMA DI PROPORRE, CAPISCI COSA SERVE AL CLIENTE. Non c'è un mix fisso: niente «una virale, una di consolidazione, una di vendita» se non te lo chiede.
-- Leggi il messaggio e la conversazione: tipo di contenuto (virale, consolidazione, vendita, content series), quante idee, angolo o format suo, obiettivo del momento.
+COME TROVI LE IDEE (lo fai tra te e te prima di scrivere; nella risposta non scrivere questi passaggi):
+1. Parti dall'avatar: i momenti in cui incontra il problema, le frasi che dice davvero, le credenze, le obiezioni. Se l'avatar non c'è, dalla scheda e dall'analisi.
+2. Per la richiesta trova almeno 5 angoli diversi: ognuno è un MOMENTO concreto o una credenza detta con le parole dell'avatar, con cosa si vede nel video.
+3. Scarta ogni angolo che potrebbe dire qualsiasi coach o professionista del settore, quelli astratti («il problema è il sistema», «è cosa comunichi»), quelli che non si capiscono in due secondi e quelli fuori dal territorio dell'offerta.
+4. Tieni il più specifico e scrivi lo script con il METODO. Le idee di una risposta partono da angoli diversi.
+
+PRIMA DI PROPORRE, CAPISCI COSA SERVE AL CLIENTE. Non c'è un mix fisso: niente «una per tipo» se non te lo chiede.
+- Leggi il messaggio e la conversazione: tipo di contenuto (dare valore: ispirare, intrattenere o insegnare · connessione · vendita · content series), quante idee, angolo o format suo, obiettivo del momento.
 - Se lo dice (anche con parole sue: «video per farmi conoscere», «qualcosa per vendere il corso», «5 idee sullo stesso tema», «nel mio format domanda e risposta»), segui ESATTAMENTE quello: tutte le idee di quel tipo, in quel numero, con quell'angolo.
-- Se ha un angolo o un format suo che non rientra nelle quattro tipologie, è quello che conta: seguilo e metti "tipologia": null quando nessuna delle quattro gli corrisponde. Non riportarlo a forza nei nostri schemi.
-- Se la richiesta è vaga («dammi idee», «cosa posso pubblicare?») e dalla conversazione non si capisce, NON generare idee a caso: fai UNA domanda breve su cosa gli serve adesso (farsi scoprire, farsi ricordare da chi lo segue già, vendere, una rubrica, oppure un angolo suo) e, se serve, quante idee vuole. Niente blocco <idee> in quella risposta.
+- Se ha un angolo o un format suo che non rientra nelle tipologie, è quello che conta: seguilo e metti <tipologia>nessuna</tipologia> quando nessuna gli corrisponde. Non riportarlo a forza nei nostri schemi.
+- Se la richiesta è vaga («dammi idee», «cosa posso pubblicare?»), NON fermarti a chiedere: proponi 1-2 idee forti partendo dall'avatar e chiudi la risposta parlata con UNA domanda breve per capire se la direzione è giusta (farsi scoprire, farsi ricordare, vendere, una rubrica). Fai solo una domanda senza idee se manca davvero un dato senza cui qualsiasi idea sarebbe sbagliata.
 - Con uno STILE SCELTO DAL CLIENTE il format è già deciso dallo stile: non chiedere il tipo, proponi nello stile.
 - Le idee di una risposta sono diverse tra loro nell'ANGOLO (punto di partenza, esempio, hook), non per forza nella tipologia.
 
 Come rispondi, SEMPRE in questo ordine:
-1. Una risposta breve e conversazionale (2-4 frasi): cosa hai capito, perché proponi quello che proponi, o UNA domanda se ti manca un dato decisivo. Italiano, dai del tu, voce di Wesley: diretta, concreta, zero fuffa, zero complimenti vuoti.
+1. Una risposta breve e conversazionale (2-4 frasi): cosa hai capito, perché proponi quello che proponi, o UNA domanda se ti manca un dato decisivo. Nella lingua in cui ti scrive il cliente (se scrive in spagnolo, rispondi e scrivi gli script in spagnolo), dai del tu, voce di Wesley: diretta, concreta, zero fuffa, zero complimenti vuoti.
 2. Se proponi idee, subito dopo un blocco ESATTAMENTE così:
 <idee>
-[{"titolo": "…", "hook": "…", "script": "…", "tipologia": "virale|consolidazione|vendita|content_series" oppure null}]
+<idea>
+<titolo>…</titolo>
+<hook>…</hook>
+<tipologia>ispirare | intrattenere | insegnare | connessione | vendita | content_series | nessuna</tipologia>
+<script>
+…
+</script>
+</idea>
 </idee>
-   - Da 1 a 3 idee (fino a 5 se il cliente ne chiede di più), diverse tra loro nell'angolo. JSON valido, nessun testo dentro il blocco oltre all'array.
-   - "titolo": nome interno breve (max 80 caratteri). "hook": la prima frase pronta da dire. "script": testo PARLATO completo in prima persona, senza titoli né elenchi (un a capo doppio tra un blocco e l'altro va bene); senza stile scelto 100-160 parole, con uno stile scelto lungo quanto gli script originali dello stile. "tipologia": una delle quattro, oppure null se l'idea segue un angolo o un format del cliente che non è nessuna delle quattro.
-   - Le idee nascono dal cliente ideale e dai dolori del cliente, con le SUE parole e i SUOI esempi. Mai inventare numeri o fatti su di lui.
+   - Da 1 a 3 <idea> (fino a 5 se il cliente ne chiede di più), diverse tra loro nell'angolo. Dentro i tag scrivi testo normale: virgolette e a capo vanno bene così come sono.
+   - titolo: nome interno breve (max 80 caratteri). hook: la prima frase pronta da dire. script: testo PARLATO completo in prima persona, senza titoli né elenchi (un a capo doppio tra un blocco e l'altro va bene); senza stile scelto 120-180 parole, con uno stile scelto lungo quanto gli script originali dello stile. tipologia: una delle sei, oppure «nessuna» se l'idea segue un angolo o un format del cliente che non è nessuna delle sei.
+   - Le idee nascono dall'avatar del cliente, con le parole vere dei suoi clienti e i SUOI esempi. Mai inventare numeri, storie personali o fatti su di lui (vedi FATTI VERI nel metodo).
 3. Se fai una domanda invece di proporre, NON mettere il blocco <idee>.
 
 Se il cliente ti chiede di cambiare una proposta (più corta, altro hook, altra tipologia), rispondi con la versione nuova nel blocco <idee>, una sola idea.
@@ -123,6 +139,8 @@ export interface DatiPrompt {
   analisi: string | null;
   /** Il blocco `=== POSIZIONAMENTO DEL CLIENTE ===` (`_shared/posizionamento/blocco.ts`), null se non c'è ancora. */
   posizionamento: string | null;
+  /** Avatar (mappa + scheda principale) e offerta del cliente (`fondamenta.ts`), null se non ci sono ancora. */
+  fondamenta: string | null;
   conoscenza: string;
   stile: StileScelto | null;
   storico: Storico[];
@@ -138,6 +156,7 @@ export function costruisciPrompt(d: DatiPrompt): Blocco[] {
   if (d.stile) cliente.push(bloccoStile(d.stile));
   cliente.push(`=== CLIENTE: ${d.nome} ===\n--- Scheda onboarding ---${d.scheda}`);
   if (d.analisi) cliente.push(`--- Analisi strategica di Aura ---\n${taglia(d.analisi, 6000)}`);
+  if (d.fondamenta) cliente.push(d.fondamenta);
   if (d.posizionamento) cliente.push(d.posizionamento);
   const variabile: string[] = [];
   if (d.ideeRecenti.length > 0) {
@@ -178,7 +197,33 @@ export function togliRagionamento(testo: string): string {
   return (testo.slice(0, a) + (idee !== -1 ? testo.slice(idee) : "")).trim();
 }
 
-/** Separa la risposta parlata dal blocco <idee> e valida le proposte (max 3). */
+/** Il contenuto di un tag dentro un pezzo di testo (null se manca o è vuoto). */
+function tag(testo: string, nome: string): string | null {
+  const m = testo.match(new RegExp(`<${nome}>([\\s\\S]*?)</${nome}>`));
+  const t = m?.[1].trim();
+  return t ? t : null;
+}
+
+/** Le proposte nel formato a tag (<idea><titolo>…). */
+function proposteATag(grezzo: string): Proposta[] {
+  const proposte: Proposta[] = [];
+  for (const m of grezzo.matchAll(/<idea>([\s\S]*?)(?:<\/idea>|$)/g)) {
+    if (proposte.length >= MAX_PROPOSTE) break;
+    const pezzo = m[1];
+    const titolo = str(tag(pezzo, "titolo"), 200);
+    if (!titolo) continue;
+    const tip = str(tag(pezzo, "tipologia"), 40)?.toLowerCase().replace(/\s+/g, "_") ?? null;
+    proposte.push({
+      titolo,
+      hook: str(tag(pezzo, "hook"), 500),
+      script: str(tag(pezzo, "script"), 20000),
+      tipologia: tip && (TIPOLOGIE as ReadonlyArray<string>).includes(tip) ? (tip as Tipologia) : null,
+    });
+  }
+  return proposte;
+}
+
+/** Separa la risposta parlata dal blocco <idee> e valida le proposte (max MAX_PROPOSTE). */
 export function estraiProposte(grezzoTesto: string): { risposta: string; proposte: Proposta[] } {
   // Il ragionamento dello stile (SYSTEM_STILE) non si mostra e non si salva.
   const testo = togliRagionamento(grezzoTesto);
@@ -187,6 +232,8 @@ export function estraiProposte(grezzoTesto: string): { risposta: string; propost
   if (apre === -1) return { risposta: pulisci(testo), proposte: [] };
   const risposta = pulisci(testo.slice(0, apre));
   const grezzo = chiude > apre ? testo.slice(apre + 6, chiude) : testo.slice(apre + 6);
+  if (grezzo.includes("<idea>")) return { risposta, proposte: proposteATag(grezzo) };
+  // Formato vecchio: array JSON.
   const a = grezzo.indexOf("[");
   const b = grezzo.lastIndexOf("]");
   if (a === -1 || b <= a) return { risposta, proposte: [] };

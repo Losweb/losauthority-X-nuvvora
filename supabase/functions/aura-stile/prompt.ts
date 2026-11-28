@@ -21,7 +21,7 @@ Rispondi ESATTAMENTE in questo formato, senza nulla prima o dopo:
 <descrizione>una sola frase (max 200 caratteri) che dice che tipo di video produce questo stile</descrizione>
 <istruzioni>
 A COSA SERVE
-Che risultato cerca questo tipo di video (tipologia: virale, consolidazione, vendita o content series) e quando usarlo.
+Che risultato cerca questo tipo di video (tipologia: dare valore, cioè ispirare, intrattenere o insegnare; connessione; vendita; content series) e quando usarlo.
 
 STRUTTURA
 I passi in ordine, con i secondi indicativi di ciascuno.
