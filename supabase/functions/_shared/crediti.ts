@@ -1,6 +1,6 @@
 /**
  * Crediti di Aura al mese (27/11/2026, migrazione 083). 1 credito = 1 centesimo di costo
- * reale; base 1000 al mese (500 fino al 28/11/2026) + quelli aggiunti dal team; si ricaricano il 1° del mese.
+ * reale; base 500 al mese + quelli aggiunti dal team; si ricaricano il 1° del mese.
  * Si controlla prima di chiamare Aura, accanto al limite orario. Il team non ha limiti.
  * Se il controllo stesso fallisce (database), si lascia passare: meglio una risposta in
  * più che un cliente bloccato per un errore nostro.
